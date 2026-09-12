@@ -19,11 +19,15 @@ from src.integrations.openrouter_client import (
     structured_completion,
 )
 
+from src.integrations.telegram import TelegramClient, telegram_client
+
 __all__ = [
     "LLMError",
     "LLMSchemaError",
+    "TelegramClient",
     "fetch_financials",
     "fetch_supplier_news",
     "structured_completion",
+    "telegram_client",
     "weather_delay_forecast",
 ]
