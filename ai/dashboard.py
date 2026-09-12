@@ -1,4 +1,4 @@
-"""ResiliChain -- Streamlit executive dark dashboard.
+"""ResiliChain -- Streamlit executive light minimalist dashboard.
 
 Chi DOC database, khong ghi. Dung SQL rieng (khong phu thuoc db_client) de
 dashboard van xem duoc ngay ca khi worker dang loi.
@@ -30,32 +30,31 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Custom Dark Theme Styling
+# Custom Light Minimalist Theme Styling (NO Gradients)
 st.markdown(
     """
     <style>
     .stApp {
-        background-color: #020617;
-        color: #f8fafc;
+        background-color: #f8fafc;
+        color: #0f172a;
     }
     .metric-card {
-        background: rgba(15, 23, 42, 0.8);
-        border: 1px solid rgba(51, 65, 85, 0.8);
-        border-radius: 16px;
-        padding: 20px;
-        backdrop-filter: blur(12px);
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
     }
     .metric-title {
-        color: #94a3b8;
+        color: #64748b;
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
     .metric-value {
-        color: #38bdf8;
-        font-size: 1.875rem;
+        color: #0f172a;
+        font-size: 1.75rem;
         font-weight: 800;
         font-family: monospace;
         margin-top: 4px;
@@ -66,9 +65,9 @@ st.markdown(
 )
 
 RISK_COLORS = {
-    RiskLevel.HIGH.value: "#ef4444",
-    RiskLevel.MEDIUM.value: "#f59e0b",
-    RiskLevel.LOW.value: "#10b981",
+    RiskLevel.HIGH.value: "#dc2626",
+    RiskLevel.MEDIUM.value: "#d97706",
+    RiskLevel.LOW.value: "#16a34a",
 }
 
 
@@ -162,11 +161,11 @@ with tab_risk:
                 sra, x="pors_score", y="supplier_name", orientation="h",
                 color="risk_level", color_discrete_map=RISK_COLORS,
                 labels={"pors_score": "Điểm PORS Score", "supplier_name": "", "risk_level": "Mức Risk"},
-                title="Bảng Điểm Rủi Ro Tổng Hop PORS Score",
-                template="plotly_dark",
+                title="Bảng Điểm Rủi Ro Tổng Hợp PORS Score",
+                template="plotly_white",
             )
-            fig.add_vline(x=settings.pors_high_threshold, line_dash="dash", line_color="#ef4444")
-            fig.add_vline(x=settings.pors_medium_threshold, line_dash="dot", line_color="#f59e0b")
+            fig.add_vline(x=settings.pors_high_threshold, line_dash="dash", line_color="#dc2626")
+            fig.add_vline(x=settings.pors_medium_threshold, line_dash="dot", line_color="#d97706")
             fig.update_layout(height=440, yaxis={"categoryorder": "total ascending"})
             st.plotly_chart(fig, use_container_width=True)
 
@@ -179,7 +178,7 @@ with tab_risk:
             fig2 = px.bar(
                 comp, x="supplier_name", y="Điểm", color="Thành phần",
                 title="4 Thành Phần Phân Tách Điểm PORS", labels={"supplier_name": ""},
-                template="plotly_dark",
+                template="plotly_white",
             )
             fig2.update_layout(height=440, xaxis_tickangle=-40)
             st.plotly_chart(fig2, use_container_width=True)
@@ -196,10 +195,10 @@ with tab_risk:
                 text="supplier_name", hover_data=["ticker"],
                 labels={"altman_z": "Altman Z-Score", "pors_score": "PORS"},
                 title="Ma Trận Tương Quan Altman Z-Score vs PORS Score",
-                template="plotly_dark",
+                template="plotly_white",
             )
-            fig3.add_vline(x=1.81, line_dash="dash", line_color="#ef4444")
-            fig3.add_vline(x=2.99, line_dash="dash", line_color="#10b981")
+            fig3.add_vline(x=1.81, line_dash="dash", line_color="#dc2626")
+            fig3.add_vline(x=2.99, line_dash="dash", line_color="#16a34a")
             fig3.update_traces(textposition="top center", marker={"size": 12})
             st.plotly_chart(fig3, use_container_width=True)
 

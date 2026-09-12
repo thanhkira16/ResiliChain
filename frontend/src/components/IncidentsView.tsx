@@ -3,17 +3,12 @@ import { Incident, PurchaseOrder, UserRole } from "../types";
 import {
   ShieldAlert,
   AlertTriangle,
-  Clock,
-  ArrowRight,
-  Sparkles,
   CheckCircle2,
   RefreshCw,
   Sliders,
-  ExternalLink,
   MapPinned,
   Building2,
-  Activity,
-  Zap,
+  Sparkles,
 } from "lucide-react";
 
 interface IncidentsViewProps {
@@ -51,15 +46,15 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
 }) => {
   return (
     <div className="space-y-6">
-      {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-6 rounded-2xl shadow-2xl">
+      {/* Light Minimalist Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-3">
-            <ShieldAlert className="w-7 h-7 text-red-400" />
+          <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
+            <ShieldAlert className="w-6 h-6 text-red-600" />
             Giám Sát Rủi Ro Trễ Hạn & Quản Lý Sự Cố (Master Risk Engine)
           </h2>
-          <p className="text-sm text-slate-400 mt-1">
-            Agent 6 (Master Orchestrator) tự động quét POs, tính toán <code className="bg-slate-950 px-1.5 py-0.5 rounded text-amber-300 font-mono">delayRiskScore</code> từ thời tiết Open-Meteo, tài chính FMP và tin tức GDELT. Khi rủi ro &gt; 65/100, hệ thống tự động kích hoạt PuLP MILP Solver sinh phương án thay thế.
+          <p className="text-xs text-slate-500 mt-1">
+            Agent 6 (Master Orchestrator) tự động quét POs, tính toán <code className="bg-slate-100 px-1.5 py-0.5 rounded text-amber-800 font-mono">delayRiskScore</code> từ thời tiết Open-Meteo, tài chính FMP và tin tức GDELT. Khi rủi ro &gt; 65/100, hệ thống tự động kích hoạt PuLP MILP Solver sinh phương án thay thế.
           </p>
         </div>
 
@@ -67,34 +62,34 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
           <button
             onClick={onRunRiskScan}
             disabled={isScanning}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition-colors shadow-sm disabled:opacity-50"
           >
-            <RefreshCw className={`w-4 h-4 ${isScanning ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isScanning ? "animate-spin" : ""}`} />
             <span>{isScanning ? "Đang Quét POs..." : "Quét Rủi Ro Ngay (just scan)"}</span>
           </button>
 
           <button
             onClick={onOpenConfig}
-            className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl border border-slate-700 flex items-center gap-2"
+            className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-lg border border-slate-200 flex items-center gap-1.5"
           >
-            <Sliders className="w-4 h-4 text-cyan-400" />
+            <Sliders className="w-3.5 h-3.5 text-slate-500" />
             Cấu Hình Ngưỡng
           </button>
         </div>
       </div>
 
-      {/* Supplier PORS Risk Telemetry Cards */}
+      {/* Supplier Risks Section */}
       {supplierRisks.length > 0 && (
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-cyan-400" />
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-slate-700" />
                 Phân Tích Chỉ Số Rủi Ro Nhà Cung Cấp (PORS Score Telemetry)
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">Kết quả tổng hợp từ GDELT News, FMP Altman Z-Score & Điểm uy tín lịch sử</p>
+              <p className="text-xs text-slate-500 mt-0.5">Kết quả tổng hợp từ GDELT News, FMP Altman Z-Score & Điểm uy tín lịch sử</p>
             </div>
-            <span className="text-xs font-bold font-mono px-3 py-1 rounded-full bg-slate-950 text-cyan-400 border border-slate-800">
+            <span className="text-xs font-bold font-mono px-2.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
               {supplierRisks.length} Nhà Cung Cấp
             </span>
           </div>
@@ -107,34 +102,34 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
               return (
                 <div
                   key={risk.supplierId}
-                  className={`bg-slate-950/80 border p-4 rounded-xl space-y-3 ${
-                    isHigh ? "border-red-800/80 shadow-lg shadow-red-950/40" : "border-slate-800"
+                  className={`bg-slate-50 border p-4 rounded-lg space-y-2.5 ${
+                    isHigh ? "border-red-300 bg-red-50/40" : "border-slate-200"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-bold text-white text-sm">{risk.supplierName}</h4>
-                      <span className="font-mono text-[10px] text-cyan-400">{risk.supplierId}</span>
+                      <h4 className="font-bold text-slate-900 text-xs">{risk.supplierName}</h4>
+                      <span className="font-mono text-[10px] text-slate-500">{risk.supplierId}</span>
                     </div>
                     <span
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        isHigh ? "bg-red-950 text-red-400 border border-red-800" : "bg-emerald-950 text-emerald-400 border border-emerald-800"
+                        isHigh ? "bg-red-100 text-red-800 border border-red-200" : "bg-emerald-100 text-emerald-800 border border-emerald-200"
                       }`}
                     >
                       {risk.riskLevel}
                     </span>
                   </div>
 
-                  <div className="flex items-end justify-between pt-2 border-t border-slate-800/80">
+                  <div className="flex items-end justify-between pt-2 border-t border-slate-200/60">
                     <div>
-                      <span className="text-[10px] text-slate-400 block font-semibold uppercase">Điểm PORS Score</span>
-                      <div className={`text-2xl font-bold font-mono ${isHigh ? "text-red-400" : "text-emerald-400"}`}>
-                        {pors.toFixed(1)} <span className="text-xs text-slate-500 font-normal">/100</span>
+                      <span className="text-[10px] text-slate-500 block font-semibold uppercase">PORS Score</span>
+                      <div className={`text-xl font-bold font-mono ${isHigh ? "text-red-600" : "text-emerald-600"}`}>
+                        {pors.toFixed(1)} <span className="text-xs text-slate-400 font-normal">/100</span>
                       </div>
                     </div>
                     <div className="text-right text-xs">
                       <span className="text-slate-500 block text-[10px]">Trạng thái AI</span>
-                      <span className="font-semibold text-slate-300">{risk.statusLabel || "Đã phân tích"}</span>
+                      <span className="font-semibold text-slate-800">{risk.statusLabel || "Đã phân tích"}</span>
                     </div>
                   </div>
                 </div>
@@ -145,87 +140,87 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
       )}
 
       {/* Incidents Main Table */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-red-400" />
+      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-600" />
             Danh Sách Sự Cố Phát Hiện Bởi AI Worker ({incidents.length} Bản Ghi)
           </h3>
         </div>
 
         {incidents.length === 0 ? (
-          <div className="text-center py-12 text-slate-400 space-y-3">
-            <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
-            <h4 className="text-base font-bold text-white">Hệ Thống An Toàn — Không Có Sự Cố Trễ Hạn!</h4>
-            <p className="text-xs max-w-md mx-auto">Tất cả các đơn hàng PO linh kiện EV hiện tại đều ở mức điểm rủi ro an toàn (&lt; 65/100).</p>
+          <div className="text-center py-10 text-slate-500 space-y-2">
+            <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
+            <h4 className="text-sm font-bold text-slate-900">Hệ Thống An Toàn — Không Có Sự Cố Trễ Hạn!</h4>
+            <p className="text-xs">Tất cả các đơn hàng PO linh kiện EV hiện tại đều ở mức điểm rủi ro an toàn (&lt; 65/100).</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             {incidents.map((inc) => (
               <div
                 key={inc.id}
-                className="bg-slate-950/80 border border-slate-800 hover:border-slate-700 p-5 rounded-2xl shadow-xl space-y-4"
+                className="bg-white border border-slate-200 hover:border-slate-300 p-4.5 rounded-xl shadow-xs space-y-3"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-red-950 text-red-400 border border-red-800">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-2.5">
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-red-100 text-red-800 border border-red-200">
                       {inc.id}
                     </span>
                     <div>
-                      <h4 className="text-sm font-bold text-white">
+                      <h4 className="text-xs font-bold text-slate-900">
                         Đơn Hàng {inc.poNumber} — SKU: {inc.sku}
                       </h4>
-                      <p className="text-xs text-slate-400">Nhà Cung Cấp: {inc.supplierName || "N/A"}</p>
+                      <p className="text-[11px] text-slate-500">Nhà Cung Cấp: {inc.supplierName || "N/A"}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <div className="text-right">
                       <span className="text-[10px] text-slate-500 block">Delay Risk Score</span>
-                      <span className="text-lg font-bold font-mono text-red-400">
+                      <span className="text-base font-bold font-mono text-red-600">
                         {inc.delayRiskScore || 66.3}/100
                       </span>
                     </div>
 
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-950 text-amber-400 border border-amber-800">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
                       {inc.status || "PENDING_APPROVAL"}
                     </span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                  <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                     <span className="text-slate-500 block text-[10px]">Tóm Tắt Sự Cố</span>
-                    <span className="text-slate-300 font-medium">{inc.summary || "Trễ hạn giao hàng do thời tiết & rủi ro tài chính NCC."}</span>
+                    <span className="text-slate-800 font-medium">{inc.summary || "Trễ hạn giao hàng do thời tiết & rủi ro tài chính NCC."}</span>
                   </div>
 
-                  <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                     <span className="text-slate-500 block text-[10px]">Dự Báo Trễ Thời Tiết</span>
-                    <span className="text-amber-300 font-mono font-bold">+{inc.weatherDelayForecast || 3} Ngày (Open-Meteo API)</span>
+                    <span className="text-amber-800 font-mono font-bold">+{inc.weatherDelayForecast || 3} Ngày (Open-Meteo API)</span>
                   </div>
 
-                  <div className="bg-slate-900 p-3 rounded-xl border border-slate-800">
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                     <span className="text-slate-500 block text-[10px]">Phương Án Thay Thế PuLP MILP</span>
-                    <span className="text-cyan-400 font-bold">Đã sinh Top 1, 2, 3 Proposals</span>
+                    <span className="text-blue-700 font-bold">Đã sinh Top 1, 2, 3 Proposals</span>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center justify-between pt-1">
                   {onViewOnMap && (
                     <button
                       onClick={() => onViewOnMap(inc.poNumber)}
-                      className="text-xs font-semibold text-cyan-400 hover:underline flex items-center gap-1.5"
+                      className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1"
                     >
-                      <MapPinned className="w-4 h-4 text-cyan-400" /> Xem Tuyến Vận Vận Trên Bản Đồ 3D Cesium
+                      <MapPinned className="w-3.5 h-3.5 text-blue-600" /> Xem Tuyến Đường Vận Chuyển 3D Cesium
                     </button>
                   )}
 
                   <button
                     onClick={() => onNavigateToApprovals(inc.id)}
-                    className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-lg shadow-amber-500/20"
+                    className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition-colors shadow-xs"
                   >
-                    <Sparkles className="w-4 h-4" /> Xem & Duyệt Phương Án 1-Click
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Xem & Duyệt Phương Án 1-Click
                   </button>
                 </div>
               </div>

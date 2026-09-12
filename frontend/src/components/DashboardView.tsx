@@ -24,14 +24,11 @@ import {
   Zap,
   Building2,
   FileText,
-  Search,
 } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
   Line,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   Tooltip,
@@ -70,7 +67,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onRunRiskScan,
   isScanning,
 }) => {
-  // Calculated KPIs
   const activeOrders = orders.filter((o) => o.status !== "Hoàn thành");
   const scoredOrders = orders.filter((o) => o.currentRiskScore !== undefined && o.currentRiskScore !== null);
   const openIncidents = incidents.filter((i) => i.status !== "Đã giải quyết");
@@ -79,7 +75,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     (r) => Number(r.porsScore) >= 50 || String(r.riskLevel).toUpperCase() === "HIGH"
   );
 
-  // On-time rate calculation
   const completedOrders = orders.filter((o) => o.status === "Hoàn thành");
   const onTimeCompleted = completedOrders.filter((o) => {
     const promised = new Date(o.promisedDeliveryDate).getTime();
@@ -91,7 +86,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       ? Math.round((onTimeCompleted.length / completedOrders.length) * 100)
       : 88;
 
-  // Chart Data
   const trendData = [
     { name: "Tuần 1", riskScore: 24, onTimeRate: 94 },
     { name: "Tuần 2", riskScore: 32, onTimeRate: 91 },
@@ -102,20 +96,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Executive Command Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-6 rounded-2xl shadow-2xl">
+      {/* Light Minimalist Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
         <div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-950 text-cyan-400 border border-cyan-800">
-              <Zap className="w-3 h-3 mr-1 animate-pulse" />
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+              <Zap className="w-3 h-3 mr-1 text-slate-900" />
               Live Telemetry System
             </span>
-            <span className="text-xs text-slate-400 font-mono">ResiliChain v2.0</span>
+            <span className="text-xs text-slate-500 font-mono">ResiliChain v2.0</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-2 flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight mt-2 flex items-center gap-3">
             Trung Tâm Tác Chiến Chuỗi Cung Ứng EV
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Giám sát 3D Digital Twin, Phân tích Rủi ro Đa nguồn với 6 AI Agents & Tối ưu hóa Sourcing MILP.
           </p>
         </div>
@@ -124,182 +118,156 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <button
             onClick={onRunRiskScan}
             disabled={isScanning}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-lg transition-colors shadow-sm disabled:opacity-50"
           >
-            <RefreshCw className={`w-4 h-4 ${isScanning ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isScanning ? "animate-spin" : ""}`} />
             {isScanning ? "Đang Quét AI..." : "Khởi Chạy Quét AI (just scan)"}
           </button>
         </div>
       </div>
 
-      {/* KPI Metric Cards Row */}
+      {/* KPI Cards Row */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* Metric 1 */}
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-5 rounded-2xl shadow-xl space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
+        <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
             <span>Đơn Hàng Mở</span>
-            <FileText className="w-4 h-4 text-cyan-400" />
+            <FileText className="w-4 h-4 text-slate-600" />
           </div>
-          <div className="text-2xl font-bold font-mono text-white">{activeOrders.length}</div>
-          <div className="text-[11px] text-slate-400">Tổng POs đang xử lý & giao</div>
+          <div className="text-2xl font-bold font-mono text-slate-900">{activeOrders.length}</div>
+          <div className="text-[11px] text-slate-500">PO đang xử lý & giao</div>
         </div>
 
-        {/* Metric 2 */}
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-5 rounded-2xl shadow-xl space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
+        <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
             <span>Đã Chấm Điểm</span>
-            <Activity className="w-4 h-4 text-indigo-400" />
+            <Activity className="w-4 h-4 text-blue-600" />
           </div>
-          <div className="text-2xl font-bold font-mono text-indigo-300">{scoredOrders.length}</div>
-          <div className="text-[11px] text-slate-400">AI Worker đã quét điểm</div>
+          <div className="text-2xl font-bold font-mono text-blue-600">{scoredOrders.length}</div>
+          <div className="text-[11px] text-slate-500">AI Worker đã quét điểm</div>
         </div>
 
-        {/* Metric 3 */}
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-5 rounded-2xl shadow-xl space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
+        <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
             <span>Sự Cố Đang Mở</span>
-            <AlertTriangle className="w-4 h-4 text-red-400" />
+            <AlertTriangle className="w-4 h-4 text-red-600" />
           </div>
-          <div className="text-2xl font-bold font-mono text-red-400">{openIncidents.length}</div>
-          <div className="text-[11px] text-slate-400">Rủi ro trễ hẹn &gt; 65/100</div>
+          <div className="text-2xl font-bold font-mono text-red-600">{openIncidents.length}</div>
+          <div className="text-[11px] text-slate-500">Rủi ro trễ hẹn &gt; 65/100</div>
         </div>
 
-        {/* Metric 4 */}
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-5 rounded-2xl shadow-xl space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
+        <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
             <span>Đề Xuất Chờ Duyệt</span>
-            <Sparkles className="w-4 h-4 text-amber-400" />
+            <Sparkles className="w-4 h-4 text-amber-600" />
           </div>
-          <div className="text-2xl font-bold font-mono text-amber-400">{pendingProposals.length}</div>
-          <div className="text-[11px] text-slate-400">Chờ duyệt 1-Click Approval</div>
+          <div className="text-2xl font-bold font-mono text-amber-600">{pendingProposals.length}</div>
+          <div className="text-[11px] text-slate-500">Chờ duyệt 1-Click</div>
         </div>
 
-        {/* Metric 5 */}
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-5 rounded-2xl shadow-xl space-y-2">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-400">
+        <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
             <span>NCC Rủi Ro Cao</span>
-            <Building2 className="w-4 h-4 text-emerald-400" />
+            <Building2 className="w-4 h-4 text-emerald-600" />
           </div>
-          <div className="text-2xl font-bold font-mono text-emerald-400">{highRiskSuppliers.length}</div>
-          <div className="text-[11px] text-slate-400">PORS &ge; 50 hoặc HIGH</div>
+          <div className="text-2xl font-bold font-mono text-emerald-600">{highRiskSuppliers.length}</div>
+          <div className="text-[11px] text-slate-500">PORS &ge; 50 hoặc HIGH</div>
         </div>
       </div>
 
       {/* Main Charts & Telemetry Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Trend Line Chart */}
-        <div className="lg:col-span-2 bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="lg:col-span-2 bg-white border border-slate-200 p-5 rounded-xl shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-cyan-400" />
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-slate-700" />
                 Xu Hướng Tỷ Lệ Giao Hàng Đúng Hạn & Điểm Rủi Ro Trung Bình
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">Theo dõi biến động điểm rủi ro trễ hẹn POs qua các tuần</p>
+              <p className="text-xs text-slate-500 mt-0.5">Theo dõi biến động điểm rủi ro trễ hẹn POs qua các tuần</p>
             </div>
-            <span className="text-xs font-mono px-2 py-1 rounded bg-slate-800 text-cyan-300">Live Metric</span>
+            <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700">Live Metric</span>
           </div>
 
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
-                <YAxis stroke="#64748b" fontSize={12} domain={[0, 100]} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "12px", color: "#fff" }}
-                />
-                <Legend wrapperStyle={{ paddingTop: "10px", fontSize: "12px" }} />
-                <Line type="monotone" dataKey="onTimeRate" name="Tỷ lệ đúng hạn (%)" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} />
-                <Line type="monotone" dataKey="riskScore" name="Điểm rủi ro (PORS)" stroke="#ef4444" strokeWidth={3} dot={{ r: 4 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="name" stroke="#64748b" fontSize={11} />
+                <YAxis stroke="#64748b" fontSize={11} domain={[0, 100]} />
+                <Tooltip contentStyle={{ backgroundColor: "#ffffff", borderColor: "#cbd5e1", borderRadius: "8px", color: "#0f172a" }} />
+                <Legend wrapperStyle={{ paddingTop: "10px", fontSize: "11px" }} />
+                <Line type="monotone" dataKey="onTimeRate" name="Tỷ lệ đúng hạn (%)" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="riskScore" name="Điểm rủi ro (PORS)" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Quick Action & System Health */}
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-6 rounded-2xl shadow-xl space-y-5">
-          <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
-            <ShieldAlert className="w-4 h-4 text-amber-400" />
+        {/* System Health Status */}
+        <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm space-y-4">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+            <ShieldAlert className="w-4 h-4 text-slate-700" />
             Trạng Thái 6 AI Agents
           </h3>
 
-          <div className="space-y-3 text-xs">
-            <div className="flex items-center justify-between p-3 bg-slate-950/60 rounded-xl border border-slate-800">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span className="font-semibold text-white">Agent 1: DB Ingestion</span>
-              </div>
-              <span className="text-emerald-400 font-mono">Hoạt động</span>
+          <div className="space-y-2.5 text-xs">
+            <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-200">
+              <span className="font-semibold text-slate-900">Agent 1: DB Ingestion</span>
+              <span className="text-emerald-700 font-mono font-semibold">Hoạt động</span>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-slate-950/60 rounded-xl border border-slate-800">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span className="font-semibold text-white">Agent 2: GDELT News</span>
-              </div>
-              <span className="text-emerald-400 font-mono">GDELT Cloud v2</span>
+            <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-200">
+              <span className="font-semibold text-slate-900">Agent 2: GDELT News</span>
+              <span className="text-emerald-700 font-mono font-semibold">GDELT v2</span>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-slate-950/60 rounded-xl border border-slate-800">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span className="font-semibold text-white">Agent 3: FMP Financial</span>
-              </div>
-              <span className="text-emerald-400 font-mono">Altman Z-Score</span>
+            <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-200">
+              <span className="font-semibold text-slate-900">Agent 3: FMP Financial</span>
+              <span className="text-emerald-700 font-mono font-semibold">Altman Z-Score</span>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-slate-950/60 rounded-xl border border-slate-800">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                <span className="font-semibold text-white">Agent 5: PuLP MILP Solver</span>
-              </div>
-              <span className="text-cyan-400 font-mono">Top 3 Optimization</span>
+            <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-200">
+              <span className="font-semibold text-slate-900">Agent 5: PuLP MILP Solver</span>
+              <span className="text-blue-700 font-mono font-semibold">Top 3 Optimization</span>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-slate-950/60 rounded-xl border border-slate-800">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-indigo-400" />
-                <span className="font-semibold text-white">Agent 6: Master Orchestrator</span>
-              </div>
-              <span className="text-indigo-400 font-mono">Telegram Dispatcher</span>
+            <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-200">
+              <span className="font-semibold text-slate-900">Agent 6: Master Orchestrator</span>
+              <span className="text-indigo-700 font-mono font-semibold">Telegram Alert</span>
             </div>
           </div>
 
           <button
             onClick={() => onNavigate("approvals")}
-            className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-700"
+            className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5"
           >
             Đến Trang Phê Duyệt 1-Click <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Critical Incidents & Proposals Table */}
-      <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-red-400" />
+      {/* Open Incidents Table */}
+      <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-600" />
             Danh Sách Sự Cố Trễ Hạn Cần Ứng Phó Ngay ({openIncidents.length})
           </h3>
-          <button
-            onClick={() => onNavigate("incidents")}
-            className="text-xs font-semibold text-cyan-400 hover:underline flex items-center gap-1"
-          >
+          <button onClick={() => onNavigate("incidents")} className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1">
             Xem toàn bộ <ArrowUpRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {openIncidents.length === 0 ? (
-          <div className="text-center py-10 text-slate-400 space-y-3">
-            <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
-            <p className="text-sm font-semibold text-white">Không Có Sự Cố Nghiêm Trọng Nào!</p>
-            <p className="text-xs max-w-md mx-auto">Tất cả các đơn hàng PO linh kiện EV đang vận chuyển đúng tiến độ cam kết.</p>
+          <div className="text-center py-8 text-slate-500 space-y-2">
+            <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
+            <p className="text-xs font-semibold text-slate-900">Không Có Sự Cố Nghiêm Trọng Nào!</p>
+            <p className="text-[11px]">Tất cả các đơn hàng PO linh kiện EV đang vận chuyển đúng tiến độ cam kết.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-950 text-slate-400 font-semibold border-b border-slate-800">
+              <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
                 <tr>
                   <th className="p-3">Mã PO / Incident</th>
                   <th className="p-3">SKU Linh Kiện</th>
@@ -309,22 +277,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <th className="p-3 text-right">Thao Tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/80 text-slate-300">
+              <tbody className="divide-y divide-slate-100 text-slate-700">
                 {openIncidents.map((inc) => (
-                  <tr key={inc.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="p-3 font-mono font-semibold text-cyan-400">{inc.poNumber}</td>
-                    <td className="p-3 font-semibold text-white">{inc.sku}</td>
+                  <tr key={inc.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="p-3 font-mono font-bold text-blue-600">{inc.poNumber}</td>
+                    <td className="p-3 font-semibold text-slate-900">{inc.sku}</td>
                     <td className="p-3">{inc.supplierName || "N/A"}</td>
-                    <td className="p-3 font-mono font-bold text-red-400">{inc.delayRiskScore || 66.3}/100</td>
+                    <td className="p-3 font-mono font-bold text-red-600">{inc.delayRiskScore || 66.3}/100</td>
                     <td className="p-3">
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
                         {inc.status || "Chờ duyệt 1-Click"}
                       </span>
                     </td>
                     <td className="p-3 text-right">
                       <button
                         onClick={() => onNavigate("approvals")}
-                        className="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-lg transition-all"
+                        className="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded text-xs transition-colors"
                       >
                         Duyệt Phương Án
                       </button>
