@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
   AtRiskShipmentMapItem,
+  Incident,
+  PurchaseOrder,
   ShipmentTrackingPoint,
   DestinationWarehouse,
   UserRole,
@@ -9,6 +11,7 @@ import { StorageService } from "../services/storage";
 import { RouteWeatherPanel } from "./RouteWeatherPanel";
 import { RouteWeatherStop, weatherSeverityStyle } from "../services/weatherService";
 import { GlobalRouteWeatherMap } from "./GlobalRouteWeatherMap";
+import { ShipmentDetailModal } from "./ShipmentDetailModal";
 import { SupplyChainApi } from "../services/api";
 import {
   MapPin,
@@ -35,18 +38,25 @@ import {
 
 interface ShipmentTrackingMapViewProps {
   userRole: UserRole;
+  orders: PurchaseOrder[];
+  incidents: Incident[];
+  focusPoNumber?: string | null;
   onNavigateToIncidents?: () => void;
   onNavigateToPo?: (poNumber: string) => void;
 }
 
 export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = ({
   userRole: _userRole,
+  orders,
+  incidents,
+  focusPoNumber,
   onNavigateToIncidents,
   onNavigateToPo,
 }) => {
   const [shipments, setShipments] = useState<AtRiskShipmentMapItem[]>([]);
   const [warehouses, setWarehouses] = useState<DestinationWarehouse[]>([]);
   const [selectedShipment, setSelectedShipment] = useState<AtRiskShipmentMapItem | null>(null);
+  const [highlightedShipment, setHighlightedShipment] = useState<AtRiskShipmentMapItem | null>(null);
 
   // Filters
   const [riskFilter, setRiskFilter] = useState<"ALL" | "HIGH" | "MEDIUM" | "LOW">("ALL");
@@ -67,8 +77,9 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
     let data = StorageService.getAtRiskShipmentsMapData();
     try {
       const apiShipments = await SupplyChainApi.getAtRiskShipments();
-      // A new database has no projection records yet, so retain the demo projection in that case.
-      if (apiShipments.length > 0 && apiShipments.every((shipment) => shipment.latestTrackingPoint)) {
+      // Use every database-backed route that has at least one GPS checkpoint. The local
+      // projection is retained only when the database genuinely has no renderable routes.
+      if (apiShipments.length > 0) {
         data = apiShipments;
       }
     } catch (error) {
@@ -81,6 +92,10 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
     if (selectedShipment) {
       const updated = data.find((s) => s.shipmentId === selectedShipment.shipmentId);
       if (updated) setSelectedShipment(updated);
+    }
+    if (highlightedShipment) {
+      const updated = data.find((s) => s.shipmentId === highlightedShipment.shipmentId);
+      if (updated) setHighlightedShipment(updated);
     }
   };
 
@@ -160,6 +175,18 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
       return true;
     });
   }, [shipments, riskFilter, supplierFilter, warehouseFilter, searchTerm]);
+
+  useEffect(() => {
+    if (!focusPoNumber) return;
+    const shipment = shipments.find((item) => item.poNumber === focusPoNumber);
+    if (!shipment) return;
+    setRiskFilter("ALL");
+    setSupplierFilter("ALL");
+    setWarehouseFilter("ALL");
+    setSearchTerm("");
+    setHighlightedShipment(shipment);
+    setSelectedShipment(null);
+  }, [focusPoNumber, shipments]);
 
   // Unique suppliers list for filter dropdown
   const uniqueSuppliers = useMemo(() => {
@@ -314,33 +341,13 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
           </h1>
           <p className="text-xs text-slate-500 mt-1 max-w-3xl">
             Hiển thị trực quan vị trí địa lý của các lô hàng đang mở có rủi ro trễ hẹn (liên kết với
-            sự cố Agent F4 đã phát hiện). Điểm số và cấu thành rủi ro được chiếu trực tiếp từ snapshot
-            của F4 (SRS §2.3) mà <strong>tuyệt đối không tính lại</strong>.
+            sự cố rủi ro đã phát hiện). Điểm số và cấu thành rủi ro được chiếu trực tiếp từ snapshot
+            giám sát (SRS §2.3) mà <strong>tuyệt đối không tính lại</strong>.
           </p>
         </div>
 
-        {/* Action Controls & Simulator */}
+        {/* Live data controls */}
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => handleSimulateCarrierPing(false)}
-            disabled={isSimulatingWebhook}
-            className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium shadow-xs transition-colors disabled:opacity-50"
-            title="Gửi dữ liệu GPS mới từ hãng vận tải qua Webhook"
-          >
-            <Zap className="w-3.5 h-3.5 text-amber-300" />
-            <span>Mô phỏng Webhook GPS</span>
-          </button>
-
-          <button
-            onClick={() => handleSimulateCarrierPing(true)}
-            disabled={isSimulatingWebhook}
-            className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-900 text-slate-200 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
-            title="Thử nghiệm gửi trùng gói tin Webhook để kiểm chứng Idempotency DB"
-          >
-            <ShieldAlert className="w-3.5 h-3.5 text-purple-400" />
-            <span>Test Idempotency Trùng</span>
-          </button>
-
           <button
             onClick={reloadData}
             className="p-2 border border-slate-300 hover:bg-slate-100 rounded-lg text-slate-700 transition-colors"
@@ -492,8 +499,11 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
             shipments={filteredShipments}
             warehouses={warehouses}
             routeWeatherStops={routeWeatherStops}
-            selectedShipment={selectedShipment}
-            onSelectShipment={setSelectedShipment}
+            selectedShipment={highlightedShipment || selectedShipment}
+            onSelectShipment={(shipment) => {
+              setHighlightedShipment(shipment);
+              setSelectedShipment(shipment);
+            }}
           />
 
           {/* Retained only as a non-rendered fallback while the interactive world map is active. */}
@@ -538,7 +548,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
           <div className="absolute bottom-3 left-3 z-10 p-2.5 rounded-lg bg-slate-900/90 backdrop-blur-md border border-slate-800 text-[11px] text-slate-300 space-y-1.5 shadow-md">
             <div className="font-semibold text-white mb-1 flex items-center gap-1.5">
               <Layers className="w-3 h-3 text-blue-400" />
-              <span>Ký hiệu rủi ro (F4 Delay Score)</span>
+              <span>Ký hiệu rủi ro (Điểm trễ)</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-xs shadow-red-500 animate-pulse"></span>
@@ -868,6 +878,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
         <div className="lg:col-span-4 space-y-4">
           <RouteWeatherPanel onWeatherChange={setRouteWeatherStops} />
 
+          <div className="hidden" aria-hidden="true">
           {selectedShipment ? (
             <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-5 animate-fadeIn">
               {/* Header with PO and Risk Score */}
@@ -983,15 +994,15 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                 </div>
               </div>
 
-              {/* EXACT SRS 2.3 RISK BREAKDOWN CARD (Snapshot from F4 - Never recalculated) */}
+              {/* SRS §2.3 risk snapshot — never recalculated in the UI */}
               <div className="border-t border-slate-200 pt-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                     <ShieldAlert className="w-4 h-4 text-red-600" />
-                    <span>Cấu thành Rủi ro F4 (SRS §2.3)</span>
+                    <span>Cấu thành rủi ro (SRS §2.3)</span>
                   </div>
                   <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono border border-slate-200">
-                    Snapshot F4 · Không tính lại
+                    Snapshot giám sát · Không tính lại
                   </span>
                 </div>
 
@@ -1085,7 +1096,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                     </div>
                   ) : (
                     <p className="text-[11px] text-slate-400">
-                      Điểm số được đọc trực tiếp từ bản ghi F4 AgentRun snapshot.
+                      Điểm số được đọc trực tiếp từ bản ghi snapshot giám sát.
                     </p>
                   )}
                 </div>
@@ -1126,7 +1137,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                     onClick={onNavigateToIncidents}
                     className="flex-1 flex items-center justify-center gap-1 py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-medium transition-colors"
                   >
-                    <span>Xem sự cố F4</span>
+                    <span>Xem sự cố</span>
                     <ArrowUpRight className="w-3.5 h-3.5" />
                   </button>
                 )}
@@ -1181,6 +1192,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
               </div>
             </div>
           )}
+          </div>
 
           {/* Architectural Notes Card */}
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs space-y-2 text-slate-600">
@@ -1191,7 +1203,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
             <ul className="list-disc pl-4 space-y-1 text-[11px]">
               <li>
                 <strong>Read-Only Projection (CQRS):</strong> Bản đồ chỉ chiếu dữ liệu đã được Agent
-                F4 tính toán. Không có logic tính toán rủi ro mới tại giao diện.
+                giám sát đã tính toán. Không có logic tính toán rủi ro mới tại giao diện.
               </li>
               <li>
                 <strong>Idempotency DB:</strong> Ràng buộc duy nhất{" "}
@@ -1211,6 +1223,12 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
           </div>
         </div>
       </div>
+      <ShipmentDetailModal
+        shipment={selectedShipment}
+        order={orders.find((order) => order.poNumber === selectedShipment?.poNumber)}
+        incident={incidents.find((incident) => incident.poNumber === selectedShipment?.poNumber)}
+        onClose={() => setSelectedShipment(null)}
+      />
     </div>
   );
 };

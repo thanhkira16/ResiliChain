@@ -27,5 +27,15 @@ export class SupplyChainController {
   @Get('supplier-risk') findSupplierRisk() { return this.supplyChainService.findSupplierRisk(); }
   @Get('ai-job-runs') findAiJobRuns(@Query('limit') limit?: string) { return this.supplyChainService.findAiJobRuns(limit ? Number(limit) : undefined); }
   @Get('shipments/at-risk-map') atRiskShipments() { return this.supplyChainService.atRiskShipments(); }
+  @Get('risk-alerts') findRiskAlerts() { return this.supplyChainService.findRiskAlerts(); }
+  @Get('supplier-risk-analysis') supplierRiskAnalysis() { return this.supplyChainService.supplierRiskAnalysis(); }
+  @Post('risk-alerts/sync') syncHighRiskOrders() { return this.supplyChainService.syncHighRiskOrders(); }
+  @Patch('purchase-orders/:id/manual-risk-score') setManualRiskScore(@Param('id') id: string, @Body() body: { riskScore: number }) { return this.supplyChainService.setManualRiskScore(id, Number(body.riskScore)); }
+  @Post('risk-alerts/evaluate') evaluateRiskAlert(@Body() body: { incidentId: string; purchaseOrderId: string; riskScore: number }) { return this.supplyChainService.evaluateRiskAlert(body); }
+  @Post('partner-confirmations/:token/on-time') onTime(@Param('token') token: string) { return this.supplyChainService.confirmDelivery(token, 'ON_TIME'); }
+  @Post('partner-confirmations/:token/delayed') delayed(@Param('token') token: string) { return this.supplyChainService.confirmDelivery(token, 'DELAYED'); }
+  @Get('incidents/:incidentId/logistics-messages') messages(@Param('incidentId') incidentId: string) { return this.supplyChainService.messagesFor(incidentId); }
+  @Post('incidents/:incidentId/logistics-messages') sendMessage(@Param('incidentId') incidentId: string, @Body() body: { body: string; senderRole: 'PARTNER' | 'PROCUREMENT' }) { return this.supplyChainService.sendLogisticsMessage(incidentId, body.body, body.senderRole); }
+  @Get('shipments/:id/route') shipmentRoute(@Param('id') id: string) { return this.supplyChainService.shipmentRoute(id); }
   @Post('shipment-tracking-points') recordTrackingPoint(@Body() body: Record<string, unknown>) { return this.supplyChainService.recordTrackingPoint(body as unknown as ShipmentTrackingPointEntity); }
 }

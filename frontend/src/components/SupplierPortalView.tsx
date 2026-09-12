@@ -108,7 +108,7 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
             </h3>
           </div>
           <p className="text-xs text-purple-200 mt-1">
-            Nhận yêu cầu báo giá khẩn cấp (RFQ) từ BikeSync AI, điền đơn giá và cam kết tiến độ giao hàng để tham gia quy trình đấu thầu tự động.
+            Nhận yêu cầu báo giá khẩn cấp (RFQ) từ Resili chain, điền đơn giá và cam kết tiến độ giao hàng để tham gia quy trình đấu thầu tự động.
           </p>
         </div>
 
@@ -193,7 +193,7 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
 
             {supplierRfqs.length === 0 && (
               <div className="p-8 text-center bg-white rounded-xl border border-slate-200 text-xs text-slate-500">
-                Nhà cung cấp này chưa nhận được yêu cầu RFQ nào từ BikeSync AI.
+                Nhà cung cấp này chưa nhận được yêu cầu RFQ nào từ Resili chain.
               </div>
             )}
           </div>
@@ -232,7 +232,7 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
               <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-1.5">
                 <div className="font-semibold text-slate-800 flex items-center gap-1">
                   <Mail className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Nội dung từ Phòng Mua Sắm BikeSync AI:</span>
+                  <span>Nội dung từ Phòng Mua Sắm Resili chain:</span>
                 </div>
                 <div className="font-medium text-slate-900">{selectedRfq.emailSubject}</div>
                 <p className="text-slate-600 whitespace-pre-line text-[11px] leading-relaxed max-h-36 overflow-y-auto">

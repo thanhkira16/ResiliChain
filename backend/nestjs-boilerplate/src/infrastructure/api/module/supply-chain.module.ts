@@ -10,12 +10,28 @@ import {
   ShipmentTrackingPointEntity,
   SourcingProposalEntity,
   SupplierEntity,
+  RiskAlertEntity,
+  LogisticsConversationEntity,
+  LogisticsMessageEntity,
   SupplierRiskAnalysisEntity,
 } from '../../../core/domain/supply-chain';
 import { SupplyChainController } from '../controller/supply-chain.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SupplierEntity, InventoryItemEntity, PurchaseOrderEntity, IncidentEntity, SourcingProposalEntity, ShipmentEntity, ShipmentTrackingPointEntity, SupplierRiskAnalysisEntity, AiJobRunEntity])],
+  imports: [TypeOrmModule.forFeature([
+    SupplierEntity,
+    InventoryItemEntity,
+    PurchaseOrderEntity,
+    IncidentEntity,
+    SourcingProposalEntity,
+    ShipmentEntity,
+    ShipmentTrackingPointEntity,
+    RiskAlertEntity,
+    LogisticsConversationEntity,
+    LogisticsMessageEntity,
+    SupplierRiskAnalysisEntity,
+    AiJobRunEntity,
+  ])],
   controllers: [SupplyChainController],
   providers: [SupplyChainService],
 })

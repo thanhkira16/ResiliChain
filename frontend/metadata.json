@@ -1,5 +1,5 @@
 {
-  "name": "BikeSync AI",
+  "name": "Resili chain",
   "description": "Nền tảng quản lý chuỗi cung ứng xe đạp tích hợp AI Agent giám sát rủi ro, điều phối nhà cung cấp và dự báo nhu cầu",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

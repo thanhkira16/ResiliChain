@@ -10,10 +10,13 @@ import {
   RefreshCw,
   Sliders,
   ExternalLink,
+  MapPinned,
 } from "lucide-react";
 
 interface IncidentsViewProps {
   incidents: Incident[];
+  highRiskOrders: PurchaseOrder[];
+  supplierRisks: Array<{ supplierId: string; supplierName: string; porsScore: number | string; riskLevel: string; statusLabel: string }>;
   onTriggerAgent2: (incident: Incident) => void;
   onNavigateToRfq: (incidentId: string) => void;
   onNavigateToApprovals: (incidentId: string) => void;
@@ -21,10 +24,13 @@ interface IncidentsViewProps {
   onRunRiskScan: () => void;
   isScanning: boolean;
   userRole: UserRole;
+  onViewOnMap?: (poNumber: string) => void;
 }
 
 export const IncidentsView: React.FC<IncidentsViewProps> = ({
   incidents,
+  highRiskOrders,
+  supplierRisks,
   onTriggerAgent2,
   onNavigateToRfq,
   onNavigateToApprovals,
@@ -32,6 +38,7 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
   onRunRiskScan,
   isScanning,
   userRole,
+  onViewOnMap,
 }) => {
   return (
     <div className="space-y-4">
@@ -73,7 +80,32 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
 
       {/* Incidents List */}
       <div className="space-y-3">
-        {incidents.map((inc) => {
+        {supplierRisks.length > 0 && (
+          <section className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs">
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+              <div>
+                <h4 className="text-sm font-bold text-slate-900">Phân tích rủi ro nhà cung cấp</h4>
+                <p className="text-xs text-slate-500 mt-0.5">Dữ liệu PORS mới nhất từ hệ thống phân tích đối tác</p>
+              </div>
+              <span className="text-xs font-bold bg-slate-900 text-white px-2.5 py-1 rounded-full">{supplierRisks.length} đối tác</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 p-4">
+              {supplierRisks.map((risk) => {
+                const level = risk.riskLevel.toUpperCase();
+                const tone = level === 'CAO' ? 'border-red-200 bg-red-50/60 text-red-700' : level.includes('TRUNG') ? 'border-amber-200 bg-amber-50/60 text-amber-700' : 'border-emerald-200 bg-emerald-50/60 text-emerald-700';
+                return <article key={risk.supplierId} className={`rounded-xl border p-4 ${tone}`}>
+                  <div className="flex justify-between gap-3"><div><h5 className="font-bold text-slate-900 text-sm">{risk.supplierName}</h5><p className="font-mono text-[10px] text-slate-500 mt-0.5">{risk.supplierId}</p></div><span className="text-[10px] font-bold px-2 py-1 rounded-full bg-white/80 border border-current">{risk.riskLevel}</span></div>
+                  <div className="flex items-end justify-between mt-5"><div><p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">PORS score</p><p className="text-3xl font-black leading-none mt-1">{Number(risk.porsScore).toFixed(2)}<span className="text-xs text-slate-400 ml-1">/100</span></p></div><div className="text-right text-xs"><p className="text-slate-500">Yếu tố chính</p><p className="font-semibold text-slate-800 mt-1">{risk.statusLabel}</p></div></div>
+                </article>;
+              })}
+            </div>
+          </section>
+        )}
+        <div className="hidden">
+        {supplierRisks.map((risk) => <div key={risk.supplierId} className="p-4 rounded-xl border border-slate-200 bg-white"><div className="flex justify-between"><b>{risk.supplierName} ({risk.supplierId})</b><b className={risk.riskLevel === 'CAO' ? 'text-red-700' : 'text-amber-700'}>PORS {Number(risk.porsScore).toFixed(2)} · {risk.riskLevel}</b></div><p className="text-xs mt-1">Phân tích NCC: {risk.statusLabel}</p></div>)}
+        {highRiskOrders.map((po) => <div key={po.id} className="p-4 rounded-xl border border-red-200 bg-red-50"><div className="flex justify-between"><b>PO {po.poNumber} — Rủi ro cao chưa tạo sự cố</b><b className="text-red-700">{po.currentRiskScore}/100</b></div><p className="text-xs mt-1">{po.supplierName} · {po.skuName}. Hệ thống sẽ gửi xác nhận tiến độ đối tác khi tạo incident.</p></div>)}
+        </div>
+        {false && incidents.map((inc) => {
           const isResolved = inc.status === "Đã giải quyết";
           const isPendingApproval = inc.status === "Chờ duyệt";
 
@@ -210,6 +242,7 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
+                  {onViewOnMap && <button onClick={() => onViewOnMap(inc.poNumber)} className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium rounded-lg transition-colors flex items-center gap-1"><MapPinned className="w-3.5 h-3.5" /><span>Xem trên map</span></button>}
                   {!inc.agent2Triggered ? (
                     <button
                       id={`btn-trigger-agent2-${inc.id}`}

@@ -57,6 +57,10 @@ export class PurchaseOrderEntity {
   @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true, name: 'current_risk_score' })
   currentRiskScore?: number;
 
+  @Column({ type: 'varchar', length: 20, default: 'CALCULATED', name: 'risk_score_source' })
+  riskScoreSource: 'MANUAL' | 'CALCULATED';
+
+
   @Column({ type: 'jsonb', nullable: true, name: 'risk_breakdown' })
   riskBreakdown?: any;
 

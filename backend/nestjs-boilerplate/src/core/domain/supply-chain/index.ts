@@ -5,6 +5,9 @@ export * from './entities/incident.entity';
 export * from './entities/sourcing-proposal.entity';
 export * from './entities/shipment-tracking.entity';
 export * from './entities/shipment.entity';
-
+export * from './entities/risk-alert.entity';
+export * from './entities/logistics-conversation.entity';
+export * from './entities/logistics-message.entity';
 export * from './entities/supplier-risk-analysis.entity';
 export * from './entities/ai-job-run.entity';
+
