@@ -33,6 +33,7 @@ from src.core.contracts import (
 from src.core.formulas import pors_score, risk_level, ssi_del_from_history
 from src.core.logging import get_logger
 from src.core.formulas import delay_risk_score
+from src.integrations.telegram import telegram_client
 from src.database import db_client as db
 
 log = get_logger("agent.agent6_orchestrator")
@@ -310,6 +311,15 @@ def node_persist(state: ScanState) -> ScanState:
             continue
         if outcome == "created":
             stats["incidents_created"] += 1
+            telegram_client.send_order_risk_alert(
+                po_number=incident.po_number,
+                sku=incident.sku,
+                sku_name=incident.sku_name,
+                supplier_name=incident.supplier_name,
+                delay_risk_score=float(incident.delay_risk_score),
+                summary=incident.summary,
+                incident_id=incident.id,
+            )
         elif outcome == "updated":
             stats["incidents_updated"] += 1
         else:
@@ -419,6 +429,14 @@ def scan_supplier_risk(correlation_id: str) -> dict[str, Any]:
         try:
             db.upsert_supplier_risk(analysis)
             stats["suppliers_scanned"] += 1
+            if analysis.risk_level == RiskLevel.HIGH or float(analysis.pors_score) >= settings.pors_high_threshold:
+                telegram_client.send_supplier_risk_alert(
+                    supplier_id=analysis.supplier_id,
+                    supplier_name=supplier.name,
+                    pors_score=float(analysis.pors_score),
+                    risk_level=analysis.risk_level.value if hasattr(analysis.risk_level, 'value') else str(analysis.risk_level),
+                    status_label=analysis.status_label,
+                )
         except Exception as exc:  # noqa: BLE001
             errors.append(f"upsert_supplier_risk {supplier.id}: {exc}")
             degraded = True
