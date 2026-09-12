@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   AtRiskShipmentMapItem,
   Incident,
@@ -175,6 +175,13 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
       return true;
     });
   }, [shipments, riskFilter, supplierFilter, warehouseFilter, searchTerm]);
+
+  // Stable identity: an inline callback here would tear down and rebuild the
+  // Cesium Viewer (and leak a WebGL context) on every render of this component.
+  const handleSelectShipmentOnMap = useCallback((shipment: AtRiskShipmentMapItem) => {
+    setHighlightedShipment(shipment);
+    setSelectedShipment(shipment);
+  }, []);
 
   useEffect(() => {
     if (!focusPoNumber) return;
@@ -500,10 +507,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
             warehouses={warehouses}
             routeWeatherStops={routeWeatherStops}
             selectedShipment={highlightedShipment || selectedShipment}
-            onSelectShipment={(shipment) => {
-              setHighlightedShipment(shipment);
-              setSelectedShipment(shipment);
-            }}
+            onSelectShipment={handleSelectShipmentOnMap}
           />
 
           {/* Retained only as a non-rendered fallback while the interactive world map is active. */}

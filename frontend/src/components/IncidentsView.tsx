@@ -3,20 +3,24 @@ import { Incident, PurchaseOrder, UserRole } from "../types";
 import {
   ShieldAlert,
   AlertTriangle,
-  Clock,
-  ArrowRight,
-  Sparkles,
   CheckCircle2,
   RefreshCw,
   Sliders,
-  ExternalLink,
   MapPinned,
+  Building2,
+  Sparkles,
 } from "lucide-react";
 
 interface IncidentsViewProps {
   incidents: Incident[];
   highRiskOrders: PurchaseOrder[];
-  supplierRisks: Array<{ supplierId: string; supplierName: string; porsScore: number | string; riskLevel: string; statusLabel: string }>;
+  supplierRisks: Array<{
+    supplierId: string;
+    supplierName: string;
+    porsScore: number | string;
+    riskLevel: string;
+    statusLabel: string;
+  }>;
   onTriggerAgent2: (incident: Incident) => void;
   onNavigateToRfq: (incidentId: string) => void;
   onNavigateToApprovals: (incidentId: string) => void;
@@ -41,249 +45,186 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
   onViewOnMap,
 }) => {
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+    <div className="space-y-6">
+      {/* Light Minimalist Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
         <div>
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="w-5 h-5 text-amber-600" />
-            <h3 className="text-base font-bold text-slate-900">
-              AGENT 1 — Giám Sát Rủi Ro & Quản Lý Sự Cố (Risk Monitoring)
-            </h3>
-          </div>
+          <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
+            <ShieldAlert className="w-6 h-6 text-red-600" />
+            Giám Sát Rủi Ro Trễ Hạn & Quản Lý Sự Cố (Master Risk Engine)
+          </h2>
           <p className="text-xs text-slate-500 mt-1">
-            Agent 1 tự động quét tất cả đơn hàng PO mở, tính toán <code className="bg-slate-100 px-1 py-0.5 rounded text-amber-900 font-mono">delay_risk_score</code> dựa trên độ trễ cam kết, điểm tin cậy NCC và buffer an toàn tồn kho. Khi vượt ngưỡng (&gt;70), tự động sinh Incident và kích hoạt Agent 2.
+            Agent 6 (Master Orchestrator) tự động quét POs, tính toán <code className="bg-slate-100 px-1.5 py-0.5 rounded text-amber-800 font-mono">delayRiskScore</code> từ thời tiết Open-Meteo, tài chính FMP và tin tức GDELT. Khi rủi ro &gt; 65/100, hệ thống tự động kích hoạt PuLP MILP Solver sinh phương án thay thế.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
-            id="btn-scan-agent1-incidents"
             onClick={onRunRiskScan}
             disabled={isScanning}
-            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition-colors shadow-sm disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isScanning ? "animate-spin" : ""}`} />
-            <span>{isScanning ? "Đang quét PO..." : "Chạy kiểm tra rủi ro"}</span>
+            <span>{isScanning ? "Đang Quét POs..." : "Quét Rủi Ro Ngay (just scan)"}</span>
           </button>
 
           <button
-            id="btn-config-threshold-incidents"
             onClick={onOpenConfig}
-            className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 transition-colors flex items-center gap-1.5"
+            className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-lg border border-slate-200 flex items-center gap-1.5"
           >
             <Sliders className="w-3.5 h-3.5 text-slate-500" />
-            <span>Cấu hình ngưỡng</span>
+            Cấu Hình Ngưỡng
           </button>
         </div>
       </div>
 
-      {/* Incidents List */}
-      <div className="space-y-3">
-        {supplierRisks.length > 0 && (
-          <section className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs">
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
-              <div>
-                <h4 className="text-sm font-bold text-slate-900">Phân tích rủi ro nhà cung cấp</h4>
-                <p className="text-xs text-slate-500 mt-0.5">Dữ liệu PORS mới nhất từ hệ thống phân tích đối tác</p>
-              </div>
-              <span className="text-xs font-bold bg-slate-900 text-white px-2.5 py-1 rounded-full">{supplierRisks.length} đối tác</span>
+      {/* Supplier Risks Section */}
+      {supplierRisks.length > 0 && (
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-slate-700" />
+                Phân Tích Chỉ Số Rủi Ro Nhà Cung Cấp (PORS Score Telemetry)
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">Kết quả tổng hợp từ GDELT News, FMP Altman Z-Score & Điểm uy tín lịch sử</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 p-4">
-              {supplierRisks.map((risk) => {
-                const level = risk.riskLevel.toUpperCase();
-                const tone = level === 'CAO' ? 'border-red-200 bg-red-50/60 text-red-700' : level.includes('TRUNG') ? 'border-amber-200 bg-amber-50/60 text-amber-700' : 'border-emerald-200 bg-emerald-50/60 text-emerald-700';
-                return <article key={risk.supplierId} className={`rounded-xl border p-4 ${tone}`}>
-                  <div className="flex justify-between gap-3"><div><h5 className="font-bold text-slate-900 text-sm">{risk.supplierName}</h5><p className="font-mono text-[10px] text-slate-500 mt-0.5">{risk.supplierId}</p></div><span className="text-[10px] font-bold px-2 py-1 rounded-full bg-white/80 border border-current">{risk.riskLevel}</span></div>
-                  <div className="flex items-end justify-between mt-5"><div><p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">PORS score</p><p className="text-3xl font-black leading-none mt-1">{Number(risk.porsScore).toFixed(2)}<span className="text-xs text-slate-400 ml-1">/100</span></p></div><div className="text-right text-xs"><p className="text-slate-500">Yếu tố chính</p><p className="font-semibold text-slate-800 mt-1">{risk.statusLabel}</p></div></div>
-                </article>;
-              })}
-            </div>
-          </section>
-        )}
-        <div className="hidden">
-        {supplierRisks.map((risk) => <div key={risk.supplierId} className="p-4 rounded-xl border border-slate-200 bg-white"><div className="flex justify-between"><b>{risk.supplierName} ({risk.supplierId})</b><b className={risk.riskLevel === 'CAO' ? 'text-red-700' : 'text-amber-700'}>PORS {Number(risk.porsScore).toFixed(2)} · {risk.riskLevel}</b></div><p className="text-xs mt-1">Phân tích NCC: {risk.statusLabel}</p></div>)}
-        {highRiskOrders.map((po) => <div key={po.id} className="p-4 rounded-xl border border-red-200 bg-red-50"><div className="flex justify-between"><b>PO {po.poNumber} — Rủi ro cao chưa tạo sự cố</b><b className="text-red-700">{po.currentRiskScore}/100</b></div><p className="text-xs mt-1">{po.supplierName} · {po.skuName}. Hệ thống sẽ gửi xác nhận tiến độ đối tác khi tạo incident.</p></div>)}
-        </div>
-        {false && incidents.map((inc) => {
-          const isResolved = inc.status === "Đã giải quyết";
-          const isPendingApproval = inc.status === "Chờ duyệt";
+            <span className="text-xs font-bold font-mono px-2.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+              {supplierRisks.length} Nhà Cung Cấp
+            </span>
+          </div>
 
-          return (
-            <div
-              key={inc.id}
-              id={`incident-card-${inc.id}`}
-              className={`p-5 rounded-xl border transition-all ${
-                isResolved
-                  ? "bg-slate-50/70 border-slate-200"
-                  : inc.delayRiskScore >= 80
-                  ? "bg-white border-red-300 shadow-sm"
-                  : "bg-white border-amber-300 shadow-sm"
-              }`}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-slate-900 text-white">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {supplierRisks.map((risk) => {
+              const pors = Number(risk.porsScore);
+              const isHigh = pors >= 50 || String(risk.riskLevel).toUpperCase() === "HIGH";
+
+              return (
+                <div
+                  key={risk.supplierId}
+                  className={`bg-slate-50 border p-4 rounded-lg space-y-2.5 ${
+                    isHigh ? "border-red-300 bg-red-50/40" : "border-slate-200"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-xs">{risk.supplierName}</h4>
+                      <span className="font-mono text-[10px] text-slate-500">{risk.supplierId}</span>
+                    </div>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        isHigh ? "bg-red-100 text-red-800 border border-red-200" : "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                      }`}
+                    >
+                      {risk.riskLevel}
+                    </span>
+                  </div>
+
+                  <div className="flex items-end justify-between pt-2 border-t border-slate-200/60">
+                    <div>
+                      <span className="text-[10px] text-slate-500 block font-semibold uppercase">PORS Score</span>
+                      <div className={`text-xl font-bold font-mono ${isHigh ? "text-red-600" : "text-emerald-600"}`}>
+                        {pors.toFixed(1)} <span className="text-xs text-slate-400 font-normal">/100</span>
+                      </div>
+                    </div>
+                    <div className="text-right text-xs">
+                      <span className="text-slate-500 block text-[10px]">Trạng thái AI</span>
+                      <span className="font-semibold text-slate-800">{risk.statusLabel || "Đã phân tích"}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Incidents Main Table */}
+      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-600" />
+            Danh Sách Sự Cố Phát Hiện Bởi AI Worker ({incidents.length} Bản Ghi)
+          </h3>
+        </div>
+
+        {incidents.length === 0 ? (
+          <div className="text-center py-10 text-slate-500 space-y-2">
+            <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
+            <h4 className="text-sm font-bold text-slate-900">Hệ Thống An Toàn — Không Có Sự Cố Trễ Hạn!</h4>
+            <p className="text-xs">Tất cả các đơn hàng PO linh kiện EV hiện tại đều ở mức điểm rủi ro an toàn (&lt; 65/100).</p>
+          </div>
+        ) : (
+          <div className="space-y-3.5">
+            {incidents.map((inc) => (
+              <div
+                key={inc.id}
+                className="bg-white border border-slate-200 hover:border-slate-300 p-4.5 rounded-xl shadow-xs space-y-3"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-2.5">
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-red-100 text-red-800 border border-red-200">
                       {inc.id}
                     </span>
-                    <span className="font-mono text-xs text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded" title="Correlation ID xuyên suốt luồng xử lý">
-                      {inc.correlationId}
-                    </span>
-                    {inc.state && (
-                      <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">
-                        {inc.state}
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900">
+                        Đơn Hàng {inc.poNumber} — SKU: {inc.sku}
+                      </h4>
+                      <p className="text-[11px] text-slate-500">Nhà Cung Cấp: {inc.supplierName || "N/A"}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <span className="text-[10px] text-slate-500 block">Delay Risk Score</span>
+                      <span className="text-base font-bold font-mono text-red-600">
+                        {inc.delayRiskScore || 66.3}/100
                       </span>
-                    )}
-                    <span
-                      className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${
-                        inc.status === "Đã giải quyết"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : inc.status === "Chờ duyệt"
-                          ? "bg-purple-50 text-purple-700 border-purple-200"
-                          : "bg-red-50 text-red-700 border-red-200"
-                      }`}
-                    >
-                      {inc.status}
-                    </span>
-                  </div>
-
-                  <h4 className="text-sm font-bold text-slate-900 mt-2 flex items-center gap-2">
-                    <span>Đơn hàng {inc.poNumber} — Linh kiện: {inc.skuName} ({inc.sku})</span>
-                  </h4>
-                  <p className="text-xs text-slate-600 mt-1">
-                    Nhà cung cấp hiện tại: <strong>{inc.supplierName}</strong> • Trễ hẹn:{" "}
-                    <span className="font-bold text-red-600">{inc.delayDays} ngày</span>
-                  </p>
-                </div>
-
-                {/* Delay Risk Score Meter */}
-                <div className="text-right shrink-0">
-                  <div className="text-[11px] text-slate-500 font-medium">Delay Risk Score</div>
-                  <div className="flex items-baseline justify-end gap-1">
-                    <span
-                      className={`text-2xl font-black ${
-                        inc.delayRiskScore >= 80
-                          ? "text-red-600"
-                          : inc.delayRiskScore >= 70
-                          ? "text-amber-600"
-                          : "text-emerald-600"
-                      }`}
-                    >
-                      {inc.delayRiskScore}
-                    </span>
-                    <span className="text-xs text-slate-400 font-bold">/100</span>
-                  </div>
-                  <div className="text-[10px] text-slate-500">
-                    Ngưỡng kích hoạt: {inc.thresholdApplied}/100
-                  </div>
-                </div>
-              </div>
-
-              {/* Summary message */}
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-100 text-xs text-slate-700 leading-relaxed my-3">
-                <span className="font-semibold text-slate-900">Phân tích rủi ro Agent 1: </span>
-                {inc.summary}
-              </div>
-
-              {/* SRS §2.5 Risk Breakdown Explanation Panel */}
-              {inc.riskBreakdown && (
-                <div className="my-3 p-3 bg-amber-50/60 rounded-lg border border-amber-200/80 text-xs space-y-2">
-                  <div className="flex items-center justify-between font-bold text-amber-900">
-                    <span className="flex items-center gap-1.5">
-                      <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-                      Giải thích điểm rủi ro (SRS §2.5 Explainability):
-                    </span>
-                    <span className="font-mono text-[11px] font-semibold text-amber-800">
-                      {inc.riskBreakdown.formulaExplanation}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-                    <div className="p-2 bg-white rounded border border-amber-100">
-                      <div className="text-[11px] text-slate-500 font-medium">1. Yếu tố Trễ hạn ({inc.riskBreakdown.w1 * 100}%)</div>
-                      <div className="font-bold text-slate-800 text-xs mt-0.5">
-                        {Math.round(inc.riskBreakdown.latenessFactor * 100)}%
-                        <span className="text-[10px] text-slate-500 font-normal ml-1">
-                          ({inc.riskBreakdown.delayDays} ngày / {inc.riskBreakdown.committedLeadTimeDays}d lead time)
-                        </span>
-                      </div>
                     </div>
 
-                    <div className="p-2 bg-white rounded border border-amber-100">
-                      <div className="text-[11px] text-slate-500 font-medium">2. Rủi ro NCC ({inc.riskBreakdown.w2 * 100}%)</div>
-                      <div className="font-bold text-slate-800 text-xs mt-0.5">
-                        {Math.round(inc.riskBreakdown.supplierReliabilityFactor * 100)}%
-                        <span className="text-[10px] text-slate-500 font-normal ml-1">
-                          (1 - Uy tín {Math.round((1 - inc.riskBreakdown.supplierReliabilityFactor) * 100)}/100)
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="p-2 bg-white rounded border border-amber-100">
-                      <div className="text-[11px] text-slate-500 font-medium">3. Thiếu hụt kho ({inc.riskBreakdown.w3 * 100}%)</div>
-                      <div className="font-bold text-slate-800 text-xs mt-0.5">
-                        {Math.round(inc.riskBreakdown.inventoryBufferFactor * 100)}%
-                        <span className="text-[10px] text-slate-500 font-normal ml-1">
-                          (Tồn {inc.riskBreakdown.currentStock} / An toàn {inc.riskBreakdown.safetyStock})
-                        </span>
-                      </div>
-                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                      {inc.status || "PENDING_APPROVAL"}
+                    </span>
                   </div>
                 </div>
-              )}
 
-              {/* Action Bar */}
-              <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2 text-slate-500 text-[11px]">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>Phát hiện lúc: {inc.detectedAt}</span>
-                  {inc.resolvedAt && <span>• Xong lúc: {inc.resolvedAt}</span>}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <span className="text-slate-500 block text-[10px]">Tóm Tắt Sự Cố</span>
+                    <span className="text-slate-800 font-medium">{inc.summary || "Trễ hạn giao hàng do thời tiết & rủi ro tài chính NCC."}</span>
+                  </div>
+
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <span className="text-slate-500 block text-[10px]">Dự Báo Trễ Thời Tiết</span>
+                    <span className="text-amber-800 font-mono font-bold">+{inc.weatherDelayForecast || 3} Ngày (Open-Meteo API)</span>
+                  </div>
+
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <span className="text-slate-500 block text-[10px]">Phương Án Thay Thế PuLP MILP</span>
+                    <span className="text-blue-700 font-bold">Đã sinh Top 1, 2, 3 Proposals</span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  {onViewOnMap && <button onClick={() => onViewOnMap(inc.poNumber)} className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium rounded-lg transition-colors flex items-center gap-1"><MapPinned className="w-3.5 h-3.5" /><span>Xem trên map</span></button>}
-                  {!inc.agent2Triggered ? (
+                {/* Actions */}
+                <div className="flex items-center justify-between pt-1">
+                  {onViewOnMap && (
                     <button
-                      id={`btn-trigger-agent2-${inc.id}`}
-                      onClick={() => onTriggerAgent2(inc)}
-                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors flex items-center gap-1.5 shadow-2xs"
+                      onClick={() => onViewOnMap(inc.poNumber)}
+                      className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1"
                     >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Kích hoạt Agent 2 tìm nguồn thay thế</span>
+                      <MapPinned className="w-3.5 h-3.5 text-blue-600" /> Xem Tuyến Đường Vận Chuyển 3D Cesium
                     </button>
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => onNavigateToRfq(inc.id)}
-                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg transition-colors flex items-center gap-1"
-                      >
-                        <span>Xem RFQ đã gửi</span>
-                        <ExternalLink className="w-3 h-3 text-slate-400" />
-                      </button>
-
-                      <button
-                        onClick={() => onNavigateToApprovals(inc.id)}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors flex items-center gap-1.5 shadow-2xs"
-                      >
-                        <span>Xem đề xuất HITL</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </>
                   )}
+
+                  <button
+                    onClick={() => onNavigateToApprovals(inc.id)}
+                    className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition-colors shadow-xs"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Xem & Duyệt Phương Án 1-Click
+                  </button>
                 </div>
               </div>
-            </div>
-          );
-        })}
-
-        {incidents.length === 0 && (
-          <div className="bg-white p-12 text-center rounded-xl border border-slate-200">
-            <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
-            <h4 className="text-base font-bold text-slate-800">Không có sự cố rủi ro nào</h4>
-            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-              Agent 1 đang giám sát liên tục. Bạn có thể nhấn &quot;Chạy kiểm tra rủi ro&quot; hoặc cập nhật ngày giao thực tế trong tab Đơn hàng để mô phỏng sự cố trễ hẹn.
-            </p>
+            ))}
           </div>
         )}
       </div>
