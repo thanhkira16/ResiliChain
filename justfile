@@ -86,6 +86,10 @@ scan:
 scan-suppliers:
     cd {{ai_dir}} && {{py}} ai_worker.py --once --job supplier_risk_scan
 
+# Quét database và phát toàn bộ cảnh báo rủi ro hiện tại qua Telegram Bot
+send-alerts:
+    cd {{ai_dir}} && {{py}} scripts/send_all_alerts.py
+
 # Chạy worker liên tục, mặc định 300 giây mỗi vòng
 watch interval="300":
     cd {{ai_dir}} && {{py}} ai_worker.py --loop {{interval}}
