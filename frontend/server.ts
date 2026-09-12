@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
+import { getWeather, WeatherRequestError } from "../ai/weatherGraph.js";
 
 dotenv.config();
 
@@ -11,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json());
 
@@ -38,6 +39,45 @@ app.get("/api/health", (_req, res) => {
     aiConfigured: Boolean(process.env.GEMINI_API_KEY),
     timestamp: new Date().toISOString(),
   });
+});
+
+// Weather Agent: a LangGraph workflow backed by the public Open-Meteo APIs.
+app.post("/api/ai/weather", async (req, res) => {
+  try {
+    const data = await getWeather(req.body ?? {});
+    return res.json({ success: true, data });
+  } catch (error) {
+    const knownError = error instanceof WeatherRequestError;
+    if (!knownError) console.error("Weather agent error:", error);
+    return res.status(knownError ? error.statusCode : 500).json({
+      success: false,
+      error: knownError ? error.message : "Đã xảy ra lỗi khi lấy dữ liệu thời tiết.",
+    });
+  }
+});
+
+// Route weather uses the same LangGraph workflow for every requested city.
+// Individual failures are retained so one miss does not discard the whole route.
+app.post("/api/ai/weather/route", async (req, res) => {
+  const requestedCities = req.body?.cities;
+  const cities: string[] = Array.isArray(requestedCities)
+    ? [...new Set(requestedCities.filter((city): city is string => typeof city === "string").map((city) => city.trim()).filter(Boolean))]
+    : [];
+
+  if (cities.length < 2 || cities.length > 10 || cities.some((city) => city.length > 100)) {
+    return res.status(400).json({ success: false, error: "Cần cung cấp từ 2 đến 10 tên thành phố hợp lệ." });
+  }
+
+  const data = await Promise.all(cities.map(async (city) => {
+    try {
+      return { city, data: await getWeather({ city }) };
+    } catch (error) {
+      const message = error instanceof WeatherRequestError ? error.message : "Không thể lấy dữ liệu thời tiết.";
+      return { city, error: message };
+    }
+  }));
+
+  return res.json({ success: true, data });
 });
 
 // ----------------------------------------------------

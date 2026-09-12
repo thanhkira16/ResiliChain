@@ -12,6 +12,10 @@ const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:300
 
 type ApiEnvelope<T> = { data: T };
 
+function isApiEnvelope<T>(payload: T | ApiEnvelope<T>): payload is ApiEnvelope<T> {
+  return typeof payload === 'object' && payload !== null && 'data' in payload;
+}
+
 const toNumber = (value: unknown): number => Number(value);
 
 function normalizeSupplier(supplier: Supplier): Supplier {
@@ -51,7 +55,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
   if (!response.ok) throw new Error(`API ${response.status}: ${await response.text()}`);
   const payload = (await response.json()) as ApiEnvelope<T> | T;
-  return 'data' in payload ? payload.data : payload;
+  return isApiEnvelope(payload) ? payload.data : payload;
 }
 
 export const SupplyChainApi = {

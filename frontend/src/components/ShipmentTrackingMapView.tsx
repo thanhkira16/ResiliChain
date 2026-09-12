@@ -6,6 +6,9 @@ import {
   UserRole,
 } from "../types";
 import { StorageService } from "../services/storage";
+import { RouteWeatherPanel } from "./RouteWeatherPanel";
+import { RouteWeatherStop, weatherSeverityStyle } from "../services/weatherService";
+import { GlobalRouteWeatherMap } from "./GlobalRouteWeatherMap";
 import { SupplyChainApi } from "../services/api";
 import {
   MapPin,
@@ -57,6 +60,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
   const [isSimulatingWebhook, setIsSimulatingWebhook] = useState<boolean>(false);
   const [lastWebhookMessage, setLastWebhookMessage] = useState<string | null>(null);
   const [isLiveStreamActive, setIsLiveStreamActive] = useState<boolean>(false);
+  const [routeWeatherStops, setRouteWeatherStops] = useState<RouteWeatherStop[]>([]);
 
   // Load projection data from StorageService (CQRS Read Model)
   const reloadData = async () => {
@@ -191,6 +195,16 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
       y: Math.round(normY * svgHeight),
     };
   };
+
+  // The current SVG is a Vietnam corridor map. Stops outside its extent remain visible in the
+  // route weather panel, but are not projected onto this regional map.
+  const visibleRouteWeatherStops = routeWeatherStops.filter(
+    (stop) =>
+      stop.location.latitude >= 9.5 &&
+      stop.location.latitude <= 22.8 &&
+      stop.location.longitude >= 103 &&
+      stop.location.longitude <= 109.8
+  );
 
   // Simulate Carrier Webhook GPS Ping
   const handleSimulateCarrierPing = async (simulateDuplicate = false) => {
@@ -467,32 +481,23 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
           </div>
         </div>
 
-        {/* Region Quick Zoom Buttons */}
-        <div className="flex items-center gap-1 border border-slate-200 rounded-lg p-1 bg-slate-50">
-          <span className="text-[11px] font-medium text-slate-500 px-1">Khu vực:</span>
-          {(["ALL", "NORTH", "CENTRAL", "SOUTH"] as const).map((r) => (
-            <button
-              key={r}
-              onClick={() => setActiveRegion(r)}
-              className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
-                activeRegion === r
-                  ? "bg-white text-blue-700 shadow-xs border border-slate-200"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              {r === "ALL" && "Toàn quốc"}
-              {r === "NORTH" && "Miền Bắc"}
-              {r === "CENTRAL" && "Miền Trung"}
-              {r === "SOUTH" && "Miền Nam"}
-            </button>
-          ))}
-        </div>
+        <span className="text-[11px] text-slate-500">Bản đồ thế giới tương tác · OpenStreetMap</span>
       </div>
 
       {/* Map + Detail Panel Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* MAP CANVAS CONTAINER */}
         <div className="lg:col-span-8 bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow-lg relative min-h-[580px] flex flex-col">
+          <GlobalRouteWeatherMap
+            shipments={filteredShipments}
+            warehouses={warehouses}
+            routeWeatherStops={routeWeatherStops}
+            selectedShipment={selectedShipment}
+            onSelectShipment={setSelectedShipment}
+          />
+
+          {/* Retained only as a non-rendered fallback while the interactive world map is active. */}
+          <div className="hidden">
           {/* Map Top Bar overlay */}
           <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-2">
             <div className="px-3 py-1.5 rounded-lg bg-slate-900/90 backdrop-blur-md border border-slate-700 text-xs text-slate-200 flex items-center gap-2 shadow-md">
@@ -551,6 +556,15 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
               <Building2 className="w-3 h-3 text-indigo-400" />
               <span>Kho đích / Nhà máy lắp ráp xe đạp</span>
             </div>
+            {routeWeatherStops.length > 0 && (
+              <>
+                <div className="pt-1 border-t border-slate-800 font-semibold text-white">Thời tiết tuyến đường</div>
+                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-red-500" /><span>Đỏ · Nguy hiểm</span></div>
+                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-orange-500" /><span>Cam · Thời tiết xấu</span></div>
+                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-amber-400" /><span>Vàng · Cần theo dõi</span></div>
+                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /><span>Xanh · Ổn định</span></div>
+              </>
+            )}
           </div>
 
           {/* SVG Map Canvas */}
@@ -695,6 +709,41 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                 );
               })}
 
+              {/* USER-ENTERED ROUTE WEATHER */}
+              {visibleRouteWeatherStops.length > 0 && (() => {
+                const routePoints = visibleRouteWeatherStops.map((stop) =>
+                  projectGeoToSvg(stop.location.latitude, stop.location.longitude)
+                );
+                const pathData = routePoints
+                  .map((point, index) => (index === 0 ? `M ${point.x} ${point.y}` : `L ${point.x} ${point.y}`))
+                  .join(" ");
+
+                return (
+                  <g aria-label="Tuyến đường và điều kiện thời tiết">
+                    {routePoints.length > 1 && (
+                      <path d={pathData} fill="none" stroke="#e2e8f0" strokeWidth="2" strokeDasharray="5,4" opacity="0.75" />
+                    )}
+                    {visibleRouteWeatherStops.map((stop, index) => {
+                      const point = routePoints[index];
+                      const color = weatherSeverityStyle[stop.severity].color;
+                      return (
+                        <g key={`weather-${stop.location.latitude}-${stop.location.longitude}`} transform={`translate(${point.x}, ${point.y})`}>
+                          {stop.severity === "SEVERE" && <circle r="17" fill="none" stroke={color} strokeWidth="1.5" opacity="0.8" className="animate-ping" />}
+                          <circle r="12" fill={color} stroke="#ffffff" strokeWidth="2" />
+                          <text x="0" y="4" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="700">{index + 1}</text>
+                          <g transform="translate(15, -10)" className="pointer-events-none">
+                            <rect width="86" height="20" rx="4" fill="#0f172a" fillOpacity="0.92" stroke={color} strokeWidth="1" />
+                            <text x="5" y="9" fill="#f8fafc" fontSize="8" fontWeight="700">{stop.location.name}</text>
+                            <text x="5" y="17" fill="#cbd5e1" fontSize="7">{stop.condition} · {stop.temperatureC}°C</text>
+                          </g>
+                          <title>{`${stop.location.name}: ${stop.severityLabel}. ${stop.condition}, ${stop.temperatureC}°C, gió ${stop.windSpeedKmh} km/h.`}</title>
+                        </g>
+                      );
+                    })}
+                  </g>
+                );
+              })()}
+
               {/* DESTINATION WAREHOUSE MARKERS */}
               {warehouses.map((wh) => {
                 const pos = projectGeoToSvg(wh.latitude, wh.longitude);
@@ -812,10 +861,13 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
               })}
             </svg>
           </div>
+          </div>
         </div>
 
         {/* SIDE DETAIL PANEL */}
         <div className="lg:col-span-4 space-y-4">
+          <RouteWeatherPanel onWeatherChange={setRouteWeatherStops} />
+
           {selectedShipment ? (
             <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-5 animate-fadeIn">
               {/* Header with PO and Risk Score */}

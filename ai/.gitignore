@@ -1,0 +1,16 @@
+# Secrets -- KHONG BAO GIO commit
+.env
+.env.*
+!.env.example
+
+# Cache dia cua src/integrations/http.py (settings.cache_dir)
+.cache/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Ket qua chay cua apidata/*.py (du lieu API tho, dung lam fixture)
+apidata/out/*.tmp
