@@ -96,6 +96,13 @@ export const StorageService = {
     safeSet(KEYS.SEASONALITY, config);
   },
 
+  getDemandHistory(): Record<string, number[]> {
+    return safeGet<Record<string, number[]>>(KEYS.DEMAND_HISTORY, {});
+  },
+  saveDemandHistory(history: Record<string, number[]>): void {
+    safeSet(KEYS.DEMAND_HISTORY, history);
+  },
+
   getThresholds(): RiskThresholdConfig {
     return safeGet<RiskThresholdConfig>(KEYS.THRESHOLDS, defaultThresholdConfig);
   },
@@ -129,6 +136,12 @@ export const StorageService = {
   },
   saveAuditLogs(items: AuditLogEntry[]): void {
     safeSet(KEYS.AUDIT_LOGS, items);
+  },
+  getLogs(): AuditLogEntry[] {
+    return this.getAuditLogs();
+  },
+  saveLogs(items: AuditLogEntry[]): void {
+    this.saveAuditLogs(items);
   },
   addAuditLog(action: string, details: string, user: string = "Hệ thống AI Worker", poNumber?: string, supplierId?: string): AuditLogEntry {
     const logs = this.getAuditLogs();
@@ -188,12 +201,34 @@ export const StorageService = {
   saveAgentRuns(runs: AgentRun[]): void {
     safeSet(KEYS.AGENT_RUNS, runs);
   },
+  recordAgentRun(run: Partial<AgentRun>): void {
+    const runs = this.getAgentRuns();
+    const newRun: AgentRun = {
+      id: run.id || `RUN-${Date.now()}`,
+      timestamp: run.timestamp || new Date().toISOString(),
+      agentName: run.agentName || "Agent Work",
+      status: run.status || "SUCCESS",
+      summary: run.summary || "",
+      executionTimeMs: run.executionTimeMs || 100,
+    };
+    this.saveAgentRuns([newRun, ...runs]);
+  },
 
   getRiskHistory(): RiskHistoryPoint[] {
     return safeGet<RiskHistoryPoint[]>(KEYS.RISK_HISTORY, []);
   },
   saveRiskHistory(history: RiskHistoryPoint[]): void {
     safeSet(KEYS.RISK_HISTORY, history);
+  },
+  appendPoRiskHistory(poNumber: string, point: Partial<RiskHistoryPoint>): void {
+    const history = this.getRiskHistory();
+    const newPoint: RiskHistoryPoint = {
+      timestamp: point.timestamp || new Date().toISOString(),
+      poNumber: poNumber,
+      riskScore: point.riskScore || 0,
+      reason: point.reason || "",
+    };
+    this.saveRiskHistory([newPoint, ...history]);
   },
 
   getTrackingPoints(): ShipmentTrackingPoint[] {
@@ -205,5 +240,8 @@ export const StorageService = {
 
   clearAllData(): void {
     Object.values(KEYS).forEach((k) => localStorage.removeItem(k));
+  },
+  resetAll(): void {
+    this.clearAllData();
   },
 };
