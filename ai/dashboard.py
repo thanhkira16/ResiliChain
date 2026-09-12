@@ -30,30 +30,33 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Custom Light Minimalist Theme Styling (NO Gradients)
+# Custom Dark Minimalist Theme Styling
 st.markdown(
     """
     <style>
     .stApp {
-        background-color: #f8fafc;
-        color: #0f172a;
+        background-color: #0f172a;
+        color: #f8fafc;
+    }
+    h1, h2, h3, h4, h5, h6, p, label, .stCaption {
+        color: #f8fafc !important;
     }
     .metric-card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
+        background: #1e293b;
+        border: 1px solid #334155;
         border-radius: 12px;
         padding: 16px;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
     }
     .metric-title {
-        color: #64748b;
+        color: #94a3b8;
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
     .metric-value {
-        color: #0f172a;
+        color: #f8fafc;
         font-size: 1.75rem;
         font-weight: 800;
         font-family: monospace;
@@ -162,7 +165,7 @@ with tab_risk:
                 color="risk_level", color_discrete_map=RISK_COLORS,
                 labels={"pors_score": "Điểm PORS Score", "supplier_name": "", "risk_level": "Mức Risk"},
                 title="Bảng Điểm Rủi Ro Tổng Hợp PORS Score",
-                template="plotly_white",
+                template="plotly_dark",
             )
             fig.add_vline(x=settings.pors_high_threshold, line_dash="dash", line_color="#dc2626")
             fig.add_vline(x=settings.pors_medium_threshold, line_dash="dot", line_color="#d97706")
@@ -178,7 +181,7 @@ with tab_risk:
             fig2 = px.bar(
                 comp, x="supplier_name", y="Điểm", color="Thành phần",
                 title="4 Thành Phần Phân Tách Điểm PORS", labels={"supplier_name": ""},
-                template="plotly_white",
+                template="plotly_dark",
             )
             fig2.update_layout(height=440, xaxis_tickangle=-40)
             st.plotly_chart(fig2, use_container_width=True)
@@ -195,7 +198,7 @@ with tab_risk:
                 text="supplier_name", hover_data=["ticker"],
                 labels={"altman_z": "Altman Z-Score", "pors_score": "PORS"},
                 title="Ma Trận Tương Quan Altman Z-Score vs PORS Score",
-                template="plotly_white",
+                template="plotly_dark",
             )
             fig3.add_vline(x=1.81, line_dash="dash", line_color="#dc2626")
             fig3.add_vline(x=2.99, line_dash="dash", line_color="#16a34a")
@@ -209,15 +212,15 @@ with tab_inc:
     inc = _num(
         q(
             """
-            SELECT i.id, i.po_number, i.sku, i.severity, i.status, i.state,
-                   i.delay_risk_score, i.weather_delay_days, i.created_at,
+            SELECT i.id, i.po_number, i.sku, i.status, i.state,
+                   i.delay_days, i.delay_risk_score, i.summary, i.created_at,
                    po.supplier_name
             FROM incidents i
             LEFT JOIN purchase_orders po ON po.po_number = i.po_number
             ORDER BY i.created_at DESC
             """
         ),
-        "delay_risk_score", "weather_delay_days",
+        "delay_days", "delay_risk_score",
     )
     if inc.empty:
         st.info("Chưa phát hiện sự cố nghiêm trọng nào trong database.")
@@ -246,10 +249,10 @@ with tab_prop:
 with tab_jobs:
     jobs = q(
         """
-        SELECT id, job_name, status, orders_processed, incidents_created,
-               duration_ms, error_message, ran_at
+        SELECT id, job_name, status, trigger_source, orders_scanned, suppliers_scanned,
+               incidents_created, proposals_created, duration_ms, message, started_at
         FROM ai_job_runs
-        ORDER BY ran_at DESC
+        ORDER BY started_at DESC
         LIMIT 50
         """
     )
