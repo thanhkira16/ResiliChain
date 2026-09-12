@@ -67,5 +67,12 @@ export const SupplyChainApi = {
   saveProposal: (value: SourcingProposal) => request<SourcingProposal>('/supply-chain/sourcing-proposals', { method: 'POST', body: JSON.stringify(value) }),
   updateProposal: (id: string, value: Partial<SourcingProposal>) => request<SourcingProposal>(`/supply-chain/sourcing-proposals/${id}`, { method: 'PATCH', body: JSON.stringify(value) }),
   getAtRiskShipments: () => request<AtRiskShipmentMapItem[]>('/supply-chain/shipments/at-risk-map'),
+  evaluateRiskAlert: (value: { incidentId: string; purchaseOrderId: string; riskScore: number }) => request<{ triggered: boolean }>('/supply-chain/risk-alerts/evaluate', { method: 'POST', body: JSON.stringify(value) }),
+  syncHighRiskOrders: () => request<unknown[]>('/supply-chain/risk-alerts/sync', { method: 'POST' }),
+  getSupplierRiskAnalysis: () => request<Array<{ supplierId: string; supplierName: string; porsScore: number | string; riskLevel: string; statusLabel: string; analyzedAt: string }>>('/supply-chain/supplier-risk-analysis'),
+  setManualRiskScore: (id: string, riskScore: number) => request<PurchaseOrder>(`/supply-chain/purchase-orders/${id}/manual-risk-score`, { method: 'PATCH', body: JSON.stringify({ riskScore }) }),
+  confirmPartnerDelivery: (token: string, response: 'on-time' | 'delayed') => request<{ redirectTo: string | null }>(`/supply-chain/partner-confirmations/${token}/${response}`, { method: 'POST' }),
+  getLogisticsMessages: (incidentId: string) => request<Array<{ id: string; senderRole: string; body: string; createdAt: string }>>(`/supply-chain/incidents/${incidentId}/logistics-messages`),
+  sendLogisticsMessage: (incidentId: string, body: string, senderRole: 'PARTNER' | 'PROCUREMENT') => request<{ id: string; senderRole: string; body: string; createdAt: string }>(`/supply-chain/incidents/${incidentId}/logistics-messages`, { method: 'POST', body: JSON.stringify({ body, senderRole }) }),
   recordTrackingPoint: (value: ShipmentTrackingPoint) => request<{ point: ShipmentTrackingPoint; isDuplicateSkipped: boolean }>('/supply-chain/shipment-tracking-points', { method: 'POST', body: JSON.stringify(value) }),
 };

@@ -31,11 +31,15 @@ import { ShipmentTrackingMapView } from "./components/ShipmentTrackingMapView";
 import { NotificationsModal } from "./components/NotificationsModal";
 import { RiskConfigModal } from "./components/RiskConfigModal";
 import { SupplyChainApi } from "./services/api";
+import { LogisticsChatModal } from "./components/LogisticsChatModal";
+
+const TAB_PATHS: Record<string, string> = { dashboard: '/', orders: '/don-hang', suppliers: '/nha-cung-cap', inventory: '/ton-kho', incidents: '/rui-ro', rfq: '/rfq', approvals: '/phe-duyet', forecasting: '/du-bao', audit: '/audit', map: '/ban-do', supplier_portal: '/doi-tac' };
+const tabFromPath = () => Object.entries(TAB_PATHS).find(([, path]) => path === window.location.pathname)?.[0] || 'dashboard';
 
 export default function App() {
   // 1. Core State
   const [userRole, setUserRole] = useState<UserRole>(StorageService.getUserRole());
-  const [currentTab, setCurrentTab] = useState<string>("dashboard");
+  const [currentTab, setCurrentTab] = useState<string>(tabFromPath);
   const [orders, setOrders] = useState<PurchaseOrder[]>(StorageService.getOrders());
   const [suppliers, setSuppliers] = useState<Supplier[]>(StorageService.getSuppliers());
   const [inventory, setInventory] = useState<InventoryItem[]>(StorageService.getInventory());
@@ -47,6 +51,31 @@ export default function App() {
   const [demandHistory, setDemandHistory] = useState<Record<string, number[]>>(StorageService.getDemandHistory());
   const [logs, setLogs] = useState<AuditLogEntry[]>(StorageService.getLogs());
   const [notifications, setNotifications] = useState<AppNotification[]>(StorageService.getNotifications());
+  const [chatIncidentId, setChatIncidentId] = useState<string | null>(null);
+  const [supplierRisks, setSupplierRisks] = useState<Array<{ supplierId: string; supplierName: string; porsScore: number | string; riskLevel: string; statusLabel: string }>>([]);
+
+  useEffect(() => {
+    const onPopState = () => setCurrentTab(tabFromPath());
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+  useEffect(() => { void SupplyChainApi.syncHighRiskOrders().catch(console.error); }, []);
+  useEffect(() => { void SupplyChainApi.getSupplierRiskAnalysis().then(setSupplierRisks).catch(console.error); }, []);
+  useEffect(() => { const path = TAB_PATHS[currentTab] || '/'; if (window.location.pathname !== path) window.history.pushState({}, '', path); }, [currentTab]);
+
+  useEffect(() => {
+    const match = window.location.pathname.match(/^\/partner-confirmation\/([^/]+)\/(on-time|delayed)$/);
+    if (match) {
+      void SupplyChainApi.confirmPartnerDelivery(match[1], match[2]).then((result) => {
+        if (result.redirectTo) { window.location.href = `/?incidentId=${result.redirectTo.split('/')[2]?.split('?')[0]}&delayConfirmed=true`; }
+        else { alert('Đã ghi nhận xác nhận vẫn đúng hẹn.'); window.history.replaceState({}, '', '/'); }
+      }).catch(() => alert('Liên kết xác nhận không hợp lệ hoặc đã hết hạn.'));
+      return;
+    }
+    const params = new URLSearchParams(window.location.search);
+    const incidentId = params.get('incidentId');
+    if (params.get('delayConfirmed') === 'true' && incidentId && window.confirm('Đối tác đã xác nhận trễ hẹn. Bạn có muốn trao đổi thêm với logistics không?')) setChatIncidentId(incidentId);
+  }, []);
 
   // Hydrate persisted supply-chain data. Local mock data remains the fallback for a fresh database.
   useEffect(() => {
@@ -184,6 +213,7 @@ export default function App() {
       for (let i = 0; i < updatedOrders.length; i++) {
         const po = updatedOrders[i];
         if (po.status === "Hoàn thành") continue;
+        if (po.riskScoreSource === "MANUAL") continue;
 
         const supplier = suppliers.find((s) => s.id === po.supplierId);
         const item = inventory.find((inv) => inv.sku === po.sku);
@@ -284,7 +314,11 @@ export default function App() {
           return updated;
         });
       }
-      void Promise.all(newIncidents.map((incident) => SupplyChainApi.saveIncident(incident))).catch(console.error);
+      void Promise.all(newIncidents.map(async (incident) => {
+        await SupplyChainApi.saveIncident(incident);
+        const po = updatedOrders.find((order) => order.poNumber === incident.poNumber);
+        if (po) await SupplyChainApi.evaluateRiskAlert({ incidentId: incident.id, purchaseOrderId: po.id, riskScore: incident.delayRiskScore });
+      })).catch(console.error);
     } finally {
       setIsScanning(false);
     }
@@ -783,7 +817,8 @@ export default function App() {
     (i) => i.status !== "Đã giải quyết" && i.status !== "Đã hủy"
   ).length;
 
-  return (
+  return (<>
+    {chatIncidentId && <LogisticsChatModal incidentId={chatIncidentId} onClose={() => setChatIncidentId(null)} />}
     <div className="min-h-screen bg-slate-100 text-slate-900 flex font-sans antialiased selection:bg-emerald-100 selection:text-emerald-900">
       {/* Sidebar Navigation */}
       <Sidebar
@@ -884,6 +919,8 @@ export default function App() {
         {currentTab === "incidents" && (
           <IncidentsView
             incidents={incidents}
+            highRiskOrders={orders.filter((order) => Number(order.currentRiskScore) >= 60 && !incidents.some((incident) => incident.poNumber === order.poNumber))}
+            supplierRisks={supplierRisks}
             onTriggerAgent2={async (inc) => {
               const po = orders.find((o) => o.poNumber === inc.poNumber);
               if (po) await triggerAgent2ForIncident(inc, po);
@@ -992,5 +1029,5 @@ export default function App() {
       />
       </div>
     </div>
-  );
+  </>);
 }
