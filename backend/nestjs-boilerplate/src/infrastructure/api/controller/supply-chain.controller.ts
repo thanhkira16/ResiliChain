@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { SupplyChainService } from '../../../core/application/supply-chain/supply-chain.service';
 import {
@@ -24,6 +24,8 @@ export class SupplyChainController {
   @Get('sourcing-proposals') findProposals() { return this.supplyChainService.findProposals(); }
   @Post('sourcing-proposals') createProposal(@Body() body: Record<string, unknown>) { return this.supplyChainService.createProposal(body as unknown as SourcingProposalEntity); }
   @Patch('sourcing-proposals/:id') updateProposal(@Param('id') id: string, @Body() body: Partial<SourcingProposalEntity>) { return this.supplyChainService.updateProposal(id, body); }
+  @Get('supplier-risk') findSupplierRisk() { return this.supplyChainService.findSupplierRisk(); }
+  @Get('ai-job-runs') findAiJobRuns(@Query('limit') limit?: string) { return this.supplyChainService.findAiJobRuns(limit ? Number(limit) : undefined); }
   @Get('shipments/at-risk-map') atRiskShipments() { return this.supplyChainService.atRiskShipments(); }
   @Get('risk-alerts') findRiskAlerts() { return this.supplyChainService.findRiskAlerts(); }
   @Get('supplier-risk-analysis') supplierRiskAnalysis() { return this.supplyChainService.supplierRiskAnalysis(); }

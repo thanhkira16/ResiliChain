@@ -36,6 +36,8 @@ import { LogisticsChatModal } from "./components/LogisticsChatModal";
 const TAB_PATHS: Record<string, string> = { dashboard: '/', orders: '/don-hang', suppliers: '/nha-cung-cap', inventory: '/ton-kho', incidents: '/rui-ro', rfq: '/rfq', approvals: '/phe-duyet', forecasting: '/du-bao', audit: '/audit', map: '/ban-do', supplier_portal: '/doi-tac' };
 const tabFromPath = () => Object.entries(TAB_PATHS).find(([, path]) => path === window.location.pathname)?.[0] || 'dashboard';
 
+
+
 export default function App() {
   // 1. Core State
   const [userRole, setUserRole] = useState<UserRole>(StorageService.getUserRole());
@@ -66,7 +68,7 @@ export default function App() {
   useEffect(() => {
     const match = window.location.pathname.match(/^\/partner-confirmation\/([^/]+)\/(on-time|delayed)$/);
     if (match) {
-      void SupplyChainApi.confirmPartnerDelivery(match[1], match[2]).then((result) => {
+      void SupplyChainApi.confirmPartnerDelivery(match[1], match[2] as 'on-time' | 'delayed').then((result) => {
         if (result.redirectTo) { window.location.href = `/?incidentId=${result.redirectTo.split('/')[2]?.split('?')[0]}&delayConfirmed=true`; }
         else { alert('Đã ghi nhận xác nhận vẫn đúng hẹn.'); window.history.replaceState({}, '', '/'); }
       }).catch(() => alert('Liên kết xác nhận không hợp lệ hoặc đã hết hạn.'));
@@ -75,6 +77,27 @@ export default function App() {
     const params = new URLSearchParams(window.location.search);
     const incidentId = params.get('incidentId');
     if (params.get('delayConfirmed') === 'true' && incidentId && window.confirm('Đối tác đã xác nhận trễ hẹn. Bạn có muốn trao đổi thêm với logistics không?')) setChatIncidentId(incidentId);
+  }, []);
+
+  // Hydrate persisted supply-chain data. Local mock data remains the fallback for a fresh database.
+  useEffect(() => {
+    let mounted = true;
+    const replaceWhenAvailable = <T,>(items: T[], setter: React.Dispatch<React.SetStateAction<T[]>>) => {
+      if (mounted && items.length > 0) setter(items);
+    };
+    Promise.all([
+      SupplyChainApi.getSuppliers(), SupplyChainApi.getInventory(), SupplyChainApi.getPurchaseOrders(),
+      SupplyChainApi.getIncidents(), SupplyChainApi.getProposals(),
+    ])
+      .then(([apiSuppliers, apiInventory, apiOrders, apiIncidents, apiProposals]) => {
+        replaceWhenAvailable(apiSuppliers, setSuppliers);
+        replaceWhenAvailable(apiInventory, setInventory);
+        replaceWhenAvailable(apiOrders, setOrders);
+        replaceWhenAvailable(apiIncidents, setIncidents);
+        replaceWhenAvailable(apiProposals, setProposals);
+      })
+      .catch((error) => console.warn('Supply-chain API is unavailable; using local demo data.', error));
+    return () => { mounted = false; };
   }, []);
 
   // Hydrate persisted supply-chain data. Local mock data remains the fallback for a fresh database.
@@ -502,7 +525,7 @@ export default function App() {
         StorageService.saveIncidents(updated);
         return updated;
       });
-      void SupplyChainApi.updateIncident(incidentId, { state: "PENDING_APPROVAL" as const, status: "Chá» duyá»‡t" as const }).catch(console.error);
+      void SupplyChainApi.updateIncident(incidentId, { state: "PENDING_APPROVAL" as const, status: "Chờ duyệt" as const }).catch(console.error);
 
       // Append log & notification
       setLogs((prev) => {

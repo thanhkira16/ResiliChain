@@ -60,6 +60,7 @@ export class PurchaseOrderEntity {
   @Column({ type: 'varchar', length: 20, default: 'CALCULATED', name: 'risk_score_source' })
   riskScoreSource: 'MANUAL' | 'CALCULATED';
 
+
   @Column({ type: 'jsonb', nullable: true, name: 'risk_breakdown' })
   riskBreakdown?: any;
 

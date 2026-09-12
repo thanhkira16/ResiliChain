@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { DataSource } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { randomUUID } from 'crypto';
 import * as nodemailer from 'nodemailer';
 import {
+  AiJobRunEntity,
   IncidentEntity,
   InventoryItemEntity,
   PurchaseOrderEntity,
@@ -16,6 +16,7 @@ import {
   RiskAlertEntity,
   LogisticsConversationEntity,
   LogisticsMessageEntity,
+  SupplierRiskAnalysisEntity,
 } from '../../domain/supply-chain';
 
 @Injectable()
@@ -31,6 +32,8 @@ export class SupplyChainService {
     @InjectRepository(RiskAlertEntity) private readonly riskAlerts: Repository<RiskAlertEntity>,
     @InjectRepository(LogisticsConversationEntity) private readonly conversations: Repository<LogisticsConversationEntity>,
     @InjectRepository(LogisticsMessageEntity) private readonly messages: Repository<LogisticsMessageEntity>,
+    @InjectRepository(SupplierRiskAnalysisEntity) private readonly supplierRisk: Repository<SupplierRiskAnalysisEntity>,
+    @InjectRepository(AiJobRunEntity) private readonly aiJobRuns: Repository<AiJobRunEntity>,
     private readonly config: ConfigService,
     private readonly dataSource: DataSource,
   ) {}
@@ -98,6 +101,11 @@ export class SupplyChainService {
   }
   async messagesFor(incidentId: string) { const c = await this.openConversation(incidentId); return this.messages.find({ where: { conversationId: c.id }, order: { createdAt: 'ASC' } }); }
   async sendLogisticsMessage(incidentId: string, body: string, senderRole: 'PARTNER' | 'PROCUREMENT') { const c = await this.openConversation(incidentId); const prefix = '[Logistics coordination] '; return this.messages.save(this.messages.create({ id: `MSG-${Date.now()}-${Math.floor(Math.random()*1000)}`, conversationId: c.id, senderRole, body: body.startsWith(prefix) ? body : `${prefix}${body}` })); }
+  // Hai bang duoi day do AI Worker so huu - Backend chi doc, khong bao gio ghi.
+  findSupplierRisk() { return this.supplierRisk.find({ order: { porsScore: 'DESC' } }); }
+  findAiJobRuns(limit = 50) { return this.aiJobRuns.find({ order: { startedAt: 'DESC' }, take: limit }); }
+
+
 
   async updatePurchaseOrder(id: string, data: Partial<PurchaseOrderEntity>) {
     return this.update(this.purchaseOrders, id, data, 'Purchase order');
