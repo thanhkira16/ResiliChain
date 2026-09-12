@@ -33,7 +33,12 @@ setup-be:
     cd {{be_dir}} && npm install
 
 setup-fe:
-    cd {{fe_dir}} && npm install
+    cd {{fe_dir}} && npm install && npm run copy-cesium
+
+# Sao chép tài nguyên Cesium (Workers, Assets, Widgets) sang public/cesium và dist/cesium
+copy-cesium:
+    cd {{fe_dir}} && npm run copy-cesium
+
 
 # Tạo venv + cài requirements cho AI service
 setup-ai:
