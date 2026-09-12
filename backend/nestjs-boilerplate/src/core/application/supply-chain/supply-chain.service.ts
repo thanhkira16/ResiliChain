@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
+  AiJobRunEntity,
   IncidentEntity,
   InventoryItemEntity,
   PurchaseOrderEntity,
@@ -9,6 +10,7 @@ import {
   ShipmentTrackingPointEntity,
   SourcingProposalEntity,
   SupplierEntity,
+  SupplierRiskAnalysisEntity,
 } from '../../domain/supply-chain';
 
 @Injectable()
@@ -21,6 +23,8 @@ export class SupplyChainService {
     @InjectRepository(SourcingProposalEntity) private readonly proposals: Repository<SourcingProposalEntity>,
     @InjectRepository(ShipmentEntity) private readonly shipments: Repository<ShipmentEntity>,
     @InjectRepository(ShipmentTrackingPointEntity) private readonly trackingPoints: Repository<ShipmentTrackingPointEntity>,
+    @InjectRepository(SupplierRiskAnalysisEntity) private readonly supplierRisk: Repository<SupplierRiskAnalysisEntity>,
+    @InjectRepository(AiJobRunEntity) private readonly aiJobRuns: Repository<AiJobRunEntity>,
   ) {}
 
   findSuppliers() { return this.suppliers.find({ order: { name: 'ASC' } }); }
@@ -28,6 +32,10 @@ export class SupplyChainService {
   findPurchaseOrders() { return this.purchaseOrders.find({ order: { createdAt: 'DESC' } }); }
   findIncidents() { return this.incidents.find({ order: { createdAt: 'DESC' } }); }
   findProposals() { return this.proposals.find({ order: { createdAt: 'DESC' } }); }
+
+  // Hai bang duoi day do AI Worker so huu - Backend chi doc, khong bao gio ghi.
+  findSupplierRisk() { return this.supplierRisk.find({ order: { porsScore: 'DESC' } }); }
+  findAiJobRuns(limit = 50) { return this.aiJobRuns.find({ order: { startedAt: 'DESC' }, take: limit }); }
 
   async updatePurchaseOrder(id: string, data: Partial<PurchaseOrderEntity>) {
     return this.update(this.purchaseOrders, id, data, 'Purchase order');
