@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     openai_base_url: str = "https://openrouter.ai/api/v1"
     openrouter_model: str = "openai/gpt-4o"
 
+    # ---- Telegram Bot Alert ----
+    telegram_bot_token: str = "8842751088:AAF-bM0fACu4ShmvJd7sillTGWIp0OjOLs8"
+    telegram_chat_id: str = "-1003705006569"
+    enable_telegram_alerts: bool = True
+
     # ---- Database (dung chung voi Backend) ----
     db_host: str = ""
     db_port: int = 5432
