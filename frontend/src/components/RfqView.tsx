@@ -45,7 +45,7 @@ export const RfqView: React.FC<RfqViewProps> = ({
   // Group RFQs by Incident ID
   const groupedByIncident = incidents.map((inc) => {
     const incidentRfqs = rfqs.filter((r) => r.incidentId === inc.id);
-    const respondedCount = incidentRfqs.filter((r) => r.status === "Đã phản hồi").length;
+    const respondedCount = incidentRfqs.filter((r) => r.status === "Responded").length;
     return {
       incident: inc,
       rfqs: incidentRfqs,
@@ -62,19 +62,19 @@ export const RfqView: React.FC<RfqViewProps> = ({
           <div className="flex items-center gap-2">
             <Mail className="w-5 h-5 text-blue-600" />
             <h3 className="text-base font-bold text-slate-900">
-              AGENT 2 — Yêu Cầu Báo Giá (RFQ) & Phản Hồi Báo Giá Nhà Cung Cấp
+              AGENT 2 — Request for Quotation (RFQ) & Supplier Quote Responses
             </h3>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Agent 2 tự động lọc top 3 nhà cung cấp dự phòng cùng SKU, dùng Gemini AI soạn thảo RFQ chuyên nghiệp bằng tiếng Việt và thu thập báo giá có cấu trúc để xếp hạng.
+            Agent 2 automatically filters top backup suppliers for matching SKUs, uses Gemini AI to draft professional RFQs, and collects structured quote responses for ranking.
           </p>
         </div>
 
         <div className="flex items-center gap-2 text-xs">
-          <button type="button" onClick={onBack} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-700 transition-colors hover:bg-slate-50"><ArrowLeft className="h-3.5 w-3.5" />Quay lại</button>
-          <span className="font-semibold text-slate-700">Tổng RFQ đã phát hành:</span>
+          <button type="button" onClick={onBack} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-700 transition-colors hover:bg-slate-50"><ArrowLeft className="h-3.5 w-3.5" />Back</button>
+          <span className="font-semibold text-slate-700">Total RFQs Issued:</span>
           <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold">
-            {rfqs.length} yêu cầu
+            {rfqs.length} requests
           </span>
         </div>
       </div>
@@ -97,14 +97,14 @@ export const RfqView: React.FC<RfqViewProps> = ({
                       {incident.id}
                     </span>
                     <span className="font-semibold text-slate-900 text-sm">
-                      Xử lý trễ hạn đơn {incident.poNumber} — {incident.skuName}
+                      Delayed PO Handling: {incident.poNumber} — {incident.skuName}
                     </span>
                     <span className="text-xs text-slate-500 font-mono">
                       ({incident.correlationId})
                     </span>
                   </div>
                   <div className="text-xs text-slate-500 mt-1">
-                    Đã gửi RFQ đến {totalRfqs} nhà cung cấp dự phòng • Đã nhận phản hồi:{" "}
+                    RFQs sent to {totalRfqs} backup suppliers • Responses received:{" "}
                     <strong className="text-emerald-600">{respondedCount}/{totalRfqs}</strong>
                   </div>
                 </div>
@@ -116,13 +116,13 @@ export const RfqView: React.FC<RfqViewProps> = ({
                     onClick={() => onRunAiEvaluation(incident.id)}
                     disabled={respondedCount === 0 || isEvaluating}
                     className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-200 text-white disabled:text-slate-400 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 shadow-2xs"
-                    title="Gọi Gemini AI đánh giá và xếp hạng tối đa 3 phương án"
+                    title="Call Gemini AI to evaluate and rank up to 3 options"
                   >
                     <Sparkles className={`w-3.5 h-3.5 ${isEvaluating ? "animate-spin" : ""}`} />
                     <span>
                       {isEvaluating
-                        ? "Gemini đang phân tích..."
-                        : "Xếp hạng phương án (Gemini AI)"}
+                        ? "Gemini is analyzing..."
+                        : "Rank Proposals (Gemini AI)"}
                     </span>
                   </button>
                 </div>
@@ -166,11 +166,11 @@ export const RfqView: React.FC<RfqViewProps> = ({
                         </div>
 
                         <div className="text-[11px] text-slate-500 space-y-1 mb-3">
-                          <div>Số lượng cần: <strong>{rfq.quantity} chiếc</strong></div>
-                          <div>Hạn giao yêu cầu: <strong>{rfq.targetDeliveryDate}</strong></div>
+                          <div>Required Quantity: <strong>{rfq.quantity} units</strong></div>
+                          <div>Target Delivery Date: <strong>{rfq.targetDeliveryDate}</strong></div>
                           <div className="flex items-center gap-1 text-slate-400">
                             <Clock className="w-3 h-3" />
-                            <span>Gửi lúc: {rfq.sentAt}</span>
+                            <span>Sent at: {rfq.sentAt}</span>
                           </div>
                         </div>
 
@@ -179,24 +179,24 @@ export const RfqView: React.FC<RfqViewProps> = ({
                           <div className="p-2.5 rounded-lg bg-white border border-emerald-200 text-xs space-y-1">
                             <div className="text-[11px] font-bold text-emerald-800 flex items-center gap-1">
                               <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>Báo giá chính thức đã nhận</span>
+                              <span>Official Quote Received</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-slate-500">Đơn giá:</span>
+                              <span className="text-slate-500">Unit Price:</span>
                               <span className="font-bold text-slate-900">
-                                {Number(rfq.response.unitPrice).toLocaleString("vi-VN")} đ
+                                VND {Number(rfq.response.unitPrice).toLocaleString("en-US")}
                               </span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-slate-500">Tổng chi phí:</span>
+                              <span className="text-slate-500">Total Cost:</span>
                               <span className="font-bold text-slate-900">
-                                {Number(rfq.response.totalCost).toLocaleString("vi-VN")} đ
+                                VND {Number(rfq.response.totalCost).toLocaleString("en-US")}
                               </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-slate-500">Lead time:</span>
                               <span className="font-semibold text-emerald-700">
-                                {rfq.response.proposedLeadTimeDays} ngày (Giao {rfq.response.proposedDeliveryDate})
+                                {rfq.response.proposedLeadTimeDays} days (Est. Delivery {rfq.response.proposedDeliveryDate})
                               </span>
                             </div>
                             {rfq.response.notes && (
@@ -207,7 +207,7 @@ export const RfqView: React.FC<RfqViewProps> = ({
                           </div>
                         ) : (
                           <div className="p-2.5 rounded-lg bg-amber-50/60 border border-amber-200 text-[11px] text-amber-800">
-                            <span>Đang chờ NCC phản hồi qua Supplier Portal...</span>
+                            <span>Awaiting supplier response via Supplier Portal...</span>
                           </div>
                         )}
                       </div>
@@ -219,7 +219,7 @@ export const RfqView: React.FC<RfqViewProps> = ({
                           className="text-slate-600 hover:text-slate-900 font-medium flex items-center gap-1 text-[11px]"
                         >
                           <FileText className="w-3 h-3 text-slate-400" />
-                          <span>Xem email RFQ</span>
+                          <span>View RFQ Email</span>
                         </button>
 
                         {!hasResponse && (
@@ -227,9 +227,9 @@ export const RfqView: React.FC<RfqViewProps> = ({
                             id={`btn-simulate-quote-${rfq.id}`}
                             onClick={() => onSimulateQuoteResponse(rfq.id)}
                             className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[10px] font-semibold transition-colors"
-                            title="Mô phỏng nhà cung cấp bấm gửi báo giá hợp lệ"
+                            title="Simulate supplier submitting a valid quote"
                           >
-                            Mô phỏng gửi báo giá
+                            Simulate Quote Submission
                           </button>
                         )}
                       </div>
@@ -244,9 +244,9 @@ export const RfqView: React.FC<RfqViewProps> = ({
         {rfqs.length === 0 && (
           <div className="bg-white p-12 text-center rounded-xl border border-slate-200">
             <Mail className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h4 className="text-base font-bold text-slate-800">Chưa có RFQ nào được phát hành</h4>
+            <h4 className="text-base font-bold text-slate-800">No RFQs Issued Yet</h4>
             <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-              Khi Agent 1 phát hiện đơn hàng trễ có nguy cơ cao, Agent 2 sẽ tự động lọc nhà cung cấp dự phòng và sinh thư mời báo giá RFQ gửi đến đây.
+              When Agent 1 detects a high-risk delayed order, Agent 2 will automatically filter backup suppliers and generate RFQ invitation emails here.
             </p>
           </div>
         )}
@@ -262,10 +262,10 @@ export const RfqView: React.FC<RfqViewProps> = ({
                   {selectedRfq.id}
                 </span>
                 <h4 className="text-sm font-bold text-slate-900 mt-1.5">
-                  Thư Yêu Cầu Báo Giá Khẩn Cấp (Soạn tự động bằng Gemini AI)
+                  Urgent Request for Quotation (Drafted automatically via Gemini AI)
                 </h4>
                 <div className="text-xs text-slate-500 mt-0.5">
-                  Gửi tới: <strong>{selectedRfq.backupSupplierName}</strong>
+                  To: <strong>{selectedRfq.backupSupplierName}</strong>
                 </div>
               </div>
               <button
@@ -278,21 +278,21 @@ export const RfqView: React.FC<RfqViewProps> = ({
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="font-semibold text-slate-600 block mb-0.5">Tiêu đề thư:</label>
+                <label className="font-semibold text-slate-600 block mb-0.5">Email Subject:</label>
                 <div className="p-2 bg-slate-50 rounded border border-slate-200 font-medium text-slate-900">
                   {selectedRfq.emailSubject}
                 </div>
               </div>
 
               <div>
-                <label className="font-semibold text-slate-600 block mb-0.5">Nội dung thư:</label>
+                <label className="font-semibold text-slate-600 block mb-0.5">Email Content:</label>
                 <div className="p-3 bg-slate-50 rounded border border-slate-200 whitespace-pre-line text-slate-700 leading-relaxed max-h-60 overflow-y-auto">
                   {selectedRfq.emailBody}
                 </div>
               </div>
 
               <div>
-                <label className="font-semibold text-slate-600 block mb-0.5">Tóm tắt điều khoản:</label>
+                <label className="font-semibold text-slate-600 block mb-0.5">Terms Summary:</label>
                 <div className="p-2 bg-blue-50/60 rounded border border-blue-200 text-blue-900 font-medium">
                   {selectedRfq.termsSummary}
                 </div>
@@ -304,7 +304,7 @@ export const RfqView: React.FC<RfqViewProps> = ({
                 onClick={() => setSelectedRfq(null)}
                 className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg"
               >
-                Đóng
+                Close
               </button>
             </div>
           </div>

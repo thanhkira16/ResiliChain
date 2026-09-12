@@ -51,7 +51,7 @@ app.post("/api/ai/weather", async (req, res) => {
     if (!knownError) console.error("Weather agent error:", error);
     return res.status(knownError ? error.statusCode : 500).json({
       success: false,
-      error: knownError ? error.message : "Đã xảy ra lỗi khi lấy dữ liệu thời tiết.",
+      error: knownError ? error.message : "An error occurred while fetching weather data.",
     });
   }
 });
@@ -65,14 +65,14 @@ app.post("/api/ai/weather/route", async (req, res) => {
     : [];
 
   if (cities.length < 2 || cities.length > 10 || cities.some((city) => city.length > 100)) {
-    return res.status(400).json({ success: false, error: "Cần cung cấp từ 2 đến 10 tên thành phố hợp lệ." });
+    return res.status(400).json({ success: false, error: "Please provide between 2 and 10 valid city names." });
   }
 
   const data = await Promise.all(cities.map(async (city) => {
     try {
       return { city, data: await getWeather({ city }) };
     } catch (error) {
-      const message = error instanceof WeatherRequestError ? error.message : "Không thể lấy dữ liệu thời tiết.";
+      const message = error instanceof WeatherRequestError ? error.message : "Unable to retrieve weather data.";
       return { city, error: message };
     }
   }));
@@ -219,26 +219,26 @@ app.post("/api/ai/rfq", async (req, res) => {
   try {
     const ai = getGeminiAI();
     if (ai) {
-      const prompt = `Bạn là AI Agent đàm phán & tìm nguồn cung (Sourcing & Negotiation Agent) của Resili chain tại Việt Nam.
-Hãy soạn thảo một thư yêu cầu báo giá khẩn (Request for Quotation - RFQ) chuyên nghiệp, lịch sự nhưng có tính cấp bách gửi đến nhà cung cấp dự phòng: ${backupSupplierName}.
+      const prompt = `You are the AI Sourcing & Negotiation Agent of Resili chain.
+Draft a professional, polite, yet urgent Request for Quotation (RFQ) letter to the backup supplier: ${backupSupplierName}.
 
-Thông tin đơn hàng khẩn cấp:
-- Mã sự cố điều phối: ${incidentId || "INC-AUTO"}
-- Mã đơn hàng gốc tham chiếu: ${poNumber}
-- Mã linh kiện (SKU): ${sku} - ${skuName}
-- Số lượng yêu cầu: ${quantity} chiếc / bộ
-- Ngày giao hàng cam kết mong muốn: ${targetDeliveryDate}
-- Ghi chú kỹ thuật: ${notes || "Tiêu chuẩn chất lượng OEM xe đạp xuất khẩu, CO/CQ đầy đủ"}
+Urgent order details:
+- Incident Correlation ID: ${incidentId || "INC-AUTO"}
+- Reference Original PO Number: ${poNumber}
+- Component SKU: ${sku} - ${skuName}
+- Required Quantity: ${quantity} units / sets
+- Target Delivery Date: ${targetDeliveryDate}
+- Technical Notes: ${notes || "Export-grade OEM bicycle quality standard, full CO/CQ documentation required"}
 
-Yêu cầu nội dung thư:
-1. Tiêu đề email chuyên nghiệp rõ ràng.
-2. Nội dung thư bằng tiếng Việt văn phong thương mại, nêu rõ lý do mở thầu khẩn, số lượng, quy cách, hạn chót báo giá (trong vòng 24h).
-3. Nêu rõ tiêu chí chọn thầu: Giá cả hợp lý, tiến độ giao hàng nhanh, cam kết chất lượng.
-4. Trả về kết quả JSON với format:
+Requirements:
+1. Clear, professional email subject line in English.
+2. Email body written in professional business English explaining the emergency sourcing reason, quantity, specifications, and a 24-hour quotation deadline.
+3. Explicit criteria: Reasonable pricing, accelerated lead time, quality assurance.
+4. Return pure JSON:
 {
-  "subject": "Tiêu đề email",
-  "body": "Nội dung email đầy đủ chia đoạn rõ ràng",
-  "termsSummary": "Tóm tắt các điều khoản chính yêu cầu"
+  "subject": "Email Subject",
+  "body": "Full body text with clear paragraph breaks",
+  "termsSummary": "Summary of key terms"
 }`;
 
       const response = await ai.models.generateContent({
@@ -258,32 +258,32 @@ Yêu cầu nội dung thư:
   }
 
   // Fallback high-quality template
-  const fallbackSubject = `[Resili chain] Yêu cầu báo giá khẩn cấp (RFQ) linh kiện ${skuName} - PO Ref: ${poNumber}`;
-  const fallbackBody = `Kính gửi Ban Giám đốc và Phòng Kinh doanh Quý đối tác ${backupSupplierName},
+  const fallbackSubject = `[Resili chain] Urgent Request for Quotation (RFQ) for ${skuName} - PO Ref: ${poNumber}`;
+  const fallbackBody = `Dear Management and Sales Team at ${backupSupplierName},
 
-Resili chain - Bộ phận Mua sắm & Quản lý Chuỗi Cung Ứng xin gửi lời chào trân trọng đến Quý công ty.
+Resili chain Procurement & Supply Chain Management hereby sends warm greetings.
 
-Do tiến độ sản xuất xe đạp theo đơn hàng xuất khẩu đang bước vào giai đoạn quyết định, chúng tôi mở gói thầu bổ sung khẩn cấp cho hạng mục linh kiện sau:
+Due to critical production schedules for export orders entering a decisive phase, we are opening an urgent supplementary sourcing package for the following component:
 
-- Mã linh kiện (SKU): ${sku} (${skuName})
-- Số lượng đặt hàng: ${Number(quantity).toLocaleString("vi-VN")} đơn vị
-- Thời hạn giao hàng mong muốn: Trước ngày ${targetDeliveryDate}
-- Tiêu chuẩn kỹ thuật: Đạt tiêu chuẩn kiểm định xuất khẩu, đầy đủ chứng chỉ nguồn gốc (CO/CQ).
-- Mã tham chiếu nội bộ: ${incidentId || "INC-AUTO"} / ${poNumber}
+- SKU Code: ${sku} (${skuName})
+- Order Quantity: ${Number(quantity).toLocaleString("en-US")} units
+- Target Delivery Date: Prior to ${targetDeliveryDate}
+- Quality Specification: Export certification standards, full CO/CQ documentation required.
+- Internal Incident Reference: ${incidentId || "INC-AUTO"} / ${poNumber}
 
-Kính đề nghị Quý công ty phản hồi báo giá (đơn giá VNĐ, lead time cam kết và chính sách thanh toán/bảo hành) qua cổng tự phục vụ Resili chain Supplier Portal trước 17:00 ngày mai.
+Kindly submit your quotation (unit price in VND, committed lead time, and payment/warranty terms) via the Resili chain Supplier Portal before 17:00 tomorrow.
 
-Rất mong nhận được sự hợp tác nhanh chóng từ Quý đối tác.
+We look forward to a swift and productive collaboration.
 
-Trân trọng,
-Bộ phận Mua sắm & Quản ứng Chuỗi Cung Ứng Resili chain`;
+Best regards,
+Resili chain Procurement & Supply Chain Team`;
 
   return res.json({
     success: true,
     data: {
       subject: fallbackSubject,
       body: fallbackBody,
-      termsSummary: `Giao ${Number(quantity).toLocaleString("vi-VN")} chiếc trước ${targetDeliveryDate}. Thanh toán T/T 30 ngày.`,
+      termsSummary: `Deliver ${Number(quantity).toLocaleString("en-US")} units before ${targetDeliveryDate}. Payment T/T 30 days.`,
     },
     isLiveAI: false,
   });
@@ -310,43 +310,43 @@ app.post("/api/ai/analyze-proposals", async (req, res) => {
   try {
     const ai = getGeminiAI();
     if (ai) {
-      const prompt = `Bạn là AI Agent tối ưu hóa nguồn cung ứng (Sourcing Optimization Agent) của hệ thống Resili chain.
-Sự cố phát hiện: Nhà cung cấp gốc (${originalSupplierName}) giao trễ đơn hàng ${poNumber} (${sku} - ${skuName}, số lượng ${quantity}).
-Giá gốc ban đầu: ${Number(originalUnitPrice).toLocaleString("vi-VN")} VNĐ/đơn vị.
-Hạn giao hàng bắt buộc: ${requiredDeliveryDate}.
+      const prompt = `You are the AI Sourcing Optimization Agent of the Resili chain system.
+Detected Incident: Primary supplier (${originalSupplierName}) delayed order ${poNumber} (${sku} - ${skuName}, quantity ${quantity}).
+Original Contract Unit Price: ${Number(originalUnitPrice).toLocaleString("en-US")} VND/unit.
+Required Delivery Deadline: ${requiredDeliveryDate}.
 
-Dưới đây là danh sách báo giá thực tế từ các nhà cung cấp dự phòng:
+Supplier Responses:
 ${JSON.stringify(responses, null, 2)}
 
-Nhiệm vụ của bạn:
-1. Đánh giá đa tiêu chí (Chi phí tổng thể, Thời gian giao hàng lead time, Độ tin cậy Reliability Score).
-2. Xếp hạng tối đa 3 phương án tốt nhất (rank 1, 2, 3).
-3. Mỗi phương án nêu rõ Ưu điểm (pros), Nhược điểm (cons), Điểm số tổng hợp (0-100), Lý do chọn.
-4. Trình bày các phương án bị loại (hoặc xếp sau) và lý do từ chối cụ thể.
-5. Soạn kết luận đề xuất (recommendation) súc tích để Trưởng phòng / Giám đốc phê duyệt.
-6. LƯU Ý: Tuyệt đối tuân thủ nguyên tắc chỉ đề xuất (Recommendation), không tự động ký hợp đồng.
+Your Tasks:
+1. Conduct multi-criteria analysis (Total Cost, Lead Time, Reliability Score).
+2. Rank up to 3 best options (rank 1, 2, 3).
+3. Provide pros, cons, composite score (0-100), and reasoning for each rank.
+4. List rejected options with clear rejection rationale.
+5. Provide a concise executive summary recommendation for manager approval.
+6. NOTE: Adhere strictly to human-in-the-loop (HITL) principles: Recommend only, do not auto-execute contracts.
 
-Trả về định dạng JSON thuần túy:
+Return pure JSON format:
 {
   "rankings": [
     {
       "rank": 1,
       "supplierId": "id",
-      "supplierName": "Tên NCC",
+      "supplierName": "Supplier Name",
       "unitPrice": 100000,
       "totalCost": 50000000,
       "leadTimeDays": 5,
-      "pros": ["ưu điểm 1", "ưu điểm 2"],
-      "cons": ["nhược điểm 1"],
+      "pros": ["pro 1", "pro 2"],
+      "cons": ["con 1"],
       "score": 92,
-      "reasoning": "Giải thích tại sao xếp hạng này"
+      "reasoning": "Explanation for ranking"
     }
   ],
-  "recommendation": "Đề xuất tóm tắt cho người phê duyệt",
+  "recommendation": "Executive summary recommendation",
   "rejectedOptionsAnalysis": [
     {
-      "supplierName": "Tên NCC",
-      "reason": "Lý do loại hoặc không ưu tiên"
+      "supplierName": "Supplier Name",
+      "reason": "Rejection reason"
     }
   ]
 }`;
@@ -379,16 +379,16 @@ Trả về định dạng JSON thuần túy:
     const pros: string[] = [];
     const cons: string[] = [];
 
-    if (r.reliabilityScore >= 85) pros.push(`Độ tin cậy lịch sử cao (${r.reliabilityScore}/100)`);
-    if (r.unitPrice <= (originalUnitPrice || r.unitPrice)) pros.push(`Đơn giá cạnh tranh, tiết kiệm ngân sách`);
-    if (r.proposedLeadTimeDays <= 5) pros.push(`Giao hàng cực nhanh (${r.proposedLeadTimeDays} ngày)`);
+    if (r.reliabilityScore >= 85) pros.push(`High historical reliability score (${r.reliabilityScore}/100)`);
+    if (r.unitPrice <= (originalUnitPrice || r.unitPrice)) pros.push(`Competitive pricing within budget baseline`);
+    if (r.proposedLeadTimeDays <= 5) pros.push(`Rapid delivery lead time (${r.proposedLeadTimeDays} days)`);
 
-    if (r.unitPrice > (originalUnitPrice || r.unitPrice)) cons.push(`Chi phí cao hơn ${Math.round(priceDiff)}% so với hợp đồng gốc`);
-    if (r.proposedLeadTimeDays > 8) cons.push(`Thời gian giao hàng tương đối dài (${r.proposedLeadTimeDays} ngày)`);
-    if (r.reliabilityScore < 75) cons.push(`Điểm uy tín nhà cung cấp ở mức trung bình (${r.reliabilityScore}/100)`);
+    if (r.unitPrice > (originalUnitPrice || r.unitPrice)) cons.push(`Unit price ${Math.round(priceDiff)}% higher than original contract`);
+    if (r.proposedLeadTimeDays > 8) cons.push(`Relatively long delivery lead time (${r.proposedLeadTimeDays} days)`);
+    if (r.reliabilityScore < 75) cons.push(`Supplier reliability score is moderate (${r.reliabilityScore}/100)`);
 
-    if (pros.length === 0) pros.push("Đáp ứng đầy đủ quy cách SKU yêu cầu");
-    if (cons.length === 0) cons.push("Cần theo dõi sát cam kết chất lượng theo lô");
+    if (pros.length === 0) pros.push("Fully meets requested SKU specifications");
+    if (cons.length === 0) cons.push("Requires close tracking of batch quality assurance");
 
     return {
       supplierId: r.supplierId,
@@ -399,7 +399,7 @@ Trả về định dạng JSON thuần túy:
       pros,
       cons,
       score,
-      reasoning: `Điểm đánh giá ${score}/100 dựa trên lead time ${r.proposedLeadTimeDays} ngày và mức giá ${Number(r.unitPrice).toLocaleString("vi-VN")} VNĐ.`,
+      reasoning: `Score of ${score}/100 based on lead time of ${r.proposedLeadTimeDays} days and unit price of ${Number(r.unitPrice).toLocaleString("en-US")} VND.`,
     };
   });
 
@@ -412,13 +412,13 @@ Trả về định dạng JSON thuần túy:
 
   const rejectedOptionsAnalysis = scored.slice(3).map((item: any) => ({
     supplierName: item.supplierName,
-    reason: `Điểm tổng hợp (${item.score}) thấp hơn top 3 do chênh lệch chi phí hoặc lead time kéo dài.`,
+    reason: `Composite score (${item.score}) lower than top 3 due to price variance or extended lead time.`,
   }));
 
   const best = rankings[0];
   const recommendation = best
-    ? `Kiến nghị lựa chọn ${best.supplierName} (Hạng 1 - Điểm ${best.score}/100) với tổng giá trị ${Number(best.totalCost).toLocaleString("vi-VN")} VNĐ, cam kết giao trong ${best.leadTimeDays} ngày để giải quyết dứt điểm sự cố ${incidentId || "thiếu linh kiện"}.`
-    : "Chưa có đủ phương án thỏa mãn yêu cầu.";
+    ? `Recommend selecting ${best.supplierName} (Rank #1 - Score ${best.score}/100) with total value of ${Number(best.totalCost).toLocaleString("en-US")} VND, committed lead time of ${best.leadTimeDays} days to resolve incident ${incidentId || "supply shortage"}.`
+    : "Insufficient viable supplier proposals.";
 
   return res.json({
     success: true,
@@ -447,23 +447,23 @@ app.post("/api/ai/forecast-explanation", async (req, res) => {
   try {
     const ai = getGeminiAI();
     if (ai) {
-      const prompt = `Bạn là AI Agent dự báo nhu cầu (Demand Forecasting Agent) của Resili chain.
-Hãy viết một bản phân tích ngắn gọn, súc tích (khoảng 3-4 câu) giải thích kết quả dự báo và đề xuất kế hoạch nhập hàng cho linh kiện xe đạp:
+      const prompt = `You are the AI Demand Forecasting Agent of Resili chain.
+Write a concise, high-level executive summary (3-4 sentences) explaining the forecast results and replenishment recommendation for the component:
 
-Dữ liệu đầu vào:
-- Linh kiện: ${sku} - ${skuName}
-- Tồn kho hiện tại: ${currentStock} đơn vị
-- Ngưỡng an toàn (Safety stock): ${safetyStock} đơn vị
-- Tốc độ tiêu thụ trung bình: ${weeklyBurnRate} đơn vị/tuần
-- Hệ số mùa vụ áp dụng: ${seasonalityFactor}x
-- Dự báo nhu cầu 4 tuần tới: ${forecastNextWeeks?.join(", ")} đơn vị/tuần
-- Số lượng đề xuất đặt bổ sung: ${suggestedOrderQuantity} đơn vị
+Input Data:
+- Component: ${sku} - ${skuName}
+- Current Stock: ${currentStock} units
+- Safety Stock Threshold: ${safetyStock} units
+- Average Weekly Burn Rate: ${weeklyBurnRate} units/week
+- Applied Seasonality Factor: ${seasonalityFactor}x
+- 4-Week Demand Forecast: ${forecastNextWeeks?.join(", ")} units/week
+- Suggested Reorder Quantity: ${suggestedOrderQuantity} units
 
-Yêu cầu trả về JSON:
+Return JSON:
 {
-  "explanation": "Đoạn giải thích súc tích bằng tiếng Việt về xu hướng nhu cầu và rủi ro hết hàng",
-  "keyFactors": ["yếu tố 1", "yếu tố 2", "yếu tố 3"],
-  "procurementRecommendation": "Hành động mua hàng cụ thể đề xuất cho Procurement Officer"
+  "explanation": "Concise summary in English regarding demand trends and stockout risks",
+  "keyFactors": ["factor 1", "factor 2", "factor 3"],
+  "procurementRecommendation": "Specific actionable recommendation for the Procurement Officer"
 }`;
 
       const response = await ai.models.generateContent({
@@ -483,20 +483,20 @@ Yêu cầu trả về JSON:
   }
 
   // Fallback explanation
-  const explanation = `Nhu cầu đối với ${skuName} (${sku}) dự kiến sẽ tăng trong các tuần tới do bước vào mùa cao điểm lắp ráp (hệ số mùa vụ ${seasonalityFactor}x). Với tốc độ tiêu thụ hiện tại ${weeklyBurnRate} chiếc/tuần, lượng tồn kho ${currentStock} chiếc sẽ chạm ngưỡng an toàn (${safetyStock} chiếc) trong khoảng ${Math.max(1, Math.round((currentStock - safetyStock) / (weeklyBurnRate * seasonalityFactor)))} tuần tới nếu không bổ sung kịp thời.`;
+  const explanation = `Demand for ${skuName} (${sku}) is projected to rise in coming weeks due to peak assembly season (seasonality factor ${seasonalityFactor}x). At the current burn rate of ${weeklyBurnRate} units/week, current stock of ${currentStock} units will hit safety threshold (${safetyStock} units) in approximately ${Math.max(1, Math.round((currentStock - safetyStock) / (weeklyBurnRate * seasonalityFactor)))} weeks if not replenished.`;
 
   return res.json({
     success: true,
     data: {
       explanation,
       keyFactors: [
-        `Hệ số mùa vụ xe đạp hè-thu tăng ${Math.round((seasonalityFactor - 1) * 100)}%`,
-        `Tốc độ tiêu thụ cơ sở: ${weeklyBurnRate} bộ/tuần`,
-        `Độ trễ an toàn tồn kho hiện tại chỉ còn ${Math.max(1, Math.round(currentStock / weeklyBurnRate))} tuần`,
+        `Peak season demand multiplier: +${Math.round((seasonalityFactor - 1) * 100)}%`,
+        `Baseline burn rate: ${weeklyBurnRate} units/week`,
+        `Effective inventory buffer remaining: ~${Math.max(1, Math.round(currentStock / weeklyBurnRate))} weeks`,
       ],
       procurementRecommendation: suggestedOrderQuantity > 0
-        ? `Lập PO bổ sung ngay ${suggestedOrderQuantity} đơn vị để duy trì buffer 30 ngày an toàn.`
-        : "Lượng tồn kho hiện tại đủ đáp ứng, tiếp tục giám sát trong chu kỳ tuần tiếp theo.",
+        ? `Issue a PO for ${suggestedOrderQuantity} units immediately to maintain a 30-day safety buffer.`
+        : "Current inventory levels are sufficient. Continue standard weekly monitoring cycle.",
     },
     isLiveAI: false,
   });

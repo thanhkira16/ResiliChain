@@ -70,13 +70,13 @@ export default function App() {
     if (match) {
       void SupplyChainApi.confirmPartnerDelivery(match[1], match[2] as 'on-time' | 'delayed').then((result) => {
         if (result.redirectTo) { window.location.href = `/?incidentId=${result.redirectTo.split('/')[2]?.split('?')[0]}&delayConfirmed=true`; }
-        else { alert('Đã ghi nhận xác nhận vẫn đúng hẹn.'); window.history.replaceState({}, '', '/'); }
-      }).catch(() => alert('Liên kết xác nhận không hợp lệ hoặc đã hết hạn.'));
+        else { alert('Confirmation recorded: schedule remains on track.'); window.history.replaceState({}, '', '/'); }
+      }).catch(() => alert('Confirmation link invalid or expired.'));
       return;
     }
     const params = new URLSearchParams(window.location.search);
     const incidentId = params.get('incidentId');
-    if (params.get('delayConfirmed') === 'true' && incidentId && window.confirm('Đối tác đã xác nhận trễ hẹn. Bạn có muốn trao đổi thêm với logistics không?')) setChatIncidentId(incidentId);
+    if (params.get('delayConfirmed') === 'true' && incidentId && window.confirm('Supplier confirmed delay. Would you like to discuss further with logistics?')) setChatIncidentId(incidentId);
   }, []);
 
   // Hydrate persisted supply-chain data. Local mock data remains the fallback for a fresh database.
@@ -183,8 +183,8 @@ export default function App() {
           action: "NO_BACKUP_SUPPLIER_FOUND",
           poNumber: po.poNumber,
           sku: po.sku,
-          inputSummary: `Tìm nhà cung cấp dự phòng cho SKU ${po.sku}.`,
-          outputReasoning: `Không tìm thấy NCC nào khác cung cấp SKU này ngoài ${po.supplierName}. Cần mở rộng danh bạ nhà cung ứng.`,
+          inputSummary: `Find backup suppliers for SKU ${po.sku}.`,
+          outputReasoning: `No other suppliers found providing this SKU besides ${po.supplierName}. Expanding supplier directory recommended.`,
         });
         return;
       }
@@ -206,7 +206,7 @@ export default function App() {
                 ...inc,
                 agent2Triggered: true,
                 state: "RFQ_SENT" as const,
-                status: "Đang tìm NCC thay thế" as const,
+                status: "Sourcing Backup Suppliers" as const,
                 rfqSentCount: newRfqs.length,
               }
             : inc
@@ -241,7 +241,7 @@ export default function App() {
 
       for (let i = 0; i < updatedOrders.length; i++) {
         const po = updatedOrders[i];
-        if (po.status === "Hoàn thành") continue;
+        if (po.status === "Completed") continue;
         if (po.riskScoreSource === "MANUAL") continue;
 
         const supplier = suppliers.find((s) => s.id === po.supplierId);
@@ -253,7 +253,7 @@ export default function App() {
         if (risk.isTriggered) {
           // Check if active incident already exists for this PO
           const existingIncident = incidents.find(
-            (inc) => inc.poNumber === po.poNumber && inc.status !== "Đã giải quyết" && inc.status !== "Đã hủy"
+            (inc) => inc.poNumber === po.poNumber && inc.status !== "Resolved" && inc.status !== "Cancelled"
           );
 
           if (!existingIncident) {
@@ -272,9 +272,9 @@ export default function App() {
               delayRiskScore: risk.delayRiskScore,
               thresholdApplied: risk.appliedThreshold,
               state: "DETECTED",
-              status: "Mới phát hiện",
+              status: "Newly Detected",
               detectedAt: new Date().toISOString().replace("T", " ").substring(0, 19),
-              summary: `PO ${po.poNumber} giao bởi ${po.supplierName} trễ ${risk.delayDays} ngày. Buffer tồn kho hiện còn ${risk.bufferDays} ngày. Nguy cơ làm dừng dây chuyền lắp ráp xe đạp.`,
+              summary: `PO ${po.poNumber} from ${po.supplierName} delayed by ${risk.delayDays} days. Inventory buffer: ${risk.bufferDays} days. Risk of halting assembly line.`,
               agent2Triggered: false,
               riskBreakdown: risk.breakdown,
               riskBreakdownJson: risk.riskBreakdownJson,
@@ -310,14 +310,14 @@ export default function App() {
               poNumber: po.poNumber,
               supplierName: po.supplierName,
               sku: po.sku,
-              inputSummary: `Quét PO ${po.poNumber}: Trễ ${risk.delayDays} ngày so với cam kết ${po.promisedDeliveryDate}. Buffer kho: ${risk.bufferDays} ngày.`,
-              outputReasoning: `Tính toán delay_risk_score = ${risk.delayRiskScore}/100 (vượt ngưỡng quy định ${risk.appliedThreshold}). Tự động sinh sự cố ${incId}.`,
+              inputSummary: `Scanned PO ${po.poNumber}: Delayed ${risk.delayDays} days from promised ${po.promisedDeliveryDate}. Inventory buffer: ${risk.bufferDays} days.`,
+              outputReasoning: `Calculated delay_risk_score = ${risk.delayRiskScore}/100 (exceeded threshold ${risk.appliedThreshold}). Automatically created Incident ${incId}.`,
             });
 
             // Notification
             addNotification({
-              title: `Phát hiện rủi ro cao: ${po.poNumber} (${risk.delayRiskScore}/100)`,
-              message: `Đơn hàng linh kiện ${po.skuName} bị trễ ${risk.delayDays} ngày từ đối tác ${po.supplierName}.`,
+              title: `High Risk Detected: ${po.poNumber} (${risk.delayRiskScore}/100)`,
+              message: `Component order ${po.skuName} delayed by ${risk.delayDays} days from supplier ${po.supplierName}.`,
               type: "warning",
               correlationId: corrId,
               linkTab: "incidents",
@@ -378,8 +378,8 @@ export default function App() {
       poNumber: updated.poNumber,
       supplierName: updated.supplierName,
       sku: updated.sku,
-      inputSummary: `Cập nhật ngày giao dự kiến/thực tế: ${updated.actualOrExpectedDeliveryDate}, trạng thái: ${updated.status}.`,
-      outputReasoning: "Người dùng mô phỏng thông tin tracking nhà cung cấp để kiểm tra phản ứng của hệ thống.",
+      inputSummary: `Updated expected delivery date: ${updated.actualOrExpectedDeliveryDate}, status: ${updated.status}.`,
+      outputReasoning: "User simulated supplier tracking update to test system response.",
     });
 
     // Run risk scan after order update to immediately capture delay
@@ -408,7 +408,7 @@ export default function App() {
       if (r.id === rfqId) {
         return {
           ...r,
-          status: "Đã phản hồi" as const,
+          status: "Responded" as const,
           response: {
             rfqId,
             supplierId: r.backupSupplierId,
@@ -438,7 +438,7 @@ export default function App() {
           return {
             ...inc,
             state: allResponded ? ("QUOTES_READY_FOR_REVIEW" as const) : ("QUOTES_COLLECTING" as const),
-            status: allResponded ? ("Sẵn sàng duyệt" as const) : ("Đang thu thập báo giá" as const),
+            status: allResponded ? ("Pending Approval" as const) : ("Sourcing Backup Suppliers" as const),
           };
         }
         return inc;
@@ -454,13 +454,13 @@ export default function App() {
       poNumber: targetRfq.poNumber,
       supplierName: targetRfq.backupSupplierName,
       sku: targetRfq.sku,
-      inputSummary: `Báo giá RFQ ${rfqId}: Đơn giá ${Number(quote.unitPrice).toLocaleString("vi-VN")} đ/chiếc, Lead time ${quote.proposedLeadTimeDays} ngày.`,
-      outputReasoning: `Nhà cung cấp đối tác ${targetRfq.backupSupplierName} hoàn tất phản hồi qua Supplier Portal. Dữ liệu sẵn sàng để Agent 2 phân tích.`,
+      inputSummary: `RFQ ${rfqId} Quote: Unit price VND ${Number(quote.unitPrice).toLocaleString("en-US")}/unit, Lead time ${quote.proposedLeadTimeDays} days.`,
+      outputReasoning: `Supplier partner ${targetRfq.backupSupplierName} submitted quote via Supplier Portal. Data ready for Agent 2 ranking.`,
     });
 
     addNotification({
-      title: `Nhận báo giá mới: ${targetRfq.backupSupplierName}`,
-      message: `Đối tác đã gửi báo giá cho gói ${targetRfq.skuName} (${Number(quote.unitPrice * targetRfq.quantity).toLocaleString("vi-VN")} đ).`,
+      title: `New Quote Received: ${targetRfq.backupSupplierName}`,
+      message: `Supplier submitted quote for package ${targetRfq.skuName} (VND ${Number(quote.unitPrice * targetRfq.quantity).toLocaleString("en-US")}).`,
       type: "info",
       correlationId: targetRfq.correlationId,
       linkTab: "rfq",
@@ -487,7 +487,7 @@ export default function App() {
       unitPrice,
       proposedLeadTimeDays: leadTime,
       proposedDeliveryDate: deliveryDate,
-      notes: "Cam kết ưu tiên dây chuyền sản xuất khẩn, chứng chỉ CO/CQ chuẩn Nhật Bản.",
+      notes: "Committed to urgent production line priority, Japanese standard CO/CQ certification.",
     });
   };
 
@@ -502,7 +502,7 @@ export default function App() {
 
       const incidentRfqs = rfqs.filter((r) => r.incidentId === incidentId && r.response);
       if (incidentRfqs.length === 0) {
-        alert("Chưa có báo giá nào được gửi từ các nhà cung cấp!");
+        alert("No quotes submitted by suppliers yet!");
         return;
       }
 
@@ -525,13 +525,13 @@ export default function App() {
       setIncidents((prev) => {
         const updated = prev.map((inc) =>
           inc.id === incidentId
-            ? { ...inc, state: "PENDING_APPROVAL" as const, status: "Chờ duyệt" as const }
+            ? { ...inc, state: "PENDING_APPROVAL" as const, status: "Pending Approval" as const }
             : inc
         );
         StorageService.saveIncidents(updated);
         return updated;
       });
-      void SupplyChainApi.updateIncident(incidentId, { state: "PENDING_APPROVAL" as const, status: "Chờ duyệt" as const }).catch(console.error);
+      void SupplyChainApi.updateIncident(incidentId, { state: "PENDING_APPROVAL" as const, status: "Pending Approval" as const }).catch(console.error);
 
       // Append log & notification
       setLogs((prev) => {
@@ -549,7 +549,7 @@ export default function App() {
       // Navigate to Approvals view
       setCurrentTab("approvals");
     } catch (e: any) {
-      alert(`Lỗi phân tích báo giá: ${e.message}`);
+      alert(`Quote evaluation error: ${e.message}`);
     } finally {
       setIsEvaluatingQuote(false);
     }
@@ -562,10 +562,10 @@ export default function App() {
     customData?: { unitPrice: number; leadTimeDays: number; notes: string }
   ) => {
     const prop = proposals.find((p) => p.id === proposalId);
-    if (!prop) return { success: false, message: "Không tìm thấy đề xuất." };
+    if (!prop) return { success: false, message: "Proposal not found." };
 
     const selectedOption = prop.rankings.find((r) => r.rank === selectedRank);
-    if (!selectedOption) return { success: false, message: "Phương án không hợp lệ." };
+    if (!selectedOption) return { success: false, message: "Invalid option selected." };
 
     const finalUnitPrice = customData ? customData.unitPrice : selectedOption.unitPrice;
     const finalLeadTime = customData ? customData.leadTimeDays : selectedOption.leadTimeDays;
@@ -575,8 +575,8 @@ export default function App() {
     if (finalTotalCost >= 50000000 && userRole === "procurement_officer") {
       // Create Escalation notification
       addNotification({
-        title: "Yêu cầu Escalation duyệt đơn hàng ≥50 triệu VNĐ",
-        message: `Đơn hàng ${Number(finalTotalCost).toLocaleString("vi-VN")} VNĐ vượt hạn mức của Procurement Officer (<50tr). Đã gửi cảnh báo escalated tới Supply Chain Manager.`,
+        title: "Escalation Request: PO Order ≥50M VND",
+        message: `Order value VND ${Number(finalTotalCost).toLocaleString("en-US")} exceeds Procurement Officer limit (<50M). Escalation notification sent to Supply Chain Manager.`,
         type: "escalation",
         correlationId: prop.correlationId,
         linkTab: "approvals",
@@ -585,7 +585,7 @@ export default function App() {
 
       return {
         success: false,
-        message: `Thẩm quyền không hợp lệ: Đơn giá trị ${Number(finalTotalCost).toLocaleString("vi-VN")} VNĐ (≥50 triệu VNĐ). Vui lòng chuyển vai trò thành Supply Chain Manager để phê duyệt!`,
+        message: `Authority Exceeded: Order value VND ${Number(finalTotalCost).toLocaleString("en-US")} (≥50M VND). Please switch user role to Supply Chain Manager to approve!`,
       };
     }
 
@@ -599,7 +599,7 @@ export default function App() {
         return {
           ...p,
           selectedRank,
-          status: customData ? ("Sửa & Duyệt" as const) : ("Đã duyệt" as const),
+          status: customData ? ("Approved" as const) : ("Approved" as const),
           reviewedByRole: userRole,
           reviewedAt: nowStr,
           customAdjusted: customData
@@ -624,8 +624,8 @@ export default function App() {
       if (o.poNumber === prop.poNumber) {
         return {
           ...o,
-          status: "Hoàn thành" as const,
-          notes: `Đã hủy & thay thế bởi đơn khẩn ${newPoNumber} (NCC ${selectedOption.supplierName})`,
+          status: "Completed" as const,
+          notes: `Cancelled & replaced by urgent PO ${newPoNumber} (Supplier ${selectedOption.supplierName})`,
         };
       }
       return o;
@@ -649,8 +649,8 @@ export default function App() {
       orderDate: new Date().toISOString().split("T")[0],
       promisedDeliveryDate: deliveryDate,
       actualOrExpectedDeliveryDate: deliveryDate,
-      status: "Đang giao",
-      notes: `Tạo tự động từ đề xuất ${prop.id} giải quyết trễ hạn đơn ${prop.poNumber}.`,
+      status: "In Transit",
+      notes: `Auto-created from proposal ${prop.id} to resolve delayed PO ${prop.poNumber}.`,
       currentRiskScore: 12,
     };
 
@@ -667,7 +667,7 @@ export default function App() {
         return {
           ...inc,
           state: "PO_AMENDED" as const,
-          status: "Đã giải quyết" as const,
+          status: "Resolved" as const,
           resolvedAt: nowStr,
         };
       }
@@ -686,15 +686,15 @@ export default function App() {
       poNumber: prop.poNumber,
       supplierName: selectedOption.supplierName,
       sku: prop.sku,
-      inputSummary: `Duyệt phương án #${selectedRank}: NCC ${selectedOption.supplierName}, Đơn giá: ${Number(finalUnitPrice).toLocaleString("vi-VN")} đ, Lead time: ${finalLeadTime} ngày.`,
-      outputReasoning: `Phê duyệt thành công. Hủy đơn trễ ${prop.poNumber}, tự động khởi tạo đơn mua hàng mới ${newPoNumber} với giá trị ${Number(finalTotalCost).toLocaleString("vi-VN")} VNĐ. Sự cố ${prop.incidentId} đánh dấu Đã giải quyết.`,
+      inputSummary: `Approved option #${selectedRank}: Supplier ${selectedOption.supplierName}, Unit price: VND ${Number(finalUnitPrice).toLocaleString("en-US")}, Lead time: ${finalLeadTime} days.`,
+      outputReasoning: `Approval successful. Cancelled delayed PO ${prop.poNumber}, auto-created replacement PO ${newPoNumber} valued at VND ${Number(finalTotalCost).toLocaleString("en-US")}. Incident ${prop.incidentId} marked as Resolved.`,
       metadata: { newPoNumber, totalCost: finalTotalCost },
     });
 
     // 6. Notification
     addNotification({
-      title: `Đã phê duyệt đề xuất ${prop.id}`,
-      message: `Đơn hàng mới ${newPoNumber} đã được phát hành cho ${selectedOption.supplierName}. Sự cố đã xử lý xong.`,
+      title: `Proposal Approved: ${prop.id}`,
+      message: `New PO ${newPoNumber} issued to ${selectedOption.supplierName}. Incident resolved.`,
       type: "success",
       correlationId: prop.correlationId,
       linkTab: "orders",
@@ -702,7 +702,7 @@ export default function App() {
 
     return {
       success: true,
-      message: `Phê duyệt thành công! Đã phát hành đơn hàng thay thế ${newPoNumber} cho nhà cung cấp ${selectedOption.supplierName}.`,
+      message: `Approval successful! Replacement PO ${newPoNumber} issued to supplier ${selectedOption.supplierName}.`,
     };
   };
 
@@ -717,7 +717,7 @@ export default function App() {
       if (p.id === proposalId) {
         return {
           ...p,
-          status: "Từ chối" as const,
+          status: "Rejected" as const,
           reviewedByRole: userRole,
           reviewedAt: nowStr,
           rejectionReason: reason,
@@ -736,7 +736,7 @@ export default function App() {
         return {
           ...inc,
           state: "MANUAL_HANDLING" as const,
-          status: "Từ chối" as const,
+          status: "Manual Handling" as const,
         };
       }
       return inc;
@@ -752,13 +752,13 @@ export default function App() {
       action: "REJECT_SOURCING_PROPOSAL",
       poNumber: prop.poNumber,
       sku: prop.sku,
-      inputSummary: `Từ chối đề xuất ${prop.id}. Lý do: ${reason}`,
-      outputReasoning: "Người dùng không đồng thuận với các phương án đề xuất của Agent 2.",
+      inputSummary: `Rejected proposal ${prop.id}. Reason: ${reason}`,
+      outputReasoning: "User rejected proposed options from Agent 2.",
     });
 
     addNotification({
-      title: `Đã từ chối đề xuất ${prop.id}`,
-      message: `Lý do: "${reason}". Cần đàm phán thêm hoặc rà soát giải pháp khác.`,
+      title: `Proposal Rejected: ${prop.id}`,
+      message: `Reason: "${reason}". Further negotiation or manual review required.`,
       type: "warning",
       correlationId: prop.correlationId,
       linkTab: "approvals",
@@ -792,8 +792,8 @@ export default function App() {
       orderDate: nowStr,
       promisedDeliveryDate: deliveryDate,
       actualOrExpectedDeliveryDate: deliveryDate,
-      status: "Đang xử lý",
-      notes: `Đơn hàng tự động sinh theo khuyến nghị của Agent 3 (Dự báo nhu cầu 4 tuần tới).`,
+      status: "Processing",
+      notes: `Auto-generated per Agent 3 recommendation (4-week demand forecast).`,
       currentRiskScore: 10,
     };
 
@@ -809,13 +809,13 @@ export default function App() {
       poNumber: newPoNumber,
       supplierName: targetSupplier.name,
       sku,
-      inputSummary: `Dự báo nhu cầu 4 tuần vượt tồn kho khả dụng. Khuyến nghị đặt bổ sung ${quantity} ${item?.unit || "chiếc"}.`,
-      outputReasoning: `Khởi tạo thành công đơn PO ${newPoNumber} gửi đối tác ${targetSupplier.name} (Lead time ${targetSupplier.averageLeadTimeDays} ngày, giá trị ${Number(totalAmount).toLocaleString("vi-VN")} đ).`,
+      inputSummary: `4-week demand forecast exceeds available stock. Recommended reorder: ${quantity} ${item?.unit || "units"}.`,
+      outputReasoning: `Successfully generated PO ${newPoNumber} sent to supplier ${targetSupplier.name} (Lead time ${targetSupplier.averageLeadTimeDays} days, total value VND ${Number(totalAmount).toLocaleString("en-US")}).`,
     });
 
     addNotification({
-      title: `Tạo đơn PO mới từ dự báo: ${newPoNumber}`,
-      message: `Đã đặt bổ sung ${quantity} ${item?.unit} ${item?.name} để phòng ngừa cạn tồn kho an toàn.`,
+      title: `New PO from Forecast: ${newPoNumber}`,
+      message: `Reordered ${quantity} ${item?.unit} ${item?.name} to prevent safety stock depletion.`,
       type: "success",
       linkTab: "orders",
     });
@@ -823,7 +823,7 @@ export default function App() {
 
   // Reset all mock data
   const handleResetData = () => {
-    if (confirm("Khôi phục toàn bộ dữ liệu về trạng thái mẫu ban đầu?")) {
+    if (confirm("Reset all data to default mock state?")) {
       StorageService.resetAll();
       setOrders(StorageService.getOrders());
       setSuppliers(StorageService.getSuppliers());
@@ -836,14 +836,14 @@ export default function App() {
       setDemandHistory(StorageService.getDemandHistory());
       setLogs(StorageService.getLogs());
       setNotifications(StorageService.getNotifications());
-      alert("Đã khôi phục dữ liệu mẫu ban đầu thành công!");
+      alert("Mock data reset to default successfully!");
     }
   };
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
-  const pendingApprovalCount = proposals.filter((p) => p.status === "Chờ duyệt").length;
+  const pendingApprovalCount = proposals.filter((p) => p.status === "Pending Approval").length;
   const openIncidentsCount = incidents.filter(
-    (i) => i.status !== "Đã giải quyết" && i.status !== "Đã hủy"
+    (i) => i.status !== "Resolved" && i.status !== "Cancelled"
   ).length;
 
   return (<>

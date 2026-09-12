@@ -34,36 +34,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: "map",
-      label: "Bản đồ Vận chuyển",
+      label: "Shipment Tracking Map",
       icon: Map,
       badge: openIncidentsCount > 0 ? `${openIncidentsCount}` : undefined,
       badgeColor: "bg-blue-500 text-white",
     },
     {
       id: "incidents",
-      label: "Rủi ro & Sự cố",
+      label: "Risks & Incidents",
       icon: ShieldAlert,
       badge: openIncidentsCount > 0 ? `${openIncidentsCount}` : undefined,
       badgeColor: "bg-amber-500 text-white animate-pulse",
     },
     {
       id: "orders",
-      label: "Đơn hàng (PO)",
+      label: "Purchase Orders (PO)",
       icon: ShoppingBag,
     },
     {
       id: "suppliers",
-      label: "Nhà cung cấp",
+      label: "Suppliers",
       icon: Truck,
     },
     {
       id: "inventory",
-      label: "Tồn kho",
+      label: "Inventory",
       icon: Boxes,
     },
     {
       id: "approvals",
-      label: "Duyệt (HITL)",
+      label: "Approvals (HITL)",
       icon: FileCheck,
       badge: pendingApprovalCount > 0 ? `${pendingApprovalCount}` : undefined,
       badgeColor: "bg-red-500 text-white font-bold",
@@ -91,7 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6 scrollbar-thin scrollbar-thumb-slate-800">
         <div>
           <div className="px-3 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-            Quản lý chuỗi cung ứng
+            Supply Chain Management
           </div>
           <nav className="space-y-1">
             {tabs.map((tab) => {

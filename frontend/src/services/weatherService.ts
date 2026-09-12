@@ -35,15 +35,15 @@ const cautionCodes = new Set([51, 53, 56, 61, 71, 77]);
 
 export function assessWeatherSeverity(report: WeatherReport): Pick<RouteWeatherStop, "severity" | "severityLabel"> {
   if (severeCodes.has(report.weatherCode) || report.windSpeedKmh >= 50) {
-    return { severity: "SEVERE", severityLabel: "Nguy hiểm" };
+    return { severity: "SEVERE", severityLabel: "Severe Hazard" };
   }
   if (poorCodes.has(report.weatherCode) || report.precipitationMm >= 2 || report.windSpeedKmh >= 30) {
-    return { severity: "POOR", severityLabel: "Thời tiết xấu" };
+    return { severity: "POOR", severityLabel: "Poor Conditions" };
   }
   if (cautionCodes.has(report.weatherCode) || report.precipitationMm > 0 || report.windSpeedKmh >= 20) {
-    return { severity: "CAUTION", severityLabel: "Cần theo dõi" };
+    return { severity: "CAUTION", severityLabel: "Caution Advised" };
   }
-  return { severity: "GOOD", severityLabel: "Ổn định" };
+  return { severity: "GOOD", severityLabel: "Optimal / Clear" };
 }
 
 export const weatherSeverityStyle: Record<WeatherSeverity, { color: string; dotClass: string }> = {
@@ -77,7 +77,7 @@ export async function getRouteWeather(cities: string[]): Promise<{ stops: RouteW
   };
 
   if (!response.ok || !payload.success || !payload.data) {
-    throw new Error(payload.error || "Không thể lấy dữ liệu thời tiết tuyến đường.");
+    throw new Error(payload.error || "Unable to fetch route weather data.");
   }
 
   const failedCities = payload.data.filter((item) => !item.data).map((item) => item.city);

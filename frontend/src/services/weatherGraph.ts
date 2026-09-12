@@ -70,7 +70,7 @@ async function readJson(response: Response): Promise<unknown> {
   try {
     return await response.json();
   } catch {
-    throw new WeatherRequestError("Dịch vụ thời tiết trả về dữ liệu không hợp lệ.", 502);
+    throw new WeatherRequestError("Weather service returned invalid data.", 502);
   }
 }
 
@@ -83,13 +83,13 @@ async function normaliseInput(state: WeatherGraphState) {
 
   const hasCoordinateValue = receivedLatitude || receivedLongitude;
   if (!city && (!receivedLatitude || !receivedLongitude)) {
-    return { error: new WeatherRequestError("Cần cung cấp tên thành phố hoặc đầy đủ latitude và longitude.") };
+    return { error: new WeatherRequestError("Must provide city name or complete latitude and longitude.") };
   }
   if (hasCoordinateValue && (receivedLatitude !== receivedLongitude || latitude === undefined || longitude === undefined)) {
-    return { error: new WeatherRequestError("latitude và longitude phải được cung cấp cùng nhau và là số hợp lệ.") };
+    return { error: new WeatherRequestError("latitude and longitude must be provided together as valid numbers.") };
   }
   if (latitude !== undefined && (latitude < -90 || latitude > 90 || longitude! < -180 || longitude! > 180)) {
-    return { error: new WeatherRequestError("Tọa độ nằm ngoài phạm vi hợp lệ (latitude -90..90, longitude -180..180).") };
+    return { error: new WeatherRequestError("Coordinates out of valid range (latitude -90..90, longitude -180..180).") };
   }
 
   return { city, latitude, longitude };
@@ -104,7 +104,7 @@ async function resolveLocation(state: WeatherGraphState) {
   if (state.latitude !== undefined && state.longitude !== undefined) {
     return {
       location: {
-        name: state.city || "Vị trí đã cung cấp",
+        name: state.city || "Provided Location",
         latitude: state.latitude,
         longitude: state.longitude,
       },
@@ -115,11 +115,11 @@ async function resolveLocation(state: WeatherGraphState) {
     const endpoint = new URL("https://geocoding-api.open-meteo.com/v1/search");
     endpoint.searchParams.set("name", state.city!);
     endpoint.searchParams.set("count", "1");
-    endpoint.searchParams.set("language", "vi");
+    endpoint.searchParams.set("language", "en");
     endpoint.searchParams.set("format", "json");
     const response = await fetch(endpoint, { signal: AbortSignal.timeout(8_000) });
     if (!response.ok) {
-      throw new WeatherRequestError("Không thể tra cứu vị trí thành phố từ Open-Meteo.", 502);
+      throw new WeatherRequestError("Unable to lookup city location from Open-Meteo.", 502);
     }
 
     const data = await readJson(response) as {
@@ -127,7 +127,7 @@ async function resolveLocation(state: WeatherGraphState) {
     };
     const result = data.results?.[0];
     if (!result) {
-      throw new WeatherRequestError(`Không tìm thấy thành phố “${state.city}”. Hãy thử tên đầy đủ hoặc nhập tọa độ.`, 404);
+      throw new WeatherRequestError(`City "${state.city}" not found. Try the full name or enter coordinates.`, 404);
     }
     return {
       location: {
@@ -139,7 +139,7 @@ async function resolveLocation(state: WeatherGraphState) {
       },
     };
   } catch (error) {
-    return { error: error instanceof WeatherRequestError ? error : new WeatherRequestError("Không thể kết nối dịch vụ định vị thời tiết.", 502) };
+    return { error: error instanceof WeatherRequestError ? error : new WeatherRequestError("Unable to connect to weather geocoding service.", 502) };
   }
 }
 
@@ -148,34 +148,34 @@ function afterLocation(state: WeatherGraphState): "fetchWeather" | typeof END {
 }
 
 const weatherConditions: Record<number, string> = {
-  0: "Trời quang",
-  1: "Chủ yếu quang đãng",
-  2: "Có mây rải rác",
-  3: "Nhiều mây",
-  45: "Sương mù",
-  48: "Sương mù đọng băng",
-  51: "Mưa phùn nhẹ",
-  53: "Mưa phùn vừa",
-  55: "Mưa phùn dày",
-  56: "Mưa phùn đóng băng nhẹ",
-  57: "Mưa phùn đóng băng dày",
-  61: "Mưa nhẹ",
-  63: "Mưa vừa",
-  65: "Mưa to",
-  66: "Mưa đóng băng nhẹ",
-  67: "Mưa đóng băng to",
-  71: "Tuyết nhẹ",
-  73: "Tuyết vừa",
-  75: "Tuyết dày",
-  77: "Mưa tuyết hạt",
-  80: "Mưa rào nhẹ",
-  81: "Mưa rào vừa",
-  82: "Mưa rào mạnh",
-  85: "Mưa tuyết nhẹ",
-  86: "Mưa tuyết mạnh",
-  95: "Dông",
-  96: "Dông kèm mưa đá nhẹ",
-  99: "Dông kèm mưa đá mạnh",
+  0: "Clear sky",
+  1: "Mainly clear",
+  2: "Partly cloudy",
+  3: "Overcast",
+  45: "Fog",
+  48: "Depositing rime fog",
+  51: "Light drizzle",
+  53: "Moderate drizzle",
+  55: "Dense drizzle",
+  56: "Light freezing drizzle",
+  57: "Dense freezing drizzle",
+  61: "Slight rain",
+  63: "Moderate rain",
+  65: "Heavy rain",
+  66: "Light freezing rain",
+  67: "Heavy freezing rain",
+  71: "Slight snow fall",
+  73: "Moderate snow fall",
+  75: "Heavy snow fall",
+  77: "Snow grains",
+  80: "Slight rain showers",
+  81: "Moderate rain showers",
+  82: "Violent rain showers",
+  85: "Slight snow showers",
+  86: "Heavy snow showers",
+  95: "Thunderstorm",
+  96: "Thunderstorm with slight hail",
+  99: "Thunderstorm with heavy hail",
 };
 
 async function fetchWeather(state: WeatherGraphState) {
@@ -186,7 +186,7 @@ async function fetchWeather(state: WeatherGraphState) {
     endpoint.searchParams.set("current", "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m");
     endpoint.searchParams.set("timezone", "auto");
     const response = await fetch(endpoint, { signal: AbortSignal.timeout(8_000) });
-    if (!response.ok) throw new WeatherRequestError("Không thể lấy dữ liệu thời tiết từ Open-Meteo.", 502);
+    if (!response.ok) throw new WeatherRequestError("Unable to fetch weather data from Open-Meteo.", 502);
 
     const data = await readJson(response) as {
       timezone?: string;
@@ -203,14 +203,14 @@ async function fetchWeather(state: WeatherGraphState) {
         wind_direction_10m: number;
       };
     };
-    if (!data.current) throw new WeatherRequestError("Open-Meteo không trả về dữ liệu thời tiết hiện tại.", 502);
+    if (!data.current) throw new WeatherRequestError("Open-Meteo did not return current weather data.", 502);
 
     return {
       report: {
         location: { ...state.location!, timezone: data.timezone || state.location!.timezone },
         observedAt: data.current.time,
         timezone: data.timezone || state.location!.timezone || "auto",
-        condition: weatherConditions[data.current.weather_code] || "Không xác định",
+        condition: weatherConditions[data.current.weather_code] || "Unknown",
         weatherCode: data.current.weather_code,
         temperatureC: data.current.temperature_2m,
         apparentTemperatureC: data.current.apparent_temperature,
@@ -224,7 +224,7 @@ async function fetchWeather(state: WeatherGraphState) {
       } satisfies WeatherReport,
     };
   } catch (error) {
-    return { error: error instanceof WeatherRequestError ? error : new WeatherRequestError("Không thể kết nối dịch vụ thời tiết.", 502) };
+    return { error: error instanceof WeatherRequestError ? error : new WeatherRequestError("Unable to connect to weather service.", 502) };
   }
 }
 
@@ -245,6 +245,6 @@ const weatherGraph = new StateGraph(WeatherState)
 export async function getWeather(input: WeatherRequest): Promise<WeatherReport> {
   const result = await weatherGraph.invoke({ request: input });
   if (result.error) throw result.error;
-  if (!result.report) throw new WeatherRequestError("Không thể hoàn tất yêu cầu thời tiết.", 502);
+  if (!result.report) throw new WeatherRequestError("Unable to complete weather request.", 502);
   return result.report;
 }

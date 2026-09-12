@@ -57,7 +57,7 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
   );
   const [deliveryDate, setDeliveryDate] = useState<string>("2026-09-18");
   const [quoteNotes, setQuoteNotes] = useState<string>(
-    "Cam kết đạt chuẩn OEM xe đạp, kiểm định xuất xưởng 100%, bảo hành 12 tháng."
+    "OEM bicycle standard compliant, 100% factory inspected, 12-month warranty."
   );
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -92,7 +92,7 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
 
     setIsSubmitting(false);
     setSuccessMsg(
-      `Đã gửi báo giá thành công cho RFQ ${selectedRfq.id}! Agent 2 đã nhận dữ liệu để tiến hành xếp hạng.`
+      `Quote submitted successfully for RFQ ${selectedRfq.id}! Agent 2 has received data for ranking.`
     );
   };
 
@@ -104,17 +104,17 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
           <div className="flex items-center gap-2">
             <Building2 className="w-5 h-5 text-purple-300" />
             <h3 className="text-base font-bold text-white">
-              CỔNG TỰ PHỤC VỤ DÀNH CHO NHÀ CUNG CẤP (Supplier Self-Service Portal)
+              SUPPLIER SELF-SERVICE PORTAL
             </h3>
           </div>
           <p className="text-xs text-purple-200 mt-1">
-            Nhận yêu cầu báo giá khẩn cấp (RFQ) từ Resili chain, điền đơn giá và cam kết tiến độ giao hàng để tham gia quy trình đấu thầu tự động.
+            Receive urgent Request for Quotations (RFQs) from Resili chain, submit unit prices and delivery commitments to participate in automated sourcing.
           </p>
         </div>
 
         {/* Switch Supplier dropdown */}
         <div className="flex items-center gap-2 bg-purple-950/80 px-3 py-2 rounded-lg border border-purple-700/60">
-          <span className="text-xs text-purple-200">Đang đóng vai NCC:</span>
+          <span className="text-xs text-purple-200">Acting as Supplier:</span>
           <select
             id="supplier-portal-switcher"
             value={currentSupplier?.id}
@@ -147,13 +147,13 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
         {/* Left column: List of RFQs sent to this supplier */}
         <div className="lg:col-span-4 space-y-3">
           <div className="text-xs font-bold text-slate-700 uppercase tracking-wider px-1">
-            Yêu cầu báo giá nhận được ({supplierRfqs.length})
+            RFQs Received ({supplierRfqs.length})
           </div>
 
           <div className="space-y-2">
             {supplierRfqs.map((rfq) => {
               const isSelected = rfq.id === selectedRfq?.id;
-              const isResponded = rfq.status === "Đã phản hồi";
+              const isResponded = rfq.status === "Responded";
 
               return (
                 <button
@@ -185,7 +185,7 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
 
                   <div className="text-xs font-semibold">{rfq.skuName}</div>
                   <div className={`text-[11px] mt-0.5 ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
-                    Cần: {rfq.quantity} chiếc • Hạn giao: {rfq.targetDeliveryDate}
+                    Qty: {rfq.quantity} units • Delivery target: {rfq.targetDeliveryDate}
                   </div>
                 </button>
               );
@@ -193,7 +193,7 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
 
             {supplierRfqs.length === 0 && (
               <div className="p-8 text-center bg-white rounded-xl border border-slate-200 text-xs text-slate-500">
-                Nhà cung cấp này chưa nhận được yêu cầu RFQ nào từ Resili chain.
+                This supplier has not received any RFQs from Resili chain yet.
               </div>
             )}
           </div>
@@ -209,17 +209,17 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
                     {selectedRfq.id}
                   </span>
                   <h4 className="text-base font-bold text-slate-900 mt-1.5">
-                    Yêu Cầu Báo Giá: {selectedRfq.skuName} ({selectedRfq.sku})
+                    Request for Quotation: {selectedRfq.skuName} ({selectedRfq.sku})
                   </h4>
                   <div className="text-xs text-slate-500 mt-0.5">
-                    Số lượng yêu cầu: <strong>{selectedRfq.quantity} chiếc</strong> • Ngày cần trước:{" "}
+                    Required Qty: <strong>{selectedRfq.quantity} units</strong> • Delivery Target:{" "}
                     <strong>{selectedRfq.targetDeliveryDate}</strong>
                   </div>
                 </div>
 
                 <span
                   className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
-                    selectedRfq.status === "Đã phản hồi"
+                    selectedRfq.status === "Responded"
                       ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                       : "bg-amber-50 text-amber-700 border-amber-200"
                   }`}
@@ -232,7 +232,7 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
               <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-1.5">
                 <div className="font-semibold text-slate-800 flex items-center gap-1">
                   <Mail className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Nội dung từ Phòng Mua Sắm Resili chain:</span>
+                  <span>Message from Resili chain Procurement Department:</span>
                 </div>
                 <div className="font-medium text-slate-900">{selectedRfq.emailSubject}</div>
                 <p className="text-slate-600 whitespace-pre-line text-[11px] leading-relaxed max-h-36 overflow-y-auto">
@@ -243,13 +243,13 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
               {/* Quote Submission Form */}
               <form onSubmit={handleSubmit} className="space-y-4 text-xs">
                 <h5 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                  Biểu Mẫu Điền Báo Giá Chính Thức (Self-Service Quote Submission)
+                  Official Quote Submission Form
                 </h5>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="font-semibold text-slate-700 block mb-1">
-                      Đơn giá đề xuất (VNĐ / chiếc) *
+                      Proposed Unit Price (VND / unit) *
                     </label>
                     <div className="relative">
                       <input
@@ -261,20 +261,20 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
                         className="w-full pl-3 pr-8 py-2 rounded-lg border border-slate-300 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
-                        đ
+                        VND
                       </span>
                     </div>
                     <span className="text-[10px] text-slate-500 mt-1 block">
-                      Tổng giá trị hợp đồng:{" "}
+                      Total Contract Value:{" "}
                       <strong className="text-slate-900">
-                        {Number(unitPrice * selectedRfq.quantity).toLocaleString("vi-VN")} đ
+                        VND {Number(unitPrice * selectedRfq.quantity).toLocaleString("en-US")}
                       </strong>
                     </span>
                   </div>
 
                   <div>
                     <label className="font-semibold text-slate-700 block mb-1">
-                      Thời gian hoàn thành (Lead time ngày) *
+                      Lead Time (Days) *
                     </label>
                     <input
                       id="input-quote-leadtime"
@@ -287,13 +287,13 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
                       className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                     />
                     <span className="text-[10px] text-slate-500 mt-1 block">
-                      Số ngày sản xuất và vận chuyển tới kho lắp ráp
+                      Production and transit duration to assembly warehouse
                     </span>
                   </div>
 
                   <div>
                     <label className="font-semibold text-slate-700 block mb-1">
-                      Ngày cam kết giao hàng thực tế *
+                      Committed Delivery Date *
                     </label>
                     <input
                       id="input-quote-delivery-date"
@@ -307,12 +307,12 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
 
                   <div>
                     <label className="font-semibold text-slate-700 block mb-1">
-                      Cam kết chất lượng & Ghi chú
+                      Quality Commitments & Notes
                     </label>
                     <input
                       id="input-quote-notes"
                       type="text"
-                      placeholder="VD: Kiểm định 100%, bảo hành 12 tháng..."
+                      placeholder="e.g. 100% QC inspected, 12-month warranty..."
                       value={quoteNotes}
                       onChange={(e) => setQuoteNotes(e.target.value)}
                       className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/20"
@@ -329,9 +329,9 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>
-                      {selectedRfq.status === "Đã phản hồi"
-                        ? "Cập nhật lại báo giá"
-                        : "Gửi báo giá chính thức"}
+                      {selectedRfq.status === "Responded"
+                        ? "Update Quote"
+                        : "Submit Official Quote"}
                     </span>
                   </button>
                 </div>
@@ -339,7 +339,7 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
             </div>
           ) : (
             <div className="py-16 text-center text-xs text-slate-400">
-              Chọn một RFQ ở danh sách bên trái để mở mẫu báo giá.
+              Select an RFQ from the list on the left to open the quote form.
             </div>
           )}
         </div>

@@ -135,7 +135,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
 
             reloadData();
             setLastWebhookMessage(
-              `⚡ Nhận vị trí real-time: ${incoming.poNumber} tại ${incoming.locationName}`
+              `⚡ Real-time location received: ${incoming.poNumber} at ${incoming.locationName}`
             );
             setTimeout(() => setLastWebhookMessage(null), 5000);
           }
@@ -277,22 +277,22 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
           longitude: newLng,
           locationName: simulateDuplicate
             ? currentPoint.locationName
-            : `Trạm kiểm soát km${Math.floor(Math.random() * 80 + 20)} hướng về ${dest.name}`,
+            : `Checkpoint km${Math.floor(Math.random() * 80 + 20)} heading to ${dest.name}`,
           recordedAt,
           source: "CarrierWebhook",
           speedKmh: Math.floor(Math.random() * 30 + 40),
           statusNote: simulateDuplicate
-            ? "Mô phỏng gửi trùng gói tin (At-least-once delivery retry)"
-            : `Đang di chuyển đúng hành trình, cách ${dest.name} ${(Math.random() * 15 + 10).toFixed(1)} km`,
+            ? "Simulated duplicate packet (At-least-once delivery retry)"
+            : `On schedule, ${(Math.random() * 15 + 10).toFixed(1)} km away from ${dest.name}`,
       });
 
       if (result.isDuplicateSkipped) {
         setLastWebhookMessage(
-          `🛡️ [IDEMPOTENT THÀNH CÔNG] Webhook gửi trùng (${target.poNumber} @ ${recordedAt.substring(11, 19)}). DB đã chặn tạo điểm trùng lặp!`
+          `🛡️ [IDEMPOTENT SUCCESS] Duplicate webhook (${target.poNumber} @ ${recordedAt.substring(11, 19)}). DB blocked duplicate creation!`
         );
       } else {
         setLastWebhookMessage(
-          `📍 [WEBHOOK GHI NHẬN] Đã cập nhật GPS mới cho ${target.poNumber} (${newLat}, ${newLng}) và phát tán real-time!`
+          `📍 [WEBHOOK RECORDED] Updated new GPS for ${target.poNumber} (${newLat}, ${newLng}) and broadcasted real-time!`
         );
         void reloadData();
       }
@@ -307,19 +307,19 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
         supplierName: target.supplierName,
         latitude: newLat,
         longitude: newLng,
-        locationName: `Trạm vệ tinh giao lộ (${dest.name})`,
+        locationName: `Junction satellite checkpoint (${dest.name})`,
         recordedAt,
         source: "CarrierWebhook",
         speedKmh: 48,
-        statusNote: "Cập nhật vệ tinh thời gian thực qua Webhook",
+        statusNote: "Real-time satellite update via Webhook",
       });
 
       if (localResult.isDuplicateSkipped) {
         setLastWebhookMessage(
-          `🛡️ [IDEMPOTENCY LOCAL] Ràng buộc khóa duy nhất đã ngăn chặn bản ghi trùng!`
+          `🛡️ [LOCAL IDEMPOTENCY] Unique constraint prevented duplicate record!`
         );
       } else {
-        setLastWebhookMessage(`📍 Đã mô phỏng GPS mới cho ${target.poNumber}!`);
+        setLastWebhookMessage(`📍 Simulated new GPS for ${target.poNumber}!`);
       void reloadData();
       }
     } finally {
@@ -344,12 +344,10 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
           </div>
           <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <Navigation className="w-5 h-5 text-blue-600" />
-            Bản đồ Giám sát Vận chuyển Lô hàng (Shipment Tracking Map)
+            Shipment Tracking Map
           </h1>
           <p className="text-xs text-slate-500 mt-1 max-w-3xl">
-            Hiển thị trực quan vị trí địa lý của các lô hàng đang mở có rủi ro trễ hẹn (liên kết với
-            sự cố rủi ro đã phát hiện). Điểm số và cấu thành rủi ro được chiếu trực tiếp từ snapshot
-            giám sát (SRS §2.3) mà <strong>tuyệt đối không tính lại</strong>.
+            Visually displays the geographical location of open shipments with delay risk (linked to detected risk incidents). Risk scores and breakdown are projected directly from monitoring snapshots (SRS §2.3) with strictly no recalculation.
           </p>
         </div>
 
@@ -358,7 +356,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
           <button
             onClick={reloadData}
             className="p-2 border border-slate-300 hover:bg-slate-100 rounded-lg text-slate-700 transition-colors"
-            title="Tải lại dữ liệu bản đồ"
+            title="Reload map data"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -383,7 +381,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
         <div className="bg-white border border-slate-200 rounded-lg p-3 shadow-2xs flex items-center justify-between">
           <div>
             <div className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
-              Lô hàng đang theo dõi
+              Tracked Shipments
             </div>
             <div className="text-lg font-bold text-slate-900 mt-0.5">{shipments.length}</div>
           </div>
@@ -395,7 +393,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
         <div className="bg-white border border-red-200 rounded-lg p-3 shadow-2xs flex items-center justify-between bg-red-50/30">
           <div>
             <div className="text-[11px] font-medium text-red-600 uppercase tracking-wider">
-              Rủi ro cao (Đỏ &gt;70)
+              High Risk (Red &gt;70)
             </div>
             <div className="text-lg font-bold text-red-700 mt-0.5">{highRiskCount}</div>
           </div>
@@ -407,7 +405,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
         <div className="bg-white border border-amber-200 rounded-lg p-3 shadow-2xs flex items-center justify-between bg-amber-50/30">
           <div>
             <div className="text-[11px] font-medium text-amber-600 uppercase tracking-wider">
-              Rủi ro vừa (Vàng 40-69)
+              Medium Risk (Yellow 40-69)
             </div>
             <div className="text-lg font-bold text-amber-700 mt-0.5">{mediumRiskCount}</div>
           </div>
@@ -419,7 +417,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
         <div className="bg-white border border-emerald-200 rounded-lg p-3 shadow-2xs flex items-center justify-between bg-emerald-50/30">
           <div>
             <div className="text-[11px] font-medium text-emerald-600 uppercase tracking-wider">
-              Bình thường (Xanh &lt;40)
+              Normal (Green &lt;40)
             </div>
             <div className="text-lg font-bold text-emerald-700 mt-0.5">{lowRiskCount}</div>
           </div>
@@ -437,7 +435,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
             <input
               type="text"
-              placeholder="Tìm mã PO, SKU, Nhà cung cấp..."
+              placeholder="Search PO, SKU, Supplier..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -447,28 +445,28 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
           {/* Risk Level filter */}
           <div className="flex items-center gap-1.5">
             <Filter className="w-3.5 h-3.5 text-slate-500" />
-            <span className="text-slate-600 font-medium">Mức rủi ro:</span>
+            <span className="text-slate-600 font-medium">Risk Level:</span>
             <select
               value={riskFilter}
               onChange={(e) => setRiskFilter(e.target.value as any)}
               className="border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-xs text-slate-800"
             >
-              <option value="ALL">Tất cả ({shipments.length})</option>
-              <option value="HIGH">Rủi ro cao &gt;70 ({highRiskCount})</option>
-              <option value="MEDIUM">Trung bình 40-69 ({mediumRiskCount})</option>
-              <option value="LOW">An toàn &lt;40 ({lowRiskCount})</option>
+              <option value="ALL">All ({shipments.length})</option>
+              <option value="HIGH">High Risk &gt;70 ({highRiskCount})</option>
+              <option value="MEDIUM">Medium 40-69 ({mediumRiskCount})</option>
+              <option value="LOW">Safe &lt;40 ({lowRiskCount})</option>
             </select>
           </div>
 
           {/* Supplier filter */}
           <div className="flex items-center gap-1.5">
-            <span className="text-slate-600 font-medium">NCC:</span>
+            <span className="text-slate-600 font-medium">Supplier:</span>
             <select
               value={supplierFilter}
               onChange={(e) => setSupplierFilter(e.target.value)}
               className="border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-xs text-slate-800 max-w-[200px] truncate"
             >
-              <option value="ALL">Tất cả nhà cung ứng</option>
+              <option value="ALL">All Suppliers</option>
               {uniqueSuppliers.map((sup) => (
                 <option key={sup.id} value={sup.id}>
                   {sup.name}
@@ -479,13 +477,13 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
 
           {/* Destination Warehouse filter */}
           <div className="flex items-center gap-1.5">
-            <span className="text-slate-600 font-medium">Kho đích:</span>
+            <span className="text-slate-600 font-medium">Dest Warehouse:</span>
             <select
               value={warehouseFilter}
               onChange={(e) => setWarehouseFilter(e.target.value)}
               className="border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-xs text-slate-800"
             >
-              <option value="ALL">Tất cả kho nhận hàng</option>
+              <option value="ALL">All Receiving Warehouses</option>
               {warehouses.map((wh) => (
                 <option key={wh.id} value={wh.id}>
                   {wh.name}
@@ -495,7 +493,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
           </div>
         </div>
 
-        <span className="text-[11px] text-slate-500">Bản đồ thế giới tương tác · OpenStreetMap</span>
+        <span className="text-[11px] text-slate-500">Interactive World Map · OpenStreetMap</span>
       </div>
 
       {/* Map + Detail Panel Layout */}
@@ -516,7 +514,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
           <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-2">
             <div className="px-3 py-1.5 rounded-lg bg-slate-900/90 backdrop-blur-md border border-slate-700 text-xs text-slate-200 flex items-center gap-2 shadow-md">
               <Compass className="w-3.5 h-3.5 text-blue-400" />
-              <span className="font-semibold">Bản đồ Hành lang Cung ứng Việt Nam</span>
+              <span className="font-semibold">Vietnam Supply Chain Corridor Map</span>
               <span className="text-slate-400 text-[11px]">WGS-84 Projection</span>
             </div>
 
@@ -524,7 +522,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
               <button
                 onClick={() => setZoomLevel((z) => Math.min(1.6, z + 0.15))}
                 className="px-2 py-1 hover:bg-slate-800 rounded font-bold text-slate-200"
-                title="Phóng to"
+                title="Zoom in"
               >
                 +
               </button>
@@ -534,7 +532,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
               <button
                 onClick={() => setZoomLevel((z) => Math.max(0.8, z - 0.15))}
                 className="px-2 py-1 hover:bg-slate-800 rounded font-bold text-slate-200"
-                title="Thu nhỏ"
+                title="Zoom out"
               >
                 -
               </button>
@@ -552,31 +550,31 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
           <div className="absolute bottom-3 left-3 z-10 p-2.5 rounded-lg bg-slate-900/90 backdrop-blur-md border border-slate-800 text-[11px] text-slate-300 space-y-1.5 shadow-md">
             <div className="font-semibold text-white mb-1 flex items-center gap-1.5">
               <Layers className="w-3 h-3 text-blue-400" />
-              <span>Ký hiệu rủi ro (Điểm trễ)</span>
+              <span>Risk Legend (Delay Score)</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-xs shadow-red-500 animate-pulse"></span>
-              <span>Rủi ro cao (&ge; 70 điểm) - Trễ nghiêm trọng</span>
+              <span>High Risk (&ge; 70 pts) - Severe Delay</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-xs shadow-amber-400"></span>
-              <span>Rủi ro trung bình (40 - 69 điểm)</span>
+              <span>Medium Risk (40 - 69 pts)</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-              <span>An toàn (&lt; 40 điểm) - Đúng lộ trình</span>
+              <span>Safe (&lt; 40 pts) - On Schedule</span>
             </div>
             <div className="flex items-center gap-2 pt-1 border-t border-slate-800 text-slate-400">
               <Building2 className="w-3 h-3 text-indigo-400" />
-              <span>Kho đích / Nhà máy lắp ráp xe đạp</span>
+              <span>Destination Warehouse / Bicycle Assembly Plant</span>
             </div>
             {routeWeatherStops.length > 0 && (
               <>
-                <div className="pt-1 border-t border-slate-800 font-semibold text-white">Thời tiết tuyến đường</div>
-                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-red-500" /><span>Đỏ · Nguy hiểm</span></div>
-                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-orange-500" /><span>Cam · Thời tiết xấu</span></div>
-                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-amber-400" /><span>Vàng · Cần theo dõi</span></div>
-                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /><span>Xanh · Ổn định</span></div>
+                <div className="pt-1 border-t border-slate-800 font-semibold text-white">Route Weather</div>
+                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-red-500" /><span>Red · Severe Hazard</span></div>
+                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-orange-500" /><span>Orange · Poor Conditions</span></div>
+                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-amber-400" /><span>Yellow · Caution Advised</span></div>
+                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /><span>Green · Optimal / Clear</span></div>
               </>
             )}
           </div>
@@ -733,7 +731,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                   .join(" ");
 
                 return (
-                  <g aria-label="Tuyến đường và điều kiện thời tiết">
+                  <g aria-label="Route and weather conditions">
                     {routePoints.length > 1 && (
                       <path d={pathData} fill="none" stroke="#e2e8f0" strokeWidth="2" strokeDasharray="5,4" opacity="0.75" />
                     )}
@@ -750,7 +748,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                             <text x="5" y="9" fill="#f8fafc" fontSize="8" fontWeight="700">{stop.location.name}</text>
                             <text x="5" y="17" fill="#cbd5e1" fontSize="7">{stop.condition} · {stop.temperatureC}°C</text>
                           </g>
-                          <title>{`${stop.location.name}: ${stop.severityLabel}. ${stop.condition}, ${stop.temperatureC}°C, gió ${stop.windSpeedKmh} km/h.`}</title>
+                          <title>{`${stop.location.name}: ${stop.severityLabel}. ${stop.condition}, ${stop.temperatureC}°C, wind ${stop.windSpeedKmh} km/h.`}</title>
                         </g>
                       );
                     })}
@@ -867,7 +865,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                         fontWeight="600"
                         fontFamily="monospace"
                       >
-                        {shipment.poNumber} · {shipment.currentDelayRiskScore}đ
+                        {shipment.poNumber} · {shipment.currentDelayRiskScore} pts
                       </text>
                     </g>
                   </g>
@@ -901,9 +899,9 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                           : "bg-emerald-100 text-emerald-800 border border-emerald-200"
                       }`}
                     >
-                      {selectedShipment.riskLevel === "HIGH" && "Rủi ro Cao"}
-                      {selectedShipment.riskLevel === "MEDIUM" && "Rủi ro Vừa"}
-                      {selectedShipment.riskLevel === "LOW" && "Bình thường"}
+                      {selectedShipment.riskLevel === "HIGH" && "High Risk"}
+                      {selectedShipment.riskLevel === "MEDIUM" && "Medium Risk"}
+                      {selectedShipment.riskLevel === "LOW" && "Normal"}
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-0.5">{selectedShipment.supplierName}</p>
@@ -920,37 +918,37 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
               {/* SKU & Destination info */}
               <div className="bg-slate-50 rounded-lg p-3 text-xs space-y-2 border border-slate-200/70">
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Linh kiện (SKU):</span>
+                  <span className="text-slate-500">Component (SKU):</span>
                   <span className="font-semibold text-slate-800 text-right">
                     {selectedShipment.sku} - {selectedShipment.skuName}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Số lượng:</span>
+                  <span className="text-slate-500">Quantity:</span>
                   <span className="font-semibold text-slate-800">
-                    {selectedShipment.quantity.toLocaleString("vi-VN")} {selectedShipment.unit}
+                    {selectedShipment.quantity.toLocaleString("en-US")} {selectedShipment.unit}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Kho nhận hàng:</span>
+                  <span className="text-slate-500">Destination Warehouse:</span>
                   <span className="font-semibold text-indigo-700">
                     {selectedShipment.destinationWarehouse.name}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Hạn cam kết (Promised):</span>
+                  <span className="text-slate-500">Promised Date:</span>
                   <span className="font-mono text-slate-700">
                     {selectedShipment.promisedDeliveryDate}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Dự kiến thực tế (ETA):</span>
+                  <span className="text-slate-500">Actual Forecast (ETA):</span>
                   <span
                     className={`font-mono font-semibold ${
                       selectedShipment.delayDays > 0 ? "text-red-600" : "text-emerald-700"
                     }`}
                   >
-                    {selectedShipment.expectedDeliveryDate} (Trễ {selectedShipment.delayDays} ngày)
+                    {selectedShipment.expectedDeliveryDate} (Delayed {selectedShipment.delayDays} days)
                   </span>
                 </div>
               </div>
@@ -959,29 +957,29 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
               <div>
                 <div className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Vị trí GPS mới nhất (Latest Checkpoint)</span>
+                  <span>Latest GPS Location (Latest Checkpoint)</span>
                 </div>
                 <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-3 text-xs space-y-2">
                   <div className="font-medium text-blue-950">
                     {selectedShipment.latestTrackingPoint.locationName}
                   </div>
                   <div className="flex justify-between text-slate-600 text-[11px]">
-                    <span>Tọa độ GPS:</span>
+                    <span>GPS Coordinates:</span>
                     <span className="font-mono font-medium">
                       {selectedShipment.latestTrackingPoint.latitude},{" "}
                       {selectedShipment.latestTrackingPoint.longitude}
                     </span>
                   </div>
                   <div className="flex justify-between text-slate-600 text-[11px]">
-                    <span>Thời gian ghi nhận:</span>
+                    <span>Recorded Time:</span>
                     <span className="font-mono">
                       {new Date(selectedShipment.latestTrackingPoint.recordedAt).toLocaleString(
-                        "vi-VN"
+                        "en-US"
                       )}
                     </span>
                   </div>
                   <div className="flex justify-between text-slate-600 text-[11px]">
-                    <span>Nguồn dữ liệu:</span>
+                    <span>Data Source:</span>
                     <span className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold text-[10px]">
                       {selectedShipment.latestTrackingPoint.source}
                     </span>
@@ -992,7 +990,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                     </div>
                   )}
                   <div className="pt-1 text-[11px] text-slate-500 flex justify-between">
-                    <span>Hãng vận tải:</span>
+                    <span>Carrier:</span>
                     <span className="font-medium text-slate-700">{selectedShipment.carrierName}</span>
                   </div>
                 </div>
@@ -1003,16 +1001,16 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                     <ShieldAlert className="w-4 h-4 text-red-600" />
-                    <span>Cấu thành rủi ro (SRS §2.3)</span>
+                    <span>Risk Breakdown (SRS §2.3)</span>
                   </div>
                   <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono border border-slate-200">
-                    Snapshot giám sát · Không tính lại
+                    Monitoring Snapshot · No Recalculation
                   </span>
                 </div>
 
                 <div className="p-3 bg-slate-900 text-slate-100 rounded-lg space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-300">Điểm rủi ro tổng thể:</span>
+                    <span className="text-xs text-slate-300">Overall Risk Score:</span>
                     <span
                       className={`text-base font-black ${
                         selectedShipment.currentDelayRiskScore >= 70
@@ -1036,7 +1034,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                     <div className="space-y-2 text-xs">
                       <div>
                         <div className="flex justify-between text-[11px] text-slate-300 mb-1">
-                          <span>1. Độ trễ giao hàng (w1=0.50):</span>
+                          <span>1. Delivery Lateness (w1=0.50):</span>
                           <span className="font-mono text-amber-300">
                             {selectedShipment.riskBreakdown.latenessFactor} (
                             {selectedShipment.riskBreakdown.delayDays}d /{" "}
@@ -1058,7 +1056,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
 
                       <div>
                         <div className="flex justify-between text-[11px] text-slate-300 mb-1">
-                          <span>2. Điểm tin cậy NCC (w2=0.25):</span>
+                          <span>2. Supplier Reliability (w2=0.25):</span>
                           <span className="font-mono text-blue-300">
                             {selectedShipment.riskBreakdown.supplierReliabilityFactor}
                           </span>
@@ -1078,10 +1076,10 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
 
                       <div>
                         <div className="flex justify-between text-[11px] text-slate-300 mb-1">
-                          <span>3. Buffer tồn kho an toàn (w3=0.25):</span>
+                          <span>3. Safety Stock Buffer (w3=0.25):</span>
                           <span className="font-mono text-red-300">
-                            {selectedShipment.riskBreakdown.inventoryBufferFactor} (Kho:{" "}
-                            {selectedShipment.riskBreakdown.currentStock} / An toàn:{" "}
+                            {selectedShipment.riskBreakdown.inventoryBufferFactor} (Stock:{" "}
+                            {selectedShipment.riskBreakdown.currentStock} / Safety:{" "}
                             {selectedShipment.riskBreakdown.safetyStock})
                           </span>
                         </div>
@@ -1100,7 +1098,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                     </div>
                   ) : (
                     <p className="text-[11px] text-slate-400">
-                      Điểm số được đọc trực tiếp từ bản ghi snapshot giám sát.
+                      Scores are read directly from the monitoring snapshot record.
                     </p>
                   )}
                 </div>
@@ -1109,8 +1107,8 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
               {/* Route checkpoints history */}
               <div className="border-t border-slate-100 pt-3">
                 <div className="text-xs font-semibold text-slate-700 mb-2 flex items-center justify-between">
-                  <span>Lịch sử các trạm đã qua ({selectedShipment.routeHistory.length})</span>
-                  <span className="text-[10px] text-slate-400 font-mono">Đoạn đường GPS</span>
+                  <span>Checkpoint History ({selectedShipment.routeHistory.length})</span>
+                  <span className="text-[10px] text-slate-400 font-mono">GPS Segment</span>
                 </div>
 
                 <div className="space-y-2 max-h-40 overflow-y-auto pr-1 text-[11px]">
@@ -1125,7 +1123,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                       <div className="flex-1">
                         <div className="font-medium text-slate-800">{pt.locationName}</div>
                         <div className="text-[10px] text-slate-400 font-mono">
-                          {new Date(pt.recordedAt).toLocaleTimeString("vi-VN")} · {pt.latitude},{" "}
+                          {new Date(pt.recordedAt).toLocaleTimeString("en-US")} · {pt.latitude},{" "}
                           {pt.longitude}
                         </div>
                       </div>
@@ -1141,7 +1139,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                     onClick={onNavigateToIncidents}
                     className="flex-1 flex items-center justify-center gap-1 py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-medium transition-colors"
                   >
-                    <span>Xem sự cố</span>
+                    <span>View Incident</span>
                     <ArrowUpRight className="w-3.5 h-3.5" />
                   </button>
                 )}
@@ -1151,7 +1149,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                     onClick={() => onNavigateToPo(selectedShipment.poNumber)}
                     className="flex-1 flex items-center justify-center gap-1 py-2 px-3 border border-slate-300 hover:bg-slate-100 text-slate-800 rounded-lg text-xs font-medium transition-colors"
                   >
-                    <span>Mở đơn hàng PO</span>
+                    <span>Open PO Order</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 )}
@@ -1162,16 +1160,15 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
               <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">
                 <Compass className="w-6 h-6 animate-pulse" />
               </div>
-              <h3 className="text-sm font-bold text-slate-900">Chọn một lô hàng trên bản đồ</h3>
+              <h3 className="text-sm font-bold text-slate-900">Select a shipment on the map</h3>
               <p className="text-xs text-slate-500 max-w-xs mx-auto">
-                Bấm vào marker định vị màu đỏ/vàng/xanh để mở panel chi tiết, xem lộ trình di
-                chuyển và bảng phân rã công thức điểm rủi ro SRS §2.3.
+                Click on a red/yellow/green location marker to open the details panel, view movement route, and inspect the SRS §2.3 risk score breakdown table.
               </p>
 
               {/* Quick Select from At-Risk list */}
               <div className="pt-3 border-t border-slate-100 text-left space-y-2">
                 <div className="text-[11px] font-semibold text-slate-700 uppercase tracking-wider">
-                  Lô hàng có nguy cơ cao nhất:
+                  Highest Risk Shipments:
                 </div>
                 {shipments
                   .filter((s) => s.riskLevel === "HIGH")
@@ -1189,7 +1186,7 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
                         </div>
                       </div>
                       <span className="px-2 py-0.5 rounded bg-red-600 text-white font-bold text-xs">
-                        {item.currentDelayRiskScore}đ
+                        {item.currentDelayRiskScore}pts
                       </span>
                     </div>
                   ))}
@@ -1202,26 +1199,25 @@ export const ShipmentTrackingMapView: React.FC<ShipmentTrackingMapViewProps> = (
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs space-y-2 text-slate-600">
             <div className="font-semibold text-slate-800 flex items-center gap-1.5">
               <Info className="w-3.5 h-3.5 text-blue-600" />
-              <span>Ràng buộc Kiến trúc & Idempotency</span>
+              <span>Architectural Constraints & Idempotency</span>
             </div>
             <ul className="list-disc pl-4 space-y-1 text-[11px]">
               <li>
-                <strong>Read-Only Projection (CQRS):</strong> Bản đồ chỉ chiếu dữ liệu đã được Agent
-                giám sát đã tính toán. Không có logic tính toán rủi ro mới tại giao diện.
+                <strong>Read-Only Projection (CQRS):</strong> Map only projects data calculated by the Monitoring Agent. Zero new risk calculation logic in the UI.
               </li>
               <li>
-                <strong>Idempotency DB:</strong> Ràng buộc duy nhất{" "}
+                <strong>Idempotency DB:</strong> Unique constraint{" "}
                 <code className="bg-slate-200 px-1 rounded font-mono text-[10px]">
                   (ShipmentId, RecordedAt)
                 </code>{" "}
-                ngăn chặn duplicate points khi carrier gửi webhook trùng.
+                prevents duplicate points when carriers retry webhooks.
               </li>
               <li>
-                <strong>Transactional Outbox:</strong> Khi ghi tracking mới, event{" "}
+                <strong>Transactional Outbox:</strong> When recording new tracking, event{" "}
                 <code className="bg-slate-200 px-1 rounded font-mono text-[10px]">
                   ShipmentLocationUpdated
                 </code>{" "}
-                được lưu vào Outbox trước khi phát tán qua WebSocket / SignalR.
+                is saved to Outbox prior to WebSocket / SignalR broadcast.
               </li>
             </ul>
           </div>

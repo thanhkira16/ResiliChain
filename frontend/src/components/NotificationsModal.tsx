@@ -68,14 +68,14 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
           <div className="flex items-center gap-2">
             <Bell className="w-5 h-5 text-slate-800" />
             <h3 className="text-sm font-bold text-slate-900">
-              Thông Báo & Cảnh Báo Chuỗi Cung Ứng
+              Supply Chain Notifications & Alerts
             </h3>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={onClearAll}
               className="text-slate-400 hover:text-slate-600 p-1 rounded"
-              title="Xóa tất cả"
+              title="Clear all"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -128,7 +128,7 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
 
                   {notif.linkTab && (
                     <span className="font-semibold text-slate-900 flex items-center gap-1 hover:underline">
-                      <span>Mở màn hình</span>
+                      <span>Open View</span>
                       <ArrowRight className="w-3 h-3" />
                     </span>
                   )}
@@ -139,14 +139,14 @@ export const NotificationsModal: React.FC<NotificationsModalProps> = ({
 
           {notifications.length === 0 && (
             <div className="py-16 text-center text-xs text-slate-400">
-              Không có thông báo nào.
+              No notifications.
             </div>
           )}
         </div>
 
         {/* Drawer Footer */}
         <div className="p-3 bg-slate-50 border-t border-slate-200 text-center text-[11px] text-slate-500">
-          Thông báo được đồng bộ tự động từ Agent 1, Agent 2 & Vòng lặp HITL
+          Notifications synchronized automatically from Agent 1, Agent 2 & HITL Loop
         </div>
       </div>
     </div>

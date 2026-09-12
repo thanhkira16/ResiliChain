@@ -51,10 +51,10 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
         <div>
           <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
             <ShieldAlert className="w-6 h-6 text-red-600" />
-            Giám Sát Rủi Ro Trễ Hạn & Quản Lý Sự Cố (Master Risk Engine)
+            Master Risk Engine & Delay Monitoring
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            Agent 6 (Master Orchestrator) tự động quét POs, tính toán <code className="bg-slate-100 px-1.5 py-0.5 rounded text-amber-800 font-mono">delayRiskScore</code> từ thời tiết Open-Meteo, tài chính FMP và tin tức GDELT. Khi rủi ro &gt; 65/100, hệ thống tự động kích hoạt PuLP MILP Solver sinh phương án thay thế.
+            Agent 6 (Master Orchestrator) automatically scans POs, computing <code className="bg-slate-100 px-1.5 py-0.5 rounded text-amber-800 font-mono">delayRiskScore</code> from Open-Meteo weather forecasts, FMP financial metrics, and GDELT news. When risk score &gt; 65/100, the PuLP MILP Solver is triggered to generate backup options.
           </p>
         </div>
 
@@ -65,7 +65,7 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
             className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition-colors shadow-sm disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isScanning ? "animate-spin" : ""}`} />
-            <span>{isScanning ? "Đang Quét POs..." : "Quét Rủi Ro Ngay (just scan)"}</span>
+            <span>{isScanning ? "Scanning POs..." : "Trigger Risk Scan"}</span>
           </button>
 
           <button
@@ -73,7 +73,7 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
             className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-lg border border-slate-200 flex items-center gap-1.5"
           >
             <Sliders className="w-3.5 h-3.5 text-slate-500" />
-            Cấu Hình Ngưỡng
+            Configure Thresholds
           </button>
         </div>
       </div>
@@ -85,12 +85,12 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
             <div>
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-slate-700" />
-                Phân Tích Chỉ Số Rủi Ro Nhà Cung Cấp (PORS Score Telemetry)
+                Supplier Risk Metrics (PORS Telemetry)
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">Kết quả tổng hợp từ GDELT News, FMP Altman Z-Score & Điểm uy tín lịch sử</p>
+              <p className="text-xs text-slate-500 mt-0.5">Aggregated results from GDELT News, FMP Altman Z-Score & historical reliability</p>
             </div>
             <span className="text-xs font-bold font-mono px-2.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
-              {supplierRisks.length} Nhà Cung Cấp
+              {supplierRisks.length} Suppliers
             </span>
           </div>
 
@@ -128,8 +128,8 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
                       </div>
                     </div>
                     <div className="text-right text-xs">
-                      <span className="text-slate-500 block text-[10px]">Trạng thái AI</span>
-                      <span className="font-semibold text-slate-800">{risk.statusLabel || "Đã phân tích"}</span>
+                      <span className="text-slate-500 block text-[10px]">AI Status</span>
+                      <span className="font-semibold text-slate-800">{risk.statusLabel || "Analyzed"}</span>
                     </div>
                   </div>
                 </div>
@@ -144,15 +144,15 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-red-600" />
-            Danh Sách Sự Cố Phát Hiện Bởi AI Worker ({incidents.length} Bản Ghi)
+            Incidents Detected by AI Worker ({incidents.length} Entries)
           </h3>
         </div>
 
         {incidents.length === 0 ? (
           <div className="text-center py-10 text-slate-500 space-y-2">
             <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
-            <h4 className="text-sm font-bold text-slate-900">Hệ Thống An Toàn — Không Có Sự Cố Trễ Hạn!</h4>
-            <p className="text-xs">Tất cả các đơn hàng PO linh kiện EV hiện tại đều ở mức điểm rủi ro an toàn (&lt; 65/100).</p>
+            <h4 className="text-sm font-bold text-slate-900">System Safe — No Delivery Delay Incidents!</h4>
+            <p className="text-xs">All EV component purchase orders currently maintain safe risk scores (&lt; 65/100).</p>
           </div>
         ) : (
           <div className="space-y-3.5">
@@ -168,9 +168,9 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
                     </span>
                     <div>
                       <h4 className="text-xs font-bold text-slate-900">
-                        Đơn Hàng {inc.poNumber} — SKU: {inc.sku}
+                        Order {inc.poNumber} — SKU: {inc.sku}
                       </h4>
-                      <p className="text-[11px] text-slate-500">Nhà Cung Cấp: {inc.supplierName || "N/A"}</p>
+                      <p className="text-[11px] text-slate-500">Supplier: {inc.supplierName || "N/A"}</p>
                     </div>
                   </div>
 
@@ -190,18 +190,18 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                   <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                    <span className="text-slate-500 block text-[10px]">Tóm Tắt Sự Cố</span>
-                    <span className="text-slate-800 font-medium">{inc.summary || "Trễ hạn giao hàng do thời tiết & rủi ro tài chính NCC."}</span>
+                    <span className="text-slate-500 block text-[10px]">Incident Summary</span>
+                    <span className="text-slate-800 font-medium">{inc.summary || "Delivery delay caused by weather & supplier financial risk."}</span>
                   </div>
 
                   <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                    <span className="text-slate-500 block text-[10px]">Dự Báo Trễ Thời Tiết</span>
-                    <span className="text-amber-800 font-mono font-bold">+{inc.weatherDelayForecast || 3} Ngày (Open-Meteo API)</span>
+                    <span className="text-slate-500 block text-[10px]">Weather Delay Forecast</span>
+                    <span className="text-amber-800 font-mono font-bold">+{inc.weatherDelayForecast || 3} Days (Open-Meteo API)</span>
                   </div>
 
                   <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                    <span className="text-slate-500 block text-[10px]">Phương Án Thay Thế PuLP MILP</span>
-                    <span className="text-blue-700 font-bold">Đã sinh Top 1, 2, 3 Proposals</span>
+                    <span className="text-slate-500 block text-[10px]">PuLP MILP Sourcing Option</span>
+                    <span className="text-blue-700 font-bold">Top 1, 2, 3 Proposals Generated</span>
                   </div>
                 </div>
 
@@ -212,7 +212,7 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
                       onClick={() => onViewOnMap(inc.poNumber)}
                       className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1"
                     >
-                      <MapPinned className="w-3.5 h-3.5 text-blue-600" /> Xem Tuyến Đường Vận Chuyển 3D Cesium
+                      <MapPinned className="w-3.5 h-3.5 text-blue-600" /> View 3D Cesium Logistics Route
                     </button>
                   )}
 
@@ -220,7 +220,7 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
                     onClick={() => onNavigateToApprovals(inc.id)}
                     className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-lg flex items-center gap-1.5 transition-colors shadow-xs"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Xem & Duyệt Phương Án 1-Click
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Review & 1-Click Approve
                   </button>
                 </div>
               </div>

@@ -41,114 +41,133 @@ const KEYS = {
 const defaultWarehouses: DestinationWarehouse[] = [
   {
     id: "WH-BN-01",
-    name: "Nhà máy Lắp ráp Bắc Ninh (Kho Đích)",
+    name: "Bac Ninh Assembly Plant (Destination)",
+    address: "Que Vo Industrial Park, Bac Ninh",
     latitude: 21.18,
     longitude: 106.07,
-    capacityUnits: 15000,
-    currentStockUnits: 8200,
   },
   {
     id: "WH-DN-02",
-    name: "Tổng kho Trung chuyển Đà Nẵng",
+    name: "Da Nang Distribution Hub",
+    address: "Hoa Khanh Industrial Zone, Da Nang",
     latitude: 16.05,
     longitude: 108.20,
-    capacityUnits: 10000,
-    currentStockUnits: 4500,
   },
   {
     id: "WH-HCM-03",
-    name: "Tổng kho Logistics Miền Nam - Dĩ An",
+    name: "Southern Logistics Hub - Di An",
+    address: "Di An Industrial Park, Binh Duong",
     latitude: 10.90,
     longitude: 106.70,
-    capacityUnits: 20000,
-    currentStockUnits: 12000,
   },
 ];
 
 const defaultMapShipments: AtRiskShipmentMapItem[] = [
   {
     shipmentId: "po-3",
+    purchaseOrderId: "po-3",
     poNumber: "PO-2026-003",
     supplierId: "SUP-03",
-    supplierName: "Công ty TNHH Phanh & Thủy lực Á Châu",
+    supplierName: "Asia Hydraulic & Brakes Co., Ltd.",
     sku: "SKU-BRK-03",
-    skuName: "Bộ phanh đĩa thủy lực 2 piston",
+    skuName: "Dual-Piston Hydraulic Disc Brake Set",
     quantity: 80,
+    unit: "sets",
     promisedDeliveryDate: "2026-09-15",
     expectedDeliveryDate: "2026-09-28",
     delayDays: 13,
     currentDelayRiskScore: 66.3,
     appliedThreshold: 65,
     riskLevel: "HIGH",
-    summary: "Siêu bão biển gây đình trệ cảng trung chuyển + Altman Z-Score NCC giảm",
+    carrierName: "Express Logistics Corp",
+    trackingNumber: "TRK-2026-9912",
     destinationWarehouse: defaultWarehouses[0],
     latestTrackingPoint: {
       id: "TP-PO-3-3",
       shipmentId: "po-3",
-      checkpointIndex: 3,
-      locationName: "Cảng Hải Phòng (Đình Vũ)",
+      purchaseOrderId: "po-3",
+      poNumber: "PO-2026-003",
+      supplierId: "SUP-03",
+      supplierName: "Asia Hydraulic & Brakes Co., Ltd.",
+      locationName: "Hai Phong Port (Dinh Vu Hub)",
       latitude: 20.83,
       longitude: 106.72,
-      timestamp: new Date().toISOString(),
-      checkpointType: "TransitHub",
-      notes: "Tàu hàng bị cấm nhổ neo do bão cấp 11",
+      recordedAt: new Date().toISOString(),
+      source: "CarrierWebhook",
+      statusNote: "Vessels prohibited from setting sail due to Category 11 typhoon",
       speedKmh: 0,
     },
     routeHistory: [
-      { id: "TP-PO-3-1", shipmentId: "po-3", checkpointIndex: 1, locationName: "Kho Phanh Á Châu (Hải Phòng)", latitude: 20.86, longitude: 106.68, timestamp: "2026-09-08T08:00:00Z", checkpointType: "OriginWarehouse", speedKmh: 45 },
-      { id: "TP-PO-3-2", shipmentId: "po-3", checkpointIndex: 2, locationName: "Cao tốc Hà Nội - Hải Phòng", latitude: 20.90, longitude: 106.40, timestamp: "2026-09-09T10:00:00Z", checkpointType: "TollPlaza", speedKmh: 75 },
-      { id: "TP-PO-3-3", shipmentId: "po-3", checkpointIndex: 3, locationName: "Cảng Hải Phòng (Đình Vũ)", latitude: 20.83, longitude: 106.72, timestamp: "2026-09-10T14:00:00Z", checkpointType: "TransitHub", speedKmh: 0 },
+      { id: "TP-PO-3-1", shipmentId: "po-3", purchaseOrderId: "po-3", poNumber: "PO-2026-003", supplierId: "SUP-03", supplierName: "Asia Hydraulic & Brakes Co., Ltd.", locationName: "Asia Brakes Warehouse (Hai Phong)", latitude: 20.86, longitude: 106.68, recordedAt: "2026-09-08T08:00:00Z", source: "CarrierWebhook", speedKmh: 45 },
+      { id: "TP-PO-3-2", shipmentId: "po-3", purchaseOrderId: "po-3", poNumber: "PO-2026-003", supplierId: "SUP-03", supplierName: "Asia Hydraulic & Brakes Co., Ltd.", locationName: "Hanoi - Hai Phong Expressway", latitude: 20.90, longitude: 106.40, recordedAt: "2026-09-09T10:00:00Z", source: "CarrierWebhook", speedKmh: 75 },
+      { id: "TP-PO-3-3", shipmentId: "po-3", purchaseOrderId: "po-3", poNumber: "PO-2026-003", supplierId: "SUP-03", supplierName: "Asia Hydraulic & Brakes Co., Ltd.", locationName: "Hai Phong Port (Dinh Vu Hub)", latitude: 20.83, longitude: 106.72, recordedAt: "2026-09-10T14:00:00Z", source: "CarrierWebhook", speedKmh: 0 },
     ],
     lastUpdatedAt: new Date().toISOString(),
   },
   {
     shipmentId: "po-1",
+    purchaseOrderId: "po-1",
     poNumber: "PO-2026-001",
     supplierId: "SUP-01",
-    supplierName: "Công ty Cổ phần Hợp kim VNJ",
+    supplierName: "VNJ Alloy Joint Stock Co.",
     sku: "SKU-FRM-01",
-    skuName: "Khung hợp kim nhôm đúc EV",
+    skuName: "EV Cast Aluminum Alloy Frame",
     quantity: 50,
+    unit: "frames",
     promisedDeliveryDate: "2026-09-20",
     expectedDeliveryDate: "2026-09-22",
     delayDays: 2,
     currentDelayRiskScore: 38.5,
     appliedThreshold: 65,
     riskLevel: "MEDIUM",
-    summary: "Mưa lớn gây ngập chốt giao thông QL1A",
+    carrierName: "VNJ Trans Express",
+    trackingNumber: "TRK-2026-1104",
     destinationWarehouse: defaultWarehouses[0],
     latestTrackingPoint: {
       id: "TP-PO-1-2",
       shipmentId: "po-1",
-      checkpointIndex: 2,
-      locationName: "Trạm thu phí Cầu Phù Đổng",
+      purchaseOrderId: "po-1",
+      poNumber: "PO-2026-001",
+      supplierId: "SUP-01",
+      supplierName: "VNJ Alloy Joint Stock Co.",
+      locationName: "Phu Dong Bridge Toll Plaza",
       latitude: 21.05,
       longitude: 105.92,
-      timestamp: new Date().toISOString(),
-      checkpointType: "TollPlaza",
+      recordedAt: new Date().toISOString(),
+      source: "CarrierWebhook",
       speedKmh: 35,
     },
     routeHistory: [
-      { id: "TP-PO-1-1", shipmentId: "po-1", checkpointIndex: 1, locationName: "KCN Tân Bình (TP.HCM)", latitude: 10.80, longitude: 106.65, timestamp: "2026-09-07T06:00:00Z", checkpointType: "OriginWarehouse", speedKmh: 50 },
-      { id: "TP-PO-1-2", shipmentId: "po-1", checkpointIndex: 2, locationName: "Trạm thu phí Cầu Phù Đổng", latitude: 21.05, longitude: 105.92, timestamp: "2026-09-11T12:00:00Z", checkpointType: "TollPlaza", speedKmh: 35 },
+      { id: "TP-PO-1-1", shipmentId: "po-1", purchaseOrderId: "po-1", poNumber: "PO-2026-001", supplierId: "SUP-01", supplierName: "VNJ Alloy Joint Stock Co.", locationName: "Tan Binh Industrial Zone (HCMC)", latitude: 10.80, longitude: 106.65, recordedAt: "2026-09-07T06:00:00Z", source: "CarrierWebhook", speedKmh: 50 },
+      { id: "TP-PO-1-2", shipmentId: "po-1", purchaseOrderId: "po-1", poNumber: "PO-2026-001", supplierId: "SUP-01", supplierName: "VNJ Alloy Joint Stock Co.", locationName: "Phu Dong Bridge Toll Plaza", latitude: 21.05, longitude: 105.92, recordedAt: "2026-09-11T12:00:00Z", source: "CarrierWebhook", speedKmh: 35 },
     ],
     lastUpdatedAt: new Date().toISOString(),
   },
 ];
 
 const defaultThresholdConfig: RiskThresholdConfig = {
-  leadTimeWarningDays: 3,
-  leadTimeCriticalDays: 7,
-  reliabilityWarningScore: 75,
-  stockoutWarningDays: 14,
+  defaultThreshold: 70,
+  autoTriggerAgent2: true,
+  w1: 0.5,
+  w2: 0.25,
+  w3: 0.25,
+  skuOverrides: {},
 };
 
-const defaultSeasonality: SeasonalityConfig = {
-  q1Multiplier: 1.0,
-  q2Multiplier: 1.25,
-  q3Multiplier: 0.95,
-  q4Multiplier: 1.15,
-};
+const defaultSeasonality: SeasonalityConfig[] = [
+  { month: 1, monthName: "Jan", factor: 0.85, description: "Post-holiday slowdown" },
+  { month: 2, monthName: "Feb", factor: 0.90, description: "Lunar New Year transition" },
+  { month: 3, monthName: "Mar", factor: 1.05, description: "Spring cycling season launch" },
+  { month: 4, monthName: "Apr", factor: 1.15, description: "Warm weather demand spike" },
+  { month: 5, monthName: "May", factor: 1.20, description: "Peak summer inventory prep" },
+  { month: 6, monthName: "Jun", factor: 1.25, description: "Summer sales peak" },
+  { month: 7, monthName: "Jul", factor: 1.10, description: "Mid-summer steady demand" },
+  { month: 8, monthName: "Aug", factor: 1.05, description: "Back-to-school commuting" },
+  { month: 9, monthName: "Sep", factor: 0.95, description: "Autumn transition" },
+  { month: 10, monthName: "Oct", factor: 0.90, description: "Q4 order planning" },
+  { month: 11, monthName: "Nov", factor: 1.10, description: "Black Friday promotion prep" },
+  { month: 12, monthName: "Dec", factor: 1.15, description: "Holiday gift demand peak" },
+];
 
 function safeGet<T>(key: string, fallback: T): T {
   try {
@@ -191,10 +210,10 @@ export const StorageService = {
     safeSet(KEYS.ORDERS, items);
   },
 
-  getSeasonality(): SeasonalityConfig {
-    return safeGet<SeasonalityConfig>(KEYS.SEASONALITY, defaultSeasonality);
+  getSeasonality(): SeasonalityConfig[] {
+    return safeGet<SeasonalityConfig[]>(KEYS.SEASONALITY, defaultSeasonality);
   },
-  saveSeasonality(config: SeasonalityConfig): void {
+  saveSeasonality(config: SeasonalityConfig[]): void {
     safeSet(KEYS.SEASONALITY, config);
   },
 
@@ -245,16 +264,19 @@ export const StorageService = {
   saveLogs(items: AuditLogEntry[]): void {
     this.saveAuditLogs(items);
   },
-  addAuditLog(action: string, details: string, user: string = "Hệ thống AI Worker", poNumber?: string, supplierId?: string): AuditLogEntry {
+  addAuditLog(inputSummary: string, outputReasoning: string, agent: AuditLogEntry["agent"] = "System", poNumber?: string, supplierName?: string, sku?: string, correlationId: string = `CORR-${Date.now()}`): AuditLogEntry {
     const logs = this.getAuditLogs();
     const newEntry: AuditLogEntry = {
       id: `LOG-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       timestamp: new Date().toISOString(),
-      action,
-      details,
-      user,
+      correlationId,
+      agent,
+      action: "MANUAL_ACTION",
+      inputSummary,
+      outputReasoning,
       poNumber,
-      supplierId,
+      supplierName,
+      sku,
     };
     const updated = [newEntry, ...logs];
     this.saveAuditLogs(updated);
@@ -267,7 +289,7 @@ export const StorageService = {
   saveNotifications(items: AppNotification[]): void {
     safeSet(KEYS.NOTIFICATIONS, items);
   },
-  addNotification(title: string, message: string, type: "info" | "warning" | "danger" | "success" = "info", linkTarget?: string): AppNotification {
+  addNotification(title: string, message: string, type: AppNotification["type"] = "info", linkTab?: string, correlationId?: string): AppNotification {
     const notifs = this.getNotifications();
     const newNotif: AppNotification = {
       id: `NOTIF-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -275,8 +297,9 @@ export const StorageService = {
       title,
       message,
       type,
-      read: false,
-      linkTarget,
+      isRead: false,
+      linkTab,
+      correlationId,
     };
     const updated = [newNotif, ...notifs];
     this.saveNotifications(updated);
@@ -284,7 +307,7 @@ export const StorageService = {
   },
 
   getUserRole(): UserRole {
-    return safeGet<UserRole>(KEYS.USER_ROLE, "PROCUREMENT_MANAGER");
+    return safeGet<UserRole>(KEYS.USER_ROLE, "supply_chain_manager");
   },
   saveUserRole(role: UserRole): void {
     safeSet(KEYS.USER_ROLE, role);
@@ -307,11 +330,12 @@ export const StorageService = {
     const runs = this.getAgentRuns();
     const newRun: AgentRun = {
       id: run.id || `RUN-${Date.now()}`,
-      timestamp: run.timestamp || new Date().toISOString(),
-      agentName: run.agentName || "Agent Work",
-      status: run.status || "SUCCESS",
-      summary: run.summary || "",
-      executionTimeMs: run.executionTimeMs || 100,
+      agentType: run.agentType || "RiskMonitoring",
+      correlationId: run.correlationId || `CORR-${Date.now()}`,
+      status: run.status || "COMPLETED",
+      resultPayloadJson: run.resultPayloadJson,
+      startedAt: run.startedAt || new Date().toISOString(),
+      completedAt: run.completedAt || new Date().toISOString(),
     };
     this.saveAgentRuns([newRun, ...runs]);
   },
@@ -326,9 +350,21 @@ export const StorageService = {
     const history = this.getRiskHistory();
     const newPoint: RiskHistoryPoint = {
       timestamp: point.timestamp || new Date().toISOString(),
-      poNumber: poNumber,
-      riskScore: point.riskScore || 0,
-      reason: point.reason || "",
+      score: point.score ?? 0,
+      delayDays: point.delayDays ?? 0,
+      breakdown: point.breakdown || {
+        latenessFactor: 0,
+        supplierReliabilityFactor: 0,
+        inventoryBufferFactor: 0,
+        w1: 0.5,
+        w2: 0.25,
+        w3: 0.25,
+        delayDays: 0,
+        committedLeadTimeDays: 7,
+        currentStock: 100,
+        safetyStock: 80,
+        formulaExplanation: "",
+      },
     };
     this.saveRiskHistory([newPoint, ...history]);
   },
@@ -338,6 +374,31 @@ export const StorageService = {
   },
   saveTrackingPoints(points: ShipmentTrackingPoint[]): void {
     safeSet(KEYS.TRACKING_POINTS, points);
+  },
+  recordTrackingPoint(point: ShipmentTrackingPoint): { point: ShipmentTrackingPoint; isDuplicateSkipped: boolean } {
+    const points = this.getTrackingPoints();
+    const isDuplicate = points.some(
+      (p) =>
+        p.shipmentId === point.shipmentId &&
+        p.recordedAt === point.recordedAt &&
+        p.latitude === point.latitude &&
+        p.longitude === point.longitude
+    );
+    if (isDuplicate) {
+      return { point, isDuplicateSkipped: true };
+    }
+    const updated = [point, ...points];
+    this.saveTrackingPoints(updated);
+
+    const shipments = this.getAtRiskShipmentsMapData();
+    const target = shipments.find((s) => s.shipmentId === point.shipmentId);
+    if (target) {
+      target.latestTrackingPoint = point;
+      target.routeHistory = [...target.routeHistory, point];
+      target.lastUpdatedAt = point.recordedAt;
+      safeSet(KEYS.MAP_SHIPMENTS, shipments);
+    }
+    return { point, isDuplicateSkipped: false };
   },
 
   getWarehouses(): DestinationWarehouse[] {

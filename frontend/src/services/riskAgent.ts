@@ -71,7 +71,7 @@ export function calculatePoRisk(
   let rawScore =
     (w1 * latenessFactor + w2 * supplierReliabilityFactor + w3 * inventoryBufferFactor) * 100;
 
-  if (po.status === "Hoàn thành") {
+  if (po.status === "Completed") {
     rawScore = 0;
   }
 
@@ -80,7 +80,7 @@ export function calculatePoRisk(
   const appliedThreshold =
     thresholds?.skuOverrides?.[po.sku] || thresholds?.defaultThreshold || 70;
 
-  const isTriggered = delayRiskScore >= appliedThreshold && po.status !== "Hoàn thành";
+  const isTriggered = delayRiskScore >= appliedThreshold && po.status !== "Completed";
 
   const breakdown: RiskBreakdown = {
     latenessFactor: Number(latenessFactor.toFixed(3)),
@@ -109,8 +109,8 @@ export function calculatePoRisk(
 
   const reason =
     delayDays > 0
-      ? `Trễ ${delayDays}/${committedLeadTimeDays} ngày (factor ${(latenessFactor * 100).toFixed(0)}%). Tồn kho ${currentStock}/${safetyStock} chiếc (buffer ${bufferDays} ngày). Điểm rủi ro ${delayRiskScore}/100.`
-      : `Đúng kế hoạch cam kết. Tồn kho an toàn ${currentStock} chiếc. Điểm rủi ro ${delayRiskScore}/100.`;
+      ? `Delayed by ${delayDays}/${committedLeadTimeDays} days (factor ${(latenessFactor * 100).toFixed(0)}%). Stock level: ${currentStock}/${safetyStock} units (buffer ${bufferDays} days). Risk score: ${delayRiskScore}/100.`
+      : `On schedule. Safety stock level: ${currentStock} units. Risk score: ${delayRiskScore}/100.`;
 
   return {
     delayDays,

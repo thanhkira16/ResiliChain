@@ -46,8 +46,8 @@ export function ShipmentDetailModal({
   if (!shipment) return null;
 
   const latest = shipment.latestTrackingPoint;
-  const riskLabel = shipment.riskLevel === "HIGH" ? "Rủi ro cao" : shipment.riskLevel === "MEDIUM" ? "Cảnh báo" : "Bình thường";
-  const formatDate = (value: string) => new Date(value).toLocaleString("vi-VN");
+  const riskLabel = shipment.riskLevel === "HIGH" ? "High Risk" : shipment.riskLevel === "MEDIUM" ? "Caution" : "Normal";
+  const formatDate = (value: string) => new Date(value).toLocaleString("en-US");
   const toggleSection = (section: "po" | "incident") => setOpenSection((current) => current === section ? null : section);
 
   return (
@@ -77,7 +77,7 @@ export function ShipmentDetailModal({
             ref={closeButtonRef}
             type="button"
             onClick={onClose}
-            aria-label="Đóng chi tiết lô hàng"
+            aria-label="Close shipment details"
             className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <X className="h-5 w-5" />
@@ -87,23 +87,23 @@ export function ShipmentDetailModal({
         <div className="grid gap-5 p-5 md:grid-cols-2 md:p-6">
           <div className="space-y-5">
             <section className="rounded-xl border border-slate-200 p-4">
-              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900"><Package className="h-4 w-4 text-blue-600" />Thông tin đơn hàng</h3>
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900"><Package className="h-4 w-4 text-blue-600" />Order Information</h3>
               <dl className="grid grid-cols-[110px_1fr] gap-x-3 gap-y-2 text-sm">
-                <dt className="text-slate-500">Linh kiện</dt><dd className="font-medium text-slate-800">{shipment.sku} - {shipment.skuName}</dd>
-                <dt className="text-slate-500">Số lượng</dt><dd className="font-medium text-slate-800">{shipment.quantity} {shipment.unit}</dd>
-                <dt className="text-slate-500">Kho nhận</dt><dd className="font-medium text-blue-700">{shipment.destinationWarehouse.name}</dd>
-                <dt className="text-slate-500">Hạn cam kết</dt><dd className="font-medium text-slate-800">{shipment.promisedDeliveryDate}</dd>
-                <dt className="text-slate-500">ETA thực tế</dt><dd className="font-medium text-slate-800">{shipment.expectedDeliveryDate}{shipment.delayDays > 0 ? ` (Trễ ${shipment.delayDays} ngày)` : ""}</dd>
+                <dt className="text-slate-500">Component</dt><dd className="font-medium text-slate-800">{shipment.sku} - {shipment.skuName}</dd>
+                <dt className="text-slate-500">Quantity</dt><dd className="font-medium text-slate-800">{shipment.quantity} {shipment.unit}</dd>
+                <dt className="text-slate-500">Receiving Warehouse</dt><dd className="font-medium text-blue-700">{shipment.destinationWarehouse.name}</dd>
+                <dt className="text-slate-500">Promised Date</dt><dd className="font-medium text-slate-800">{shipment.promisedDeliveryDate}</dd>
+                <dt className="text-slate-500">Actual ETA</dt><dd className="font-medium text-slate-800">{shipment.expectedDeliveryDate}{shipment.delayDays > 0 ? ` (Delayed ${shipment.delayDays} days)` : ""}</dd>
               </dl>
             </section>
 
             <section className="rounded-xl border border-blue-100 bg-blue-50/70 p-4">
-              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900"><MapPin className="h-4 w-4 text-blue-600" />Vị trí GPS mới nhất</h3>
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900"><MapPin className="h-4 w-4 text-blue-600" />Latest GPS Location</h3>
               <p className="font-semibold text-slate-900">{latest.locationName}</p>
               <dl className="mt-3 grid grid-cols-[110px_1fr] gap-x-3 gap-y-2 text-sm">
-                <dt className="text-slate-500">Tọa độ GPS</dt><dd className="font-mono text-slate-700">{latest.latitude}, {latest.longitude}</dd>
-                <dt className="text-slate-500">Ghi nhận</dt><dd className="text-slate-700">{formatDate(latest.recordedAt)}</dd>
-                <dt className="text-slate-500">Nguồn dữ liệu</dt><dd className="text-slate-700">{latest.source}</dd>
+                <dt className="text-slate-500">GPS Coordinates</dt><dd className="font-mono text-slate-700">{latest.latitude}, {latest.longitude}</dd>
+                <dt className="text-slate-500">Recorded</dt><dd className="text-slate-700">{formatDate(latest.recordedAt)}</dd>
+                <dt className="text-slate-500">Data Source</dt><dd className="text-slate-700">{latest.source}</dd>
               </dl>
               {latest.statusNote && <p className="mt-3 border-t border-blue-100 pt-3 text-sm italic text-slate-600">“{latest.statusNote}”</p>}
             </section>
@@ -111,16 +111,16 @@ export function ShipmentDetailModal({
 
           <div className="space-y-5">
             <section className="rounded-xl border border-slate-200 p-4">
-              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900"><ShieldAlert className="h-4 w-4 text-amber-600" />Cấu thành rủi ro</h3>
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900"><ShieldAlert className="h-4 w-4 text-amber-600" />Risk Breakdown</h3>
               <div className="flex items-center gap-3">
                 <span className={`flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold ${shipment.riskLevel === "HIGH" ? "bg-red-100 text-red-700" : shipment.riskLevel === "MEDIUM" ? "bg-orange-100 text-orange-700" : "bg-emerald-100 text-emerald-700"}`}>{shipment.currentDelayRiskScore}</span>
-                <div><p className="font-semibold text-slate-900">Điểm rủi ro tổng thể / 100</p><p className="text-xs text-slate-500">Dữ liệu snapshot · Không tính lại tại giao diện</p></div>
+                <div><p className="font-semibold text-slate-900">Overall Risk Score / 100</p><p className="text-xs text-slate-500">Snapshot data · No recalculation in UI</p></div>
               </div>
-              {shipment.riskBreakdown ? <p className="mt-3 text-sm text-slate-600">{shipment.riskBreakdown.formulaExplanation}</p> : <p className="mt-3 text-sm text-slate-500">Điểm số được đọc trực tiếp từ bản ghi snapshot giám sát rủi ro.</p>}
+              {shipment.riskBreakdown ? <p className="mt-3 text-sm text-slate-600">{shipment.riskBreakdown.formulaExplanation}</p> : <p className="mt-3 text-sm text-slate-500">Score read directly from risk monitoring snapshot record.</p>}
             </section>
 
             <section className="rounded-xl border border-slate-200 p-4">
-              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900"><Truck className="h-4 w-4 text-blue-600" />Lịch sử các trạm đã qua ({shipment.routeHistory.length})</h3>
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900"><Truck className="h-4 w-4 text-blue-600" />Checkpoint History ({shipment.routeHistory.length})</h3>
               <ol className="space-y-2">
                 {shipment.routeHistory.map((point, index) => (
                   <li key={point.id || `${point.recordedAt}-${index}`} className="flex gap-3 rounded-lg bg-slate-50 p-2.5">
@@ -137,34 +137,34 @@ export function ShipmentDetailModal({
           <section className="mx-5 mb-5 rounded-xl border border-slate-200 bg-slate-50 p-4 md:mx-6 md:mb-6" aria-live="polite">
             {openSection === "po" ? (
               <>
-                <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900"><Package className="h-4 w-4 text-blue-600" />Hồ sơ đơn hàng {shipment.poNumber}</h3>
+                <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900"><Package className="h-4 w-4 text-blue-600" />Order File {shipment.poNumber}</h3>
                 <dl className="mt-3 grid gap-x-4 gap-y-2 text-sm sm:grid-cols-2">
-                  <div><dt className="text-slate-500">Mã Shipment</dt><dd className="font-medium text-slate-800">{shipment.shipmentId}</dd></div>
-                  <div><dt className="text-slate-500">Mã PO nội bộ</dt><dd className="font-medium text-slate-800">{shipment.purchaseOrderId}</dd></div>
-                  <div><dt className="text-slate-500">Nhà cung cấp</dt><dd className="font-medium text-slate-800">{order?.supplierName || shipment.supplierName}</dd></div>
-                  <div><dt className="text-slate-500">Mã vận đơn</dt><dd className="font-medium text-slate-800">{shipment.trackingNumber}</dd></div>
-                  <div><dt className="text-slate-500">Ngày đặt hàng</dt><dd className="font-medium text-slate-800">{order?.orderDate || "Chưa đồng bộ"}</dd></div>
-                  <div><dt className="text-slate-500">Trạng thái PO</dt><dd className="font-medium text-slate-800">{order?.status || "Đang giao"}</dd></div>
-                  <div><dt className="text-slate-500">Đơn giá</dt><dd className="font-medium text-slate-800">{order ? `${order.unitPrice.toLocaleString("vi-VN")} VNĐ` : "Chưa đồng bộ"}</dd></div>
-                  <div><dt className="text-slate-500">Tổng giá trị</dt><dd className="font-medium text-slate-800">{order ? `${order.totalAmount.toLocaleString("vi-VN")} VNĐ` : "Chưa đồng bộ"}</dd></div>
+                  <div><dt className="text-slate-500">Shipment ID</dt><dd className="font-medium text-slate-800">{shipment.shipmentId}</dd></div>
+                  <div><dt className="text-slate-500">Internal PO Code</dt><dd className="font-medium text-slate-800">{shipment.purchaseOrderId}</dd></div>
+                  <div><dt className="text-slate-500">Supplier</dt><dd className="font-medium text-slate-800">{order?.supplierName || shipment.supplierName}</dd></div>
+                  <div><dt className="text-slate-500">Tracking Number</dt><dd className="font-medium text-slate-800">{shipment.trackingNumber}</dd></div>
+                  <div><dt className="text-slate-500">Order Date</dt><dd className="font-medium text-slate-800">{order?.orderDate || "Not synchronized"}</dd></div>
+                  <div><dt className="text-slate-500">PO Status</dt><dd className="font-medium text-slate-800">{order?.status || "In Transit"}</dd></div>
+                  <div><dt className="text-slate-500">Unit Price</dt><dd className="font-medium text-slate-800">{order ? `VND ${order.unitPrice.toLocaleString("en-US")}` : "Not synchronized"}</dd></div>
+                  <div><dt className="text-slate-500">Total Amount</dt><dd className="font-medium text-slate-800">{order ? `VND ${order.totalAmount.toLocaleString("en-US")}` : "Not synchronized"}</dd></div>
                 </dl>
-                <div className="mt-3 border-t border-slate-200 pt-3 text-sm"><p className="font-medium text-slate-800">Tracking thực tế / dự kiến</p><p className="mt-1 text-slate-600">{order?.actualOrExpectedDeliveryDate || shipment.expectedDeliveryDate} · {shipment.delayDays > 0 ? `Trễ ${shipment.delayDays} ngày so với cam kết` : "Đúng tiến độ"}</p>{order?.notes && <p className="mt-2 italic text-slate-500">Ghi chú PO: {order.notes}</p>}</div>
+                <div className="mt-3 border-t border-slate-200 pt-3 text-sm"><p className="font-medium text-slate-800">Actual / Expected Tracking</p><p className="mt-1 text-slate-600">{order?.actualOrExpectedDeliveryDate || shipment.expectedDeliveryDate} · {shipment.delayDays > 0 ? `Delayed ${shipment.delayDays} days compared to promise` : "On schedule"}</p>{order?.notes && <p className="mt-2 italic text-slate-500">PO Note: {order.notes}</p>}</div>
               </>
             ) : (
               <>
-                <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900"><ShieldAlert className="h-4 w-4 text-amber-600" />Sự cố rủi ro {incident?.id || shipment.incidentId ? `· ${incident?.id || shipment.incidentId}` : ""}</h3>
+                <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900"><ShieldAlert className="h-4 w-4 text-amber-600" />Risk Incident {incident?.id || shipment.incidentId ? `· ${incident?.id || shipment.incidentId}` : ""}</h3>
                 <dl className="mt-3 grid gap-x-4 gap-y-2 text-sm sm:grid-cols-2">
-                  <div><dt className="text-slate-500">Trạng thái workflow</dt><dd className="font-medium text-slate-800">{incident?.state || shipment.incidentState || "Chưa tạo sự cố"}</dd></div>
-                  <div><dt className="text-slate-500">Trạng thái xử lý</dt><dd className="font-medium text-slate-800">{incident?.status || "Đang theo dõi"}</dd></div>
-                  <div><dt className="text-slate-500">Điểm snapshot</dt><dd className="font-medium text-slate-800">{incident?.delayRiskScore ?? shipment.currentDelayRiskScore} / 100</dd></div>
-                  <div><dt className="text-slate-500">Ngưỡng kích hoạt</dt><dd className="font-medium text-slate-800">{incident?.thresholdApplied ?? shipment.appliedThreshold} / 100</dd></div>
-                  <div><dt className="text-slate-500">Phát hiện lúc</dt><dd className="font-medium text-slate-800">{incident?.detectedAt || "Chưa đồng bộ"}</dd></div>
-                  <div><dt className="text-slate-500">Agent 2 / RFQ</dt><dd className="font-medium text-slate-800">{incident ? (incident.agent2Triggered ? `${incident.rfqSentCount || 0} RFQ đã gửi` : "Chưa kích hoạt") : "Chưa có sự cố"}</dd></div>
+                  <div><dt className="text-slate-500">Workflow State</dt><dd className="font-medium text-slate-800">{incident?.state || shipment.incidentState || "Incident not created"}</dd></div>
+                  <div><dt className="text-slate-500">Processing Status</dt><dd className="font-medium text-slate-800">{incident?.status || "Monitoring"}</dd></div>
+                  <div><dt className="text-slate-500">Snapshot Score</dt><dd className="font-medium text-slate-800">{incident?.delayRiskScore ?? shipment.currentDelayRiskScore} / 100</dd></div>
+                  <div><dt className="text-slate-500">Trigger Threshold</dt><dd className="font-medium text-slate-800">{incident?.thresholdApplied ?? shipment.appliedThreshold} / 100</dd></div>
+                  <div><dt className="text-slate-500">Detected At</dt><dd className="font-medium text-slate-800">{incident?.detectedAt || "Not synchronized"}</dd></div>
+                  <div><dt className="text-slate-500">Agent 2 / RFQ</dt><dd className="font-medium text-slate-800">{incident ? (incident.agent2Triggered ? `${incident.rfqSentCount || 0} RFQs sent` : "Not triggered") : "No incident"}</dd></div>
                 </dl>
-                <p className="mt-3 text-sm text-slate-600">{incident?.summary || shipment.riskBreakdown?.formulaExplanation || "Dữ liệu chỉ đọc từ hệ thống giám sát; giao diện không tính lại điểm rủi ro."}</p>
+                <p className="mt-3 text-sm text-slate-600">{incident?.summary || shipment.riskBreakdown?.formulaExplanation || "Read-only data from monitoring system; UI does not recalculate risk scores."}</p>
                 {(incident?.riskBreakdown || shipment.riskBreakdown) && (() => {
                   const breakdown = incident?.riskBreakdown || shipment.riskBreakdown!;
-                  return <div className="mt-3 grid gap-2 sm:grid-cols-3"><div className="rounded-lg border border-amber-100 bg-white p-2"><p className="text-xs text-slate-500">1. Trễ hạn ({breakdown.w1 * 100}%)</p><p className="mt-1 font-bold text-slate-800">{Math.round(breakdown.latenessFactor * 100)}% <span className="text-xs font-normal">({breakdown.delayDays} ngày / {breakdown.committedLeadTimeDays}d)</span></p></div><div className="rounded-lg border border-amber-100 bg-white p-2"><p className="text-xs text-slate-500">2. Rủi ro NCC ({breakdown.w2 * 100}%)</p><p className="mt-1 font-bold text-slate-800">{Math.round(breakdown.supplierReliabilityFactor * 100)}% <span className="text-xs font-normal">(uy tín {Math.round((1 - breakdown.supplierReliabilityFactor) * 100)}/100)</span></p></div><div className="rounded-lg border border-amber-100 bg-white p-2"><p className="text-xs text-slate-500">3. Thiếu hụt kho ({breakdown.w3 * 100}%)</p><p className="mt-1 font-bold text-slate-800">{Math.round(breakdown.inventoryBufferFactor * 100)}% <span className="text-xs font-normal">(tồn {breakdown.currentStock}/{breakdown.safetyStock})</span></p></div></div>;
+                  return <div className="mt-3 grid gap-2 sm:grid-cols-3"><div className="rounded-lg border border-amber-100 bg-white p-2"><p className="text-xs text-slate-500">1. Lateness ({breakdown.w1 * 100}%)</p><p className="mt-1 font-bold text-slate-800">{Math.round(breakdown.latenessFactor * 100)}% <span className="text-xs font-normal">({breakdown.delayDays} days / {breakdown.committedLeadTimeDays}d)</span></p></div><div className="rounded-lg border border-amber-100 bg-white p-2"><p className="text-xs text-slate-500">2. Supplier Risk ({breakdown.w2 * 100}%)</p><p className="mt-1 font-bold text-slate-800">{Math.round(breakdown.supplierReliabilityFactor * 100)}% <span className="text-xs font-normal">(reliability {Math.round((1 - breakdown.supplierReliabilityFactor) * 100)}/100)</span></p></div><div className="rounded-lg border border-amber-100 bg-white p-2"><p className="text-xs text-slate-500">3. Stock Shortage ({breakdown.w3 * 100}%)</p><p className="mt-1 font-bold text-slate-800">{Math.round(breakdown.inventoryBufferFactor * 100)}% <span className="text-xs font-normal">(stock {breakdown.currentStock}/{breakdown.safetyStock})</span></p></div></div>;
                 })()}
               </>
             )}
@@ -172,9 +172,9 @@ export function ShipmentDetailModal({
         )}
 
         <footer className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 p-4 sm:flex-row sm:justify-end">
-          <button type="button" onClick={onClose} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-white">Đóng</button>
-          <button type="button" onClick={() => toggleSection("incident")} aria-expanded={openSection === "incident"} className="inline-flex items-center justify-center gap-1 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"><ShieldAlert className="h-4 w-4" />Xem sự cố</button>
-          <button type="button" onClick={() => toggleSection("po")} aria-expanded={openSection === "po"} className="inline-flex items-center justify-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"><Package className="h-4 w-4" />Mở đơn hàng PO</button>
+          <button type="button" onClick={onClose} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-white">Close</button>
+          <button type="button" onClick={() => toggleSection("incident")} aria-expanded={openSection === "incident"} className="inline-flex items-center justify-center gap-1 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"><ShieldAlert className="h-4 w-4" />View Incident</button>
+          <button type="button" onClick={() => toggleSection("po")} aria-expanded={openSection === "po"} className="inline-flex items-center justify-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"><Package className="h-4 w-4" />Open PO Order</button>
         </footer>
       </section>
     </div>

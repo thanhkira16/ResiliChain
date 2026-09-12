@@ -81,7 +81,7 @@ export const ForecastingAgent = {
 
       forecastWeeks.push({
         weekIndex: w,
-        label: `Tuần +${w}`,
+        label: `Week +${w}`,
         predictedDemand: p50,
         predictedP10: p10,
         predictedP50: p50,
@@ -107,7 +107,7 @@ export const ForecastingAgent = {
 
       feedbackHistory.push({
         week: i + 1,
-        weekLabel: `Tuần ${i + 1}`,
+        weekLabel: `Week ${i + 1}`,
         forecastP50: pastPredicted,
         actualSales: actual,
         absPercentageError: Number(absErrorPct.toFixed(1)),
@@ -121,7 +121,7 @@ export const ForecastingAgent = {
 
     // 4. Shortfall comparison: compare forecast P90 vs currentStock + incomingFromOpenPOs (SRS §4.3, FR-6.4)
     const incomingFromOpenPOs = openOrders
-      .filter((po) => po.sku === sku && po.status !== "Hoàn thành")
+      .filter((po) => po.sku === sku && po.status !== "Completed")
       .reduce((sum, po) => sum + po.quantity, 0);
 
     const netAvailableStock = inventory.currentStock + incomingFromOpenPOs;

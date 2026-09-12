@@ -76,12 +76,12 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
     const currentForecast = forecastResult.forecastWeeks[0]?.predictedDemand || Math.round(history[history.length - 1]);
     const updatedFeedback = ForecastingAgent.recordActualDemandFeedback(
       selectedSku,
-      `T-0 (Hiện tại)`,
+      `T-0 (Current)`,
       currentForecast,
       actualDemandInput
     );
     setFeedbackSuccess(
-      `Đã ghi nhận số liệu thực tế ${actualDemandInput} chiếc. Mô hình đã cập nhật MAPE: ${updatedFeedback.mape}%.`
+      `Recorded actual sales of ${actualDemandInput} units. Model updated MAPE: ${updatedFeedback.mape}%.`
     );
     loadForecast(selectedSku);
   };
@@ -122,7 +122,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
   // Prepare chart data combining 12 weeks of historical data + 4 weeks of forecast
   const chartData = [
     ...history.map((val, idx) => ({
-      week: `T-${12 - idx}`,
+      week: `W-${12 - idx}`,
       actual: val,
       predicted: null as number | null,
       lowerBound: null as number | null,
@@ -143,7 +143,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
       (history[idx] + history[idx + 1] + history[idx + 2] + history[idx + 3]) / 4
     );
     return {
-      week: `Tuần ${idx + 5}`,
+      week: `Week ${idx + 5}`,
       actual: actualVal,
       forecast: pastPredicted,
       error: Math.abs(actualVal - pastPredicted),
@@ -158,18 +158,18 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
           <div className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-purple-600" />
             <h3 className="text-base font-bold text-slate-900">
-              AGENT 3 — Dự Báo Nhu Cầu & Tự Động Đề Xuất Mua Hàng (Demand Forecasting)
+              AGENT 3 — Demand Forecasting & Automated Replenishment
             </h3>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Agent 3 phân tích 12 tuần lịch sử bán hàng kết hợp hệ số mùa vụ ngoại sinh, dự báo 4 tuần tới kèm dải tin cậy Confidence Interval và tự động tính toán nhu cầu đặt hàng bù đắp tồn kho.
+            Agent 3 analyzes 12 weeks of historical consumption data combined with exogenous seasonality factors, projecting a 4-week forecast with Confidence Intervals and computing reorder quantities.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <button type="button" onClick={onBack} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50"><ArrowLeft className="h-3.5 w-3.5" />Quay lại</button>
+          <button type="button" onClick={onBack} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50"><ArrowLeft className="h-3.5 w-3.5" />Back</button>
           <div className="flex items-center gap-2 text-xs">
-            <span className="font-semibold text-slate-600">Chọn linh kiện xe đạp:</span>
+            <span className="font-semibold text-slate-600">Select Component SKU:</span>
             <select
               id="select-forecast-sku"
               value={selectedSku}
@@ -185,7 +185,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5 text-xs">
-            <span className="text-slate-500">Tháng:</span>
+            <span className="text-slate-500">Month:</span>
             <select
               id="select-forecast-month"
               value={currentMonth}
@@ -205,7 +205,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
             onClick={() => loadForecast(selectedSku)}
             disabled={isLoadingForecast}
             className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 disabled:opacity-50"
-            title="Tính lại dự báo"
+            title="Recalculate Forecast"
           >
             <RefreshCw className={`w-4 h-4 ${isLoadingForecast ? "animate-spin" : ""}`} />
           </button>
@@ -244,28 +244,28 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="p-2.5 bg-slate-50 rounded-lg">
-                <span className="text-slate-500 block text-[11px]">Tồn kho hiện tại</span>
+                <span className="text-slate-500 block text-[11px]">Current Stock</span>
                 <span className="text-base font-bold text-slate-900 mt-0.5 block">
                   {currentItem.currentStock} {currentItem.unit}
                 </span>
               </div>
 
               <div className="p-2.5 bg-slate-50 rounded-lg">
-                <span className="text-slate-500 block text-[11px]">Ngưỡng an toàn</span>
+                <span className="text-slate-500 block text-[11px]">Safety Stock</span>
                 <span className="text-base font-bold text-amber-700 mt-0.5 block">
                   {currentItem.safetyStock} {currentItem.unit}
                 </span>
               </div>
 
               <div className="p-2.5 bg-slate-50 rounded-lg">
-                <span className="text-slate-500 block text-[11px]">Tiêu thụ tb/tuần</span>
+                <span className="text-slate-500 block text-[11px]">Avg Weekly Burn Rate</span>
                 <span className="text-base font-bold text-slate-900 mt-0.5 block">
                   {currentItem.weeklyBurnRate} {currentItem.unit}
                 </span>
               </div>
 
               <div className="p-2.5 bg-slate-50 rounded-lg">
-                <span className="text-slate-500 block text-[11px]">Hệ số mùa vụ</span>
+                <span className="text-slate-500 block text-[11px]">Seasonality Factor</span>
                 <span className="text-base font-bold text-purple-700 mt-0.5 block">
                   {forecastResult?.seasonalityFactor || 1.0}x
                 </span>
@@ -277,19 +277,19 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
               <div className="flex items-center justify-between">
                 <span className="font-bold text-amber-900 flex items-center gap-1.5">
                   <Package className="w-4 h-4 text-amber-600" />
-                  <span>Khuyến nghị đặt hàng (Agent 3):</span>
+                  <span>Reorder Recommendation (Agent 3):</span>
                 </span>
                 <span className="text-xs font-black px-2 py-0.5 rounded bg-amber-200 text-amber-900">
                   {forecastResult?.suggestedOrderQuantity && forecastResult.suggestedOrderQuantity > 0
-                    ? `Cần đặt: ${forecastResult.suggestedOrderQuantity} ${currentItem.unit}`
-                    : "Đủ tồn kho"}
+                    ? `Reorder: ${forecastResult.suggestedOrderQuantity} ${currentItem.unit}`
+                    : "Sufficient Stock"}
                 </span>
               </div>
 
               <p className="text-[11px] text-amber-800 leading-relaxed">
                 {forecastResult?.suggestedOrderQuantity && forecastResult.suggestedOrderQuantity > 0
-                  ? `Tổng nhu cầu 4 tuần tới cộng ngưỡng an toàn vượt quá lượng tồn kho thực tế. Đề xuất phát hành PO bổ sung ${forecastResult.suggestedOrderQuantity} đơn vị ngay.`
-                  : "Lượng hàng tồn kho hiện hữu đủ đảm bảo kế hoạch lắp ráp cho 4 tuần kế tiếp."}
+                  ? `Total projected 4-week demand plus safety stock threshold exceeds current inventory. Recommended to issue a PO for ${forecastResult.suggestedOrderQuantity} units immediately.`
+                  : "Current inventory level is sufficient for assembly plans over the next 4 weeks."}
               </p>
 
               {forecastResult?.suggestedOrderQuantity && forecastResult.suggestedOrderQuantity > 0 && (
@@ -301,13 +301,13 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
                       forecastResult?.suggestedOrderQuantity || 50
                     );
                     setCreatedPoSuccess(
-                      `Đã tạo thành công PO mới bổ sung ${forecastResult.suggestedOrderQuantity} ${currentItem.unit} cho SKU ${selectedSku}. Đơn đã được cập nhật vào tab Đơn hàng (PO).`
+                      `Successfully created a PO for ${forecastResult.suggestedOrderQuantity} ${currentItem.unit} for SKU ${selectedSku}. Order updated in Purchase Orders tab.`
                     );
                   }}
                   className="w-full mt-2 py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Tạo PO bổ sung ({forecastResult.suggestedOrderQuantity} {currentItem.unit})</span>
+                  <span>Create Replenishment PO ({forecastResult.suggestedOrderQuantity} {currentItem.unit})</span>
                 </button>
               )}
             </div>
@@ -318,13 +318,13 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
             <div className="flex items-center justify-between mb-3">
               <div className="font-bold text-slate-800 flex items-center gap-1.5">
                 <Sliders className="w-3.5 h-3.5 text-purple-600" />
-                <span>Tín hiệu ngoại sinh: Hệ số mùa vụ</span>
+                <span>Exogenous Signal: Seasonality Factor</span>
               </div>
               <button
                 onClick={() => setEditingSeasonality(!editingSeasonality)}
                 className="text-xs text-purple-600 hover:text-purple-800 font-semibold"
               >
-                {editingSeasonality ? "Hủy" : "Chỉnh sửa"}
+                {editingSeasonality ? "Cancel" : "Edit"}
               </button>
             </div>
 
@@ -338,7 +338,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
                       : "bg-slate-50 border-slate-200 text-slate-700"
                   }`}
                 >
-                  <div className="text-[10px] text-slate-500 mb-1">T{s.month}</div>
+                  <div className="text-[10px] text-slate-500 mb-1">M{s.month}</div>
                   {editingSeasonality ? (
                     <input
                       type="number"
@@ -364,7 +364,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
                   onClick={handleSaveSeasonality}
                   className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded text-xs font-semibold"
                 >
-                  Lưu hệ số mùa vụ
+                  Save Seasonality Factors
                 </button>
               </div>
             )}
@@ -377,12 +377,12 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
           <div className="p-4 rounded-xl bg-gradient-to-r from-purple-50/80 via-indigo-50/40 to-slate-50 border border-purple-200 text-xs space-y-2">
             <div className="flex items-center gap-2 text-purple-900 font-bold">
               <Sparkles className="w-4 h-4 text-purple-600" />
-              <span>Giải thích chuyên sâu từ Agent 3 (Gemini 3.8 Flash AI):</span>
+              <span>In-depth Analysis from Agent 3 (Gemini 3.8 Flash AI):</span>
             </div>
 
             <p className="text-slate-700 leading-relaxed font-medium">
               {forecastResult?.aiExplanation.explanation ||
-                "Đang phân tích các yếu tố mùa vụ và lượng hàng tồn kho..."}
+                "Analyzing seasonality trends and stock levels..."}
             </p>
 
             {forecastResult?.aiExplanation.keyFactors && (
@@ -404,15 +404,15 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h4 className="text-sm font-bold text-slate-900">
-                  Biểu Đồ Dự Báo Nhu Cầu Kèm Dải Tin Cậy 85% (Confidence Interval)
+                  Demand Forecast Chart with 85% Confidence Interval
                 </h4>
                 <p className="text-xs text-slate-500">
-                  Lịch sử 12 tuần thực tế vs Dự báo 4 tuần tới (Vùng biên trên/dưới)
+                  12-Week Historical Demand vs 4-Week Forecast (Upper/Lower Bounds)
                 </p>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <span className="inline-block w-3 h-3 bg-purple-200 rounded" />
-                <span className="text-slate-600 text-[11px]">Dải biến động dự báo</span>
+                <span className="text-slate-600 text-[11px]">Forecast Variance Band</span>
               </div>
             </div>
 
@@ -431,7 +431,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
                   <Area
                     type="monotone"
                     dataKey="upperBound"
-                    name="Dải biên trên"
+                    name="Upper Confidence Band"
                     stroke="none"
                     fill="#c084fc"
                     fillOpacity={0.25}
@@ -439,7 +439,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
                   <Area
                     type="monotone"
                     dataKey="lowerBound"
-                    name="Dải biên dưới"
+                    name="Lower Confidence Band"
                     stroke="none"
                     fill="#ffffff"
                     fillOpacity={1}
@@ -449,7 +449,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
                   <Line
                     type="monotone"
                     dataKey="actual"
-                    name="Thực tế bán ra (12 tuần)"
+                    name="Historical Demand (12 Weeks)"
                     stroke="#0f172a"
                     strokeWidth={2.5}
                     dot={{ r: 3, fill: "#0f172a" }}
@@ -459,7 +459,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
                   <Line
                     type="monotone"
                     dataKey="predicted"
-                    name="Dự báo (4 tuần tới)"
+                    name="Forecast (Next 4 Weeks)"
                     stroke="#9333ea"
                     strokeWidth={2.5}
                     strokeDasharray="4 4"
@@ -475,10 +475,10 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
             <div className="flex items-center justify-between mb-3">
               <div>
                 <h4 className="text-sm font-bold text-slate-900">
-                  Vòng Lặp Phản Hồi: So Sánh Dự Báo Quá Khứ vs Thực Tế (Feedback Loop)
+                  Feedback Loop: Past Forecast vs Actual Performance
                 </h4>
                 <p className="text-xs text-slate-500">
-                  Đo lường độ lệch để tự động hiệu chỉnh mô hình (Sai số MAPE hiện tại: {forecastResult?.mape}%)
+                  Measuring variance to auto-calibrate model (Current MAPE: {forecastResult?.mape}%)
                 </p>
               </div>
             </div>
@@ -496,7 +496,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
                   <Line
                     type="monotone"
                     dataKey="actual"
-                    name="Thực tế"
+                    name="Actual"
                     stroke="#10b981"
                     strokeWidth={2}
                     dot={{ r: 3 }}
@@ -504,7 +504,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
                   <Line
                     type="monotone"
                     dataKey="forecast"
-                    name="Dự báo trước đó"
+                    name="Prior Forecast"
                     stroke="#64748b"
                     strokeDasharray="3 3"
                     strokeWidth={1.5}
@@ -518,7 +518,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
             <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-slate-700">
-                  Nhập số liệu bán thực tế tuần này ({currentItem.sku}):
+                  Input actual sales for this week ({currentItem.sku}):
                 </span>
                 <input
                   type="number"
@@ -533,7 +533,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
                   onClick={handleFeedbackSubmit}
                   className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded text-xs transition-colors"
                 >
-                  Gửi dữ liệu thực tế (Retrain)
+                  Submit Actuals (Retrain)
                 </button>
               </div>
 

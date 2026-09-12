@@ -133,7 +133,7 @@ export function GlobalRouteWeatherMap({
       };
     } catch (err) {
       console.error("Cesium initialization error:", err);
-      setError("Không thể khởi tạo bản đồ Cesium 3D. Vui lòng thử lại.");
+      setError("Unable to initialize Cesium 3D map. Please try again.");
     }
   }, [token]);
 
@@ -222,7 +222,7 @@ export function GlobalRouteWeatherMap({
               pixelSize: isSelected ? 16 : 12,
             },
             label: {
-              text: `${shipment.poNumber || 'PO'} · ${score.toFixed(1)}đ (${riskLabel})`,
+              text: `${shipment.poNumber || 'PO'} · ${score.toFixed(1)}pts (${riskLabel})`,
               font: "bold 12px sans-serif",
               fillColor: Color.WHITE,
               style: LabelStyle.FILL_AND_OUTLINE,
@@ -250,7 +250,7 @@ export function GlobalRouteWeatherMap({
             pixelSize: 10,
           },
           label: {
-            text: `🌩️ ${stop.location.name} · ${stop.severityLabel || 'Thời tiết'}`,
+            text: `🌩️ ${stop.location.name} · ${stop.severityLabel || 'Weather'}`,
             font: "bold 11px sans-serif",
             fillColor: Color.WHITE,
             showBackground: true,
@@ -292,16 +292,16 @@ export function GlobalRouteWeatherMap({
 
       {/* Floating Status Bar */}
       <div className="pointer-events-none absolute left-3 top-3 z-10 rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-800 shadow-sm backdrop-blur">
-        <div className="font-bold text-slate-900">Bản Đồ 3D Digital Twin · CARTO Vector Engine</div>
-        <div className="mt-0.5 text-[11px] text-slate-500">Cuộn để phóng to, kéo để xoay. Nhấp vào pin lô hàng để xem chi tiết.</div>
+        <div className="font-bold text-slate-900">3D Digital Twin Map · CARTO Vector Engine</div>
+        <div className="mt-0.5 text-[11px] text-slate-500">Scroll to zoom, drag to rotate. Click on shipment pin to view details.</div>
       </div>
 
       {/* Legend */}
       <div className="pointer-events-none absolute bottom-3 left-3 z-10 space-y-1 rounded-lg border border-slate-200 bg-white/95 p-2.5 text-[11px] text-slate-800 shadow-sm backdrop-blur">
-        <div className="font-bold text-slate-900 mb-1">Chú Giải Điểm Rủi Ro Lô Hàng</div>
-        <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-red-500" />Đỏ · Rủi ro cao (&ge;65đ)</div>
-        <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-orange-500" />Cam · Cảnh báo (&ge;35đ)</div>
-        <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />Xanh · An toàn (&lt;35đ)</div>
+        <div className="font-bold text-slate-900 mb-1">Shipment Risk Score Legend</div>
+        <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-red-500" />Red · High Risk (&ge;65pts)</div>
+        <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-orange-500" />Orange · Caution (&ge;35pts)</div>
+        <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />Green · Safe (&lt;35pts)</div>
       </div>
     </section>
   );

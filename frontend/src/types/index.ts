@@ -37,15 +37,15 @@ export interface Supplier {
   transitWaypoints?: TransitWaypoint[];
 }
 
-export type POStatus = "Đang xử lý" | "Đang giao" | "Trễ hẹn" | "Hoàn thành";
+export type POStatus = "Processing" | "In Transit" | "Delayed" | "Completed";
 
 export interface RiskBreakdown {
-  latenessFactor: number; // [0, 1] min(1, số ngày trễ / lead_time_cam_kết)
+  latenessFactor: number; // [0, 1] min(1, delay_days / committed_lead_time)
   supplierReliabilityFactor: number; // [0, 1] 1 - reliability_score
-  inventoryBufferFactor: number; // [0, 1] 1 - (tồn_kho_hiện_tại / safety_stock)
-  w1: number; // trọng số lateness (mặc định 0.50)
-  w2: number; // trọng số reliability (mặc định 0.25)
-  w3: number; // trọng số buffer kho (mặc định 0.25)
+  inventoryBufferFactor: number; // [0, 1] 1 - (current_stock / safety_stock)
+  w1: number; // lateness weight (default 0.50)
+  w2: number; // reliability weight (default 0.25)
+  w3: number; // stock buffer weight (default 0.25)
   delayDays: number;
   committedLeadTimeDays: number;
   currentStock: number;
@@ -88,8 +88,8 @@ export interface InventoryItem {
   unit: string;
   currentStock: number;
   safetyStock: number;
-  weeklyBurnRate: number; // Tốc độ tiêu thụ trung bình/tuần
-  unitPriceEstimate: number; // VNĐ
+  weeklyBurnRate: number; // Average consumption rate/week
+  unitPriceEstimate: number; // VND
   minLeadTimeDays: number;
 }
 
@@ -122,16 +122,16 @@ export interface Incident {
   delayRiskScore: number; // 0-100
   thresholdApplied: number;
   state: IncidentState;
-  // Friendly localized label for backward compatibility
+  // Friendly localized label
   status:
-    | "Mới phát hiện"
-    | "Đang tìm nguồn thay thế"
-    | "Chờ duyệt"
-    | "Đã duyệt"
-    | "Đã giải quyết"
-    | "Đã hủy"
+    | "Newly Detected"
+    | "Sourcing Backup Suppliers"
+    | "Pending Approval"
+    | "Approved"
+    | "Resolved"
+    | "Cancelled"
     | "Escalated"
-    | "Xử lý thủ công";
+    | "Manual Handling";
   detectedAt: string;
   resolvedAt?: string;
   summary: string;
@@ -158,7 +158,7 @@ export interface RFQItem {
   termsSummary: string;
   sentAt: string;
   deadline: string; // ISO string
-  status: "Đã gửi" | "Đã phản hồi" | "Hết hạn" | "Đã hủy";
+  status: "Sent" | "Responded" | "Expired" | "Cancelled";
   response?: SupplierQuoteResponse;
 }
 
@@ -166,7 +166,7 @@ export interface SupplierQuoteResponse {
   respondedAt: string;
   supplierId: string;
   supplierName: string;
-  unitPrice: number; // VNĐ
+  unitPrice: number; // VND
   totalCost: number;
   proposedLeadTimeDays: number;
   proposedDeliveryDate: string;
@@ -178,9 +178,9 @@ export interface RankingScoreBreakdown {
   normalizedCost: number; // [0, 1] min-max
   normalizedLeadTime: number; // [0, 1] min-max
   supplierReliabilityScore: number; // [0, 1]
-  w1: number; // trọng số giá (thích ứng theo mức độ khẩn cấp của incident)
-  w2: number; // trọng số thời gian
-  w3: number; // trọng số uy tín
+  w1: number; // cost weight (adapts based on incident urgency)
+  w2: number; // lead time weight
+  w3: number; // reliability weight
   costScoreContribution: number;
   timeScoreContribution: number;
   reliabilityContribution: number;
@@ -227,7 +227,7 @@ export interface SourcingProposal {
     supplierName: string;
     reason: string;
   }>;
-  status: "Chờ duyệt" | "Đã duyệt" | "Từ chối" | "Sửa & Duyệt" | "Đã hủy (Compensated)";
+  status: "Pending Approval" | "Approved" | "Rejected" | "Modified & Approved" | "Cancelled (Compensated)";
   totalValueVND: number;
   createdAt: string;
   decisionAt?: string;

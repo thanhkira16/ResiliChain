@@ -27,15 +27,15 @@ export const Header: React.FC<HeaderProps> = ({
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const pageTitles: Record<string, { title: string; subtitle: string }> = {
-    dashboard: { title: "Trung Tâm Tác Chiến", subtitle: "Giám sát hiệu suất chuỗi cung ứng & chỉ số PORS real-time" },
-    map: { title: "Bản Đồ 3D Digital Twin", subtitle: "Theo dõi vị trí lô hàng GPS và thời tiết tuyến Open-Meteo" },
-    orders: { title: "Quản Lý Đơn Hàng (PO)", subtitle: "Danh sách đơn mua hàng linh kiện xe điện EV" },
-    suppliers: { title: "Danh Mục Nhà Cung Cấp", subtitle: "Đánh giá Altman Z-Score, tin tức GDELT & điểm uy tín" },
-    inventory: { title: "Quản Lý Tồn Kho Linh Kiện", subtitle: "Theo dõi mức tồn kho an toàn & tốc độ tiêu thụ" },
-    incidents: { title: "Quản Lý Rủi Ro & Sự Cố", subtitle: "Tự động phát hiện chậm trễ & kích hoạt PuLP MILP Solver" },
-    approvals: { title: "Trung Tâm Phê Duyệt 1-Click", subtitle: "Xem xét & phê duyệt đề xuất nhà cung cấp thay thế" },
-    forecasting: { title: "Dự Báo Nhu Cầu & Mùa Vụ", subtitle: "Mô hình lập kế hoạch vật tư linh kiện EV" },
-    audit: { title: "Nhật Ký Hệ Thống (Audit Log)", subtitle: "Lịch sử thao tác & nhật ký vận hành 6 AI Agents" },
+    dashboard: { title: "Command Operations Center", subtitle: "Supply chain risk monitoring & real-time PORS metrics" },
+    map: { title: "3D Digital Twin Logistics Map", subtitle: "Real-time GPS shipment tracking & Open-Meteo route weather" },
+    orders: { title: "Purchase Order (PO) Management", subtitle: "EV component purchase order directory" },
+    suppliers: { title: "Supplier Directory & Ratings", subtitle: "Altman Z-Score evaluation, GDELT risk feeds & reliability scores" },
+    inventory: { title: "Component Inventory Management", subtitle: "Safety stock monitoring & weekly consumption burn rate" },
+    incidents: { title: "Risk & Incident Management", subtitle: "Automated delay detection & PuLP MILP solver trigger" },
+    approvals: { title: "1-Click Approval Center (HITL)", subtitle: "Review & approve multi-criteria backup supplier proposals" },
+    forecasting: { title: "Demand & Seasonality Forecasting", subtitle: "EV component material planning & Holt-Winters model" },
+    audit: { title: "System Audit Logs", subtitle: "Operational history & 6 AI Agent execution records" },
   };
 
   const normalizedRole = String(userRole || "supply_chain_manager").toLowerCase();
@@ -49,40 +49,40 @@ export const Header: React.FC<HeaderProps> = ({
     department: string;
   }> = {
     procurement_officer: {
-      name: "Nguyễn Văn Hoàng",
+      name: "Henry Nguyen",
       email: "hoang.nguyen@resilichain.ai",
-      avatarInitials: "VH",
+      avatarInitials: "HN",
       bgColor: "bg-blue-600",
       title: "Procurement Officer",
-      department: "Bộ phận Mua sắm & Vật tư",
+      department: "Procurement & Materials Dept",
     },
     supply_chain_manager: {
-      name: "Lê Hoàng Nam",
+      name: "Leo Le",
       email: "nam.le@resilichain.ai",
-      avatarInitials: "LN",
+      avatarInitials: "LL",
       bgColor: "bg-emerald-600",
       title: "Supply Chain Manager",
-      department: "Ban Giám đốc Chuỗi Cung Ứng",
+      department: "Supply Chain Executive Board",
     },
     procurement_manager: {
-      name: "Lê Hoàng Nam",
+      name: "Leo Le",
       email: "nam.le@resilichain.ai",
-      avatarInitials: "LN",
+      avatarInitials: "LL",
       bgColor: "bg-emerald-600",
       title: "Procurement Manager",
-      department: "Ban Giám đốc Chuỗi Cung Ứng",
+      department: "Supply Chain Executive Board",
     },
     supplier: {
-      name: "Trần Đức Phú",
+      name: "David Tran",
       email: "phu.tran@supplier-ev.com",
-      avatarInitials: "TP",
+      avatarInitials: "DT",
       bgColor: "bg-purple-600",
-      title: "Supplier (Đối tác)",
-      department: "Phòng Kinh doanh Đối tác",
+      title: "Supplier Partner",
+      department: "Partner Sales Division",
     },
   };
 
-  const currentInfo = pageTitles[currentTab] || { title: "ResiliChain EV", subtitle: "Hệ thống quản lý tự chủ chuỗi cung ứng" };
+  const currentInfo = pageTitles[currentTab] || { title: "ResiliChain EV", subtitle: "Autonomous Supply Chain Management System" };
   const currentUser = userProfiles[normalizedRole] || userProfiles["supply_chain_manager"];
 
   return (
@@ -103,7 +103,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={onOpenConfig}
           className="p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 transition-colors border border-slate-200"
-          title="Cấu hình ngưỡng rủi ro"
+          title="Configure Risk Thresholds"
         >
           <Settings className="w-4 h-4 text-slate-600" />
         </button>
@@ -113,7 +113,7 @@ export const Header: React.FC<HeaderProps> = ({
           id="btn-notification-bell"
           onClick={onOpenNotifications}
           className="relative p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 transition-colors border border-slate-200"
-          title="Thông báo rủi ro & Telegram Dispatch"
+          title="Risk Notifications & Telegram Dispatch"
         >
           <Bell className="w-4 h-4 text-amber-600" />
           {unreadCount > 0 && (
@@ -160,11 +160,11 @@ export const Header: React.FC<HeaderProps> = ({
 
               <div className="text-xs text-slate-600 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span>Quyền Hạn:</span>
+                  <span>Role:</span>
                   <span className="text-slate-900 font-bold">{currentUser.title}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>Trạng Thái AI:</span>
+                  <span>AI Agent Status:</span>
                   <span className="text-emerald-700 font-bold flex items-center gap-1">
                     <Zap className="w-3 h-3 text-emerald-600" /> Live Sync
                   </span>

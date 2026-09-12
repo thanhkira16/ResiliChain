@@ -89,9 +89,9 @@ export const AIService = {
       console.warn("API /api/ai/rfq call failed, using client fallback:", e);
       return {
         data: {
-          subject: `[Resili chain] Yêu cầu báo giá khẩn cấp (RFQ) - ${payload.skuName} (PO: ${payload.poNumber})`,
-          body: `Kính gửi Ban Giám đốc và Phòng Kinh doanh Quý đối tác ${payload.backupSupplierName},\n\nBộ phận Mua sắm Resili chain gửi yêu cầu báo giá khẩn cấp cho gói linh kiện ${payload.skuName} (${payload.sku}) số lượng ${Number(payload.quantity).toLocaleString("vi-VN")} chiếc.\n\nThời hạn giao hàng đề xuất: Trước ${payload.targetDeliveryDate}.\n\nKính đề nghị Quý công ty cập nhật phản hồi đơn giá và lead time trên Resili chain Supplier Portal trong vòng 24 giờ.\n\nTrân trọng cảm ơn!`,
-          termsSummary: `Giao ${payload.quantity} chiếc trước ngày ${payload.targetDeliveryDate}. Thanh toán T/T 30 ngày sau nghiệm thu.`,
+          subject: `[Resili chain] Urgent Request for Quotation (RFQ) - ${payload.skuName} (PO: ${payload.poNumber})`,
+          body: `Dear Management and Sales Team at ${payload.backupSupplierName},\n\nThe Procurement Department at Resili chain hereby submits an urgent Request for Quotation (RFQ) for component batch ${payload.skuName} (${payload.sku}) in the quantity of ${Number(payload.quantity).toLocaleString("en-US")} units.\n\nProposed target delivery date: Prior to ${payload.targetDeliveryDate}.\n\nPlease update your unit price quote and lead time proposal on the Resili chain Supplier Portal within 24 hours.\n\nBest regards,\nResili chain Procurement Team`,
+          termsSummary: `Deliver ${payload.quantity} units prior to ${payload.targetDeliveryDate}. Payment T/T 30 days post-acceptance inspection.`,
         },
         isLiveAI: false,
       };
@@ -119,16 +119,16 @@ export const AIService = {
         totalCost: r.unitPrice * payload.quantity,
         leadTimeDays: r.proposedLeadTimeDays,
         pros: [
-          `Thời gian giao hàng ${r.proposedLeadTimeDays} ngày`,
-          `Điểm uy tín nhà cung cấp ${r.reliabilityScore}/100`,
+          `Lead time of ${r.proposedLeadTimeDays} days`,
+          `Supplier reliability score of ${r.reliabilityScore}/100`,
         ],
         cons: [
           r.unitPrice > payload.originalUnitPrice
-            ? `Đơn giá cao hơn ${Math.round(((r.unitPrice - payload.originalUnitPrice) / payload.originalUnitPrice) * 100)}% so với ban đầu`
-            : "Cần nghiệm thu chất lượng kỹ càng",
+            ? `Unit price ${Math.round(((r.unitPrice - payload.originalUnitPrice) / payload.originalUnitPrice) * 100)}% higher than original contract`
+            : "Requires stringent incoming quality inspection",
         ],
         score: Math.min(98, Math.max(60, r.reliabilityScore - (r.proposedLeadTimeDays > 7 ? 10 : 0))),
-        reasoning: `Nhà cung cấp đáp ứng tiến độ giao ${r.proposedDeliveryDate} với độ tin cậy ${r.reliabilityScore}%.`,
+        reasoning: `Supplier meets requested delivery date of ${r.proposedDeliveryDate} with a reliability score of ${r.reliabilityScore}%.`,
       }));
 
       scored.sort((a, b) => b.score - a.score);
@@ -137,10 +137,10 @@ export const AIService = {
       return {
         data: {
           rankings,
-          recommendation: `Kiến nghị chọn ${rankings[0]?.supplierName || "phương án số 1"} để giải quyết trễ hạn kịp thời.`,
+          recommendation: `Recommend selecting ${rankings[0]?.supplierName || "Option #1"} to mitigate delivery delay promptly.`,
           rejectedOptionsAnalysis: scored.slice(3).map((item) => ({
             supplierName: item.supplierName,
-            reason: `Điểm đánh giá (${item.score}) thấp hơn top 3 đề xuất.`,
+            reason: `Overall score (${item.score}) ranked lower than top 3 proposed options.`,
           })),
         },
         isLiveAI: false,
@@ -162,15 +162,15 @@ export const AIService = {
       console.warn("API /api/ai/forecast-explanation failed, using fallback:", e);
       return {
         data: {
-          explanation: `Nhu cầu đối với ${payload.skuName} (${payload.sku}) dự kiến sẽ tăng trong các tuần tới với hệ số mùa vụ ${payload.seasonalityFactor}x. Tồn kho hiện tại ${payload.currentStock} đơn vị sắp chạm ngưỡng an toàn ${payload.safetyStock} đơn vị.`,
+          explanation: `Demand for ${payload.skuName} (${payload.sku}) is projected to increase over upcoming weeks with a seasonality factor of ${payload.seasonalityFactor}x. Current stock of ${payload.currentStock} units is approaching the safety threshold of ${payload.safetyStock} units.`,
           keyFactors: [
-            `Tốc độ tiêu thụ trung bình: ${payload.weeklyBurnRate} đơn vị/tuần`,
-            `Hệ số mùa vụ xe đạp: ${payload.seasonalityFactor}x`,
-            `Lượng tồn kho thực tế chỉ còn tương đương ${Math.max(1, Math.round(payload.currentStock / (payload.weeklyBurnRate || 1)))} tuần sản xuất`,
+            `Average weekly burn rate: ${payload.weeklyBurnRate} units/week`,
+            `Bicycle seasonality index: ${payload.seasonalityFactor}x`,
+            `Effective inventory covers approximately ${Math.max(1, Math.round(payload.currentStock / (payload.weeklyBurnRate || 1)))} weeks of production`,
           ],
           procurementRecommendation: payload.suggestedOrderQuantity > 0
-            ? `Cần tạo PO bổ sung ${payload.suggestedOrderQuantity} đơn vị ngay trong tuần này.`
-            : "Lượng tồn kho hiện tại và đơn đang giao đủ an toàn, tiếp tục theo dõi chu kỳ kế tiếp.",
+            ? `Recommended to issue a PO for ${payload.suggestedOrderQuantity} additional units within this week.`
+            : "Current stock level and active incoming POs are sufficient. Maintain standard monitoring cycle.",
         },
         isLiveAI: false,
       };

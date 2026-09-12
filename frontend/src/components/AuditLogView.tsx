@@ -73,16 +73,16 @@ export const AuditLogView: React.FC<AuditLogViewProps> = ({
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-slate-800" />
             <h3 className="text-base font-bold text-slate-900">
-              AUDIT LOG & TRANSPARENCY — Nhật Ký Hành Động & Truy Vết Chuỗi Quyết Định
+              AUDIT LOG & TRANSPARENCY — Action Logging & Decision Chain Traceability
             </h3>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Mọi hành động của AI Agent và quyết định phê duyệt của con người đều được gán nhãn Correlation ID để truy vết minh bạch end-to-end từ lúc phát hiện trễ đến khi giải quyết.
+            All AI Agent actions and human approval decisions are tagged with a Correlation ID for transparent end-to-end auditability from delay detection to resolution.
           </p>
         </div>
 
         <div className="text-xs font-semibold text-slate-600">
-          Tổng số bản ghi: <span className="text-slate-900 font-bold">{logs.length} sự kiện</span>
+          Total Log Entries: <span className="text-slate-900 font-bold">{logs.length} events</span>
         </div>
       </div>
 
@@ -93,7 +93,7 @@ export const AuditLogView: React.FC<AuditLogViewProps> = ({
           <input
             id="input-search-audit"
             type="text"
-            placeholder="Tìm theo PO, nhà cung cấp, nội dung suy luận hoặc hành động..."
+            placeholder="Search by PO, supplier, reasoning text, or action..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-slate-400"
@@ -103,18 +103,18 @@ export const AuditLogView: React.FC<AuditLogViewProps> = ({
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-1.5">
             <Filter className="w-3.5 h-3.5 text-slate-500" />
-            <span className="text-slate-600 font-medium">Tác nhân:</span>
+            <span className="text-slate-600 font-medium">Agent:</span>
             <select
               id="select-audit-agent"
               value={agentFilter}
               onChange={(e) => setAgentFilter(e.target.value)}
               className="py-1 px-2.5 rounded-lg border border-slate-200 font-medium text-slate-800 bg-white"
             >
-              <option value="all">Tất cả Agent & Con người</option>
-              <option value="Agent 1">Agent 1 (Risk)</option>
-              <option value="Agent 2">Agent 2 (Sourcing)</option>
-              <option value="Agent 3">Agent 3 (Forecasting)</option>
-              <option value="Human">Con người (HITL)</option>
+              <option value="all">All Agents & Humans</option>
+              <option value="Agent 1">Agent 1 (Risk Monitoring)</option>
+              <option value="Agent 2">Agent 2 (Negotiation & Sourcing)</option>
+              <option value="Agent 3">Agent 3 (Demand Forecasting)</option>
+              <option value="Human">Human (HITL)</option>
             </select>
           </div>
 
@@ -127,7 +127,7 @@ export const AuditLogView: React.FC<AuditLogViewProps> = ({
               onChange={(e) => setSelectedCorrelationId(e.target.value)}
               className="py-1 px-2.5 rounded-lg border border-slate-200 font-mono text-xs text-slate-800 bg-white max-w-[200px]"
             >
-              <option value="all">Tất cả chuỗi ({correlationIds.length})</option>
+              <option value="all">All Chains ({correlationIds.length})</option>
               {correlationIds.map((cid) => (
                 <option key={cid} value={cid}>
                   {cid}
@@ -144,12 +144,12 @@ export const AuditLogView: React.FC<AuditLogViewProps> = ({
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
               <tr>
-                <th className="py-3 px-3.5 whitespace-nowrap">Thời gian</th>
-                <th className="py-3 px-3">Tác nhân</th>
-                <th className="py-3 px-3">Hành động (Action)</th>
+                <th className="py-3 px-3.5 whitespace-nowrap">Timestamp</th>
+                <th className="py-3 px-3">Agent / User</th>
+                <th className="py-3 px-3">Action</th>
                 <th className="py-3 px-3">Correlation ID</th>
-                <th className="py-3 px-3">Đầu vào (Input)</th>
-                <th className="py-3 px-3">Suy luận & Kết quả (Output / Reasoning)</th>
+                <th className="py-3 px-3">Input Summary</th>
+                <th className="py-3 px-3">Reasoning / Output</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -216,7 +216,7 @@ export const AuditLogView: React.FC<AuditLogViewProps> = ({
               {filteredLogs.length === 0 && (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-slate-400">
-                    Không có bản ghi nhật ký nào phù hợp.
+                    No matching audit log entries found.
                   </td>
                 </tr>
               )}

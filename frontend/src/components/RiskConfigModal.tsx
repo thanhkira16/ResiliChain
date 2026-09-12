@@ -66,7 +66,7 @@ export const RiskConfigModal: React.FC<RiskConfigModalProps> = ({
           <div className="flex items-center gap-2">
             <Sliders className="w-5 h-5 text-emerald-600" />
             <h4 className="text-sm font-bold text-slate-900">
-              Cấu Hình Ngưỡng Rủi Ro Agent 1 (Risk Monitoring Configuration)
+              Agent 1 Risk Monitoring Configuration
             </h4>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 font-bold p-1">
@@ -78,7 +78,7 @@ export const RiskConfigModal: React.FC<RiskConfigModalProps> = ({
           {/* Default Threshold */}
           <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
             <div className="flex items-center justify-between">
-              <label className="font-bold text-slate-900">Ngưỡng rủi ro mặc định (Default Threshold):</label>
+              <label className="font-bold text-slate-900">Default Risk Threshold:</label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
@@ -92,7 +92,7 @@ export const RiskConfigModal: React.FC<RiskConfigModalProps> = ({
               </div>
             </div>
             <p className="text-[11px] text-slate-500">
-              Khi <code className="font-mono text-slate-700">delay_risk_score</code> của đơn hàng vượt qua ngưỡng này, Agent 1 sẽ lập tức kích hoạt sự cố Incident mới.
+              When an order&apos;s <code className="font-mono text-slate-700">delay_risk_score</code> exceeds this threshold, Agent 1 will immediately trigger a new Incident.
             </p>
           </div>
 
@@ -100,9 +100,9 @@ export const RiskConfigModal: React.FC<RiskConfigModalProps> = ({
           <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <label className="font-bold text-slate-900 block">Trọng số công thức rủi ro (SRS §2.3 Weights):</label>
+                <label className="font-bold text-slate-900 block">Risk Formula Weights (SRS §2.3 Weights):</label>
                 <span className="text-[11px] text-slate-500">
-                  delay_risk = (w1 × trễ) + (w2 × (1-uy tín)) + (w3 × đệm kho)
+                  delay_risk = (w1 × lateness) + (w2 × (1-reliability)) + (w3 × stock buffer)
                 </span>
               </div>
               <span
@@ -112,13 +112,13 @@ export const RiskConfigModal: React.FC<RiskConfigModalProps> = ({
                     : "bg-rose-50 text-rose-700 border-rose-200"
                 }`}
               >
-                Tổng w: {weightSum} / 1.0 {isWeightValid ? "✓" : "(!)"}
+                Total w: {weightSum} / 1.0 {isWeightValid ? "✓" : "(!)"}
               </span>
             </div>
 
             <div className="grid grid-cols-3 gap-2 pt-1">
               <div className="p-2 bg-white rounded-lg border border-slate-200">
-                <div className="text-[11px] font-semibold text-slate-700">w1: Độ trễ (Lateness)</div>
+                <div className="text-[11px] font-semibold text-slate-700">w1: Lateness</div>
                 <div className="flex items-center gap-1 mt-1">
                   <input
                     type="number"
@@ -133,7 +133,7 @@ export const RiskConfigModal: React.FC<RiskConfigModalProps> = ({
               </div>
 
               <div className="p-2 bg-white rounded-lg border border-slate-200">
-                <div className="text-[11px] font-semibold text-slate-700">w2: Uy tín NCC</div>
+                <div className="text-[11px] font-semibold text-slate-700">w2: Reliability</div>
                 <div className="flex items-center gap-1 mt-1">
                   <input
                     type="number"
@@ -148,7 +148,7 @@ export const RiskConfigModal: React.FC<RiskConfigModalProps> = ({
               </div>
 
               <div className="p-2 bg-white rounded-lg border border-slate-200">
-                <div className="text-[11px] font-semibold text-slate-700">w3: Đệm tồn kho</div>
+                <div className="text-[11px] font-semibold text-slate-700">w3: Stock Buffer</div>
                 <div className="flex items-center gap-1 mt-1">
                   <input
                     type="number"
@@ -164,7 +164,7 @@ export const RiskConfigModal: React.FC<RiskConfigModalProps> = ({
             </div>
             {!isWeightValid && (
               <p className="text-[11px] text-rose-600 font-medium">
-                Lưu ý: Tổng trọng số w1 + w2 + w3 phải bằng đúng 1.0 theo đặc tả SRS §2.3.
+                Note: The sum of weights w1 + w2 + w3 must equal exactly 1.0 per SRS §2.3.
               </p>
             )}
           </div>
@@ -173,10 +173,10 @@ export const RiskConfigModal: React.FC<RiskConfigModalProps> = ({
           <div className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200">
             <div>
               <div className="font-bold text-slate-900">
-                Tự động kích hoạt Agent 2 khi phát hiện sự cố
+                Automatically trigger Agent 2 upon incident detection
               </div>
               <p className="text-[11px] text-slate-500 mt-0.5">
-                Agent 2 sẽ tự động lọc nhà cung cấp dự phòng và sinh RFQ gửi đi ngay khi Incident mở.
+                Agent 2 will automatically filter backup suppliers and issue RFQs immediately when an Incident is opened.
               </p>
             </div>
             <input
@@ -190,7 +190,7 @@ export const RiskConfigModal: React.FC<RiskConfigModalProps> = ({
           {/* SKU-Specific Overrides Table */}
           <div className="space-y-2">
             <label className="font-bold text-slate-800 block">
-              Tùy chỉnh ngưỡng rủi ro riêng theo từng linh kiện (SKU Overrides):
+              SKU-Specific Risk Threshold Overrides:
             </label>
             <div className="border border-slate-200 rounded-lg max-h-48 overflow-y-auto divide-y divide-slate-100">
               {inventory.map((item) => (
@@ -204,7 +204,7 @@ export const RiskConfigModal: React.FC<RiskConfigModalProps> = ({
                   </div>
 
                   <div className="flex items-center gap-1.5">
-                    <span className="text-slate-500 text-[11px]">Ngưỡng:</span>
+                    <span className="text-slate-500 text-[11px]">Threshold:</span>
                     <input
                       type="number"
                       min={10}
@@ -233,7 +233,7 @@ export const RiskConfigModal: React.FC<RiskConfigModalProps> = ({
             className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 font-medium"
           >
             <RotateCcw className="w-3 h-3" />
-            <span>Khôi phục mặc định (70)</span>
+            <span>Reset to default (70)</span>
           </button>
 
           <div className="flex items-center gap-2 text-xs">
@@ -241,13 +241,13 @@ export const RiskConfigModal: React.FC<RiskConfigModalProps> = ({
               onClick={onClose}
               className="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 font-medium hover:bg-slate-50"
             >
-              Hủy
+              Cancel
             </button>
             <button
               onClick={handleSave}
               className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold transition-colors"
             >
-              Lưu cấu hình
+              Save Configuration
             </button>
           </div>
         </div>

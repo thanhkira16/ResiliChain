@@ -63,22 +63,22 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: "dashboard", label: "Dashboard" },
     {
       id: "map",
-      label: "Bản đồ Vận chuyển",
-      badge: openIncidentsCount > 0 ? `${openIncidentsCount} rủi ro` : undefined,
+      label: "Shipment Tracking Map",
+      badge: openIncidentsCount > 0 ? `${openIncidentsCount} risks` : undefined,
       badgeColor: "bg-blue-600",
     },
     {
       id: "incidents",
-      label: "Rủi ro & Sự cố",
+      label: "Risks & Incidents",
       badge: openIncidentsCount > 0 ? openIncidentsCount : undefined,
       badgeColor: "bg-amber-600",
     },
-    { id: "orders", label: "Đơn hàng (PO)" },
-    { id: "suppliers", label: "Nhà cung cấp" },
-    { id: "inventory", label: "Tồn kho" },
+    { id: "orders", label: "Purchase Orders (PO)" },
+    { id: "suppliers", label: "Suppliers" },
+    { id: "inventory", label: "Inventory" },
     {
       id: "approvals",
-      label: "Duyệt (HITL)",
+      label: "Approvals (HITL)",
       badge: pendingApprovalCount > 0 ? pendingApprovalCount : undefined,
       badgeColor: "bg-red-600",
     },
@@ -87,17 +87,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   const roleLabels: Record<UserRole, { title: string; subtitle: string; color: string }> = {
     procurement_officer: {
       title: "Procurement Officer",
-      subtitle: "Duyệt đơn <50tr VNĐ",
+      subtitle: "Approves POs < VND 50M",
       color: "bg-blue-50 text-blue-800 border-blue-200",
     },
     supply_chain_manager: {
       title: "Supply Chain Manager",
-      subtitle: "Toàn quyền & duyệt ≥50tr VNĐ",
+      subtitle: "Full Authority & Approvals ≥ VND 50M",
       color: "bg-emerald-50 text-emerald-800 border-emerald-200",
     },
     supplier: {
-      title: "Supplier (Đối tác)",
-      subtitle: "Báo giá qua Self-Service",
+      title: "Supplier Partner",
+      subtitle: "Quote via Self-Service Portal",
       color: "bg-purple-50 text-purple-800 border-purple-200",
     },
   };
@@ -110,25 +110,25 @@ export const Navbar: React.FC<NavbarProps> = ({
     department: string;
   }> = {
     procurement_officer: {
-      name: "Nguyễn Văn Hoàng",
-      email: "hoang.nguyen@bikesync.ai",
-      avatarInitials: "VH",
+      name: "Henry Nguyen",
+      email: "hoang.nguyen@resilichain.ai",
+      avatarInitials: "HN",
       gradient: "from-blue-600 to-indigo-600",
-      department: "Bộ phận Mua sắm & Vật tư",
+      department: "Procurement & Materials Dept",
     },
     supply_chain_manager: {
-      name: "Lê Hoàng Nam",
-      email: "nam.le@bikesync.ai",
-      avatarInitials: "LN",
+      name: "Leo Le",
+      email: "nam.le@resilichain.ai",
+      avatarInitials: "LL",
       gradient: "from-emerald-600 to-teal-600",
-      department: "Ban Giám đốc Chuỗi Cung Ứng",
+      department: "Supply Chain Executive Board",
     },
     supplier: {
-      name: "Trần Đức Phú",
-      email: "phu.tran@supplier-vietnam.com",
-      avatarInitials: "TP",
+      name: "David Tran",
+      email: "phu.tran@supplier-ev.com",
+      avatarInitials: "DT",
       gradient: "from-purple-600 to-pink-600",
-      department: "Phòng Kinh doanh Đối tác",
+      department: "Partner Sales Division",
     },
   };
 
@@ -156,7 +156,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             id="btn-notification-bell"
             onClick={onOpenNotifications}
             className="relative p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-            title="Hộp thư thông báo & Escalation"
+            title="Notification Inbox & Escalations"
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
@@ -212,14 +212,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {/* Body details */}
                 <div className="p-3 bg-slate-50 border-b border-slate-100 text-xs">
                   <div className="flex items-center justify-between text-slate-600 mb-1">
-                    <span>Trạng thái tài khoản:</span>
+                    <span>Account Status:</span>
                     <span className="font-semibold text-emerald-600 flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       Online
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-slate-600">
-                    <span>Quyền hạn:</span>
+                    <span>Role:</span>
                     <span className="font-medium text-slate-900">{roleLabels[userRole].title}</span>
                   </div>
                 </div>
@@ -231,7 +231,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-700 transition-colors text-left"
                   >
                     <User className="w-4 h-4 text-slate-500" />
-                    <span>Hồ sơ cá nhân</span>
+                    <span>User Profile</span>
                   </button>
                   <button
                     onClick={() => {
@@ -241,7 +241,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-700 transition-colors text-left"
                   >
                     <Settings className="w-4 h-4 text-slate-500" />
-                    <span>Cấu hình rủi ro & hệ thống</span>
+                    <span>Risk & System Settings</span>
                   </button>
                   <button
                     onClick={() => {
@@ -251,7 +251,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-700 transition-colors text-left"
                   >
                     <ShieldCheck className="w-4 h-4 text-slate-500" />
-                    <span>Phê duyệt & Hạn mức</span>
+                    <span>Approvals & Limits</span>
                   </button>
                 </div>
 
@@ -299,7 +299,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-3 shrink-0 ml-auto">
           {userRole === "supplier" && (
             <div className="flex items-center gap-1.5 text-xs">
-              <span className="text-slate-500 hidden sm:inline">Giả lập NCC:</span>
+              <span className="text-slate-500 hidden sm:inline">Simulate Supplier:</span>
               <select
                 id="select-active-supplier"
                 value={activeSupplierId}
@@ -318,7 +318,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center gap-2">
             <div className="text-right hidden sm:block">
               <div className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
-                Đang đóng vai
+                Current Role
               </div>
               <div className="text-xs font-semibold text-slate-800">
                 {roleLabels[userRole].title}
@@ -332,9 +332,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onChange={(e) => setUserRole(e.target.value as UserRole)}
                 className={`text-xs font-semibold rounded-lg px-2.5 py-1.5 border transition-all cursor-pointer shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20 ${roleLabels[userRole].color}`}
               >
-                <option value="procurement_officer">1. Procurement Officer (&lt;50tr)</option>
-                <option value="supply_chain_manager">2. Supply Chain Manager (≥50tr)</option>
-                <option value="supplier">3. Supplier (Báo giá RFQ)</option>
+                <option value="procurement_officer">1. Procurement Officer (&lt; VND 50M)</option>
+                <option value="supply_chain_manager">2. Supply Chain Manager (≥ VND 50M)</option>
+                <option value="supplier">3. Supplier Partner (RFQ Bidding)</option>
               </select>
             </div>
           </div>

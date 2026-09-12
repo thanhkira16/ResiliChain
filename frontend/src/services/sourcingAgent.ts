@@ -62,7 +62,7 @@ export const SourcingAgent = {
         originalSupplierName: po.supplierName,
         backupSupplierName: supplier.name,
         historicalPrice: supplier.historicalPrice[po.sku] || po.unitPrice,
-        notes: `Đơn hàng khẩn bù đắp trễ hẹn từ đối tác ${po.supplierName}. Tiêu chuẩn kiểm định OEM xe đạp xuất khẩu.`,
+        notes: `Urgent order offsetting delivery delay from partner ${po.supplierName}. Export bicycle OEM inspection standards apply.`,
       });
 
       const rfqItem: RFQItem = {
@@ -81,7 +81,7 @@ export const SourcingAgent = {
         termsSummary: aiDraft.data.termsSummary,
         sentAt: new Date().toISOString().replace("T", " ").substring(0, 19),
         deadline,
-        status: "Đã gửi",
+        status: "Sent",
       };
 
       rfqs.push(rfqItem);
@@ -95,8 +95,8 @@ export const SourcingAgent = {
         poNumber: po.poNumber,
         supplierName: supplier.name,
         sku: po.sku,
-        inputSummary: `Gửi RFQ ${rfqId} cho NCC dự phòng: ${supplier.name} (Độ tin cậy: ${supplier.reliabilityScore}/100, Lead time chuẩn: ${supplier.averageLeadTimeDays} ngày).`,
-        outputReasoning: `Nội dung thư RFQ soạn tự động bằng ${aiDraft.isLiveAI ? "Gemini 3.8 Flash AI" : "Mẫu thương mại chuẩn"}. Hạn chót phản hồi: 24h.`,
+        inputSummary: `Sent RFQ ${rfqId} to backup supplier: ${supplier.name} (Reliability: ${supplier.reliabilityScore}/100, Std lead time: ${supplier.averageLeadTimeDays} days).`,
+        outputReasoning: `RFQ email drafted automatically using ${aiDraft.isLiveAI ? "Gemini 3.8 Flash AI" : "Standard Commercial Template"}. Response deadline: 24h.`,
         metadata: { isLiveAI: aiDraft.isLiveAI },
       });
     }
@@ -104,8 +104,8 @@ export const SourcingAgent = {
     notifs.push({
       id: `NOTIF-${Date.now()}`,
       timestamp: new Date().toISOString().replace("T", " ").substring(0, 19),
-      title: `Agent 2 đã phát lệnh ${rfqs.length} RFQ khẩn cấp`,
-      message: `Đã gửi yêu cầu báo giá cho ${topBackups.map((s) => s.name).join(", ")} để bù đắp đơn trễ ${po.poNumber}.`,
+      title: `Agent 2 dispatched ${rfqs.length} emergency RFQs`,
+      message: `Sent quotation requests to ${topBackups.map((s) => s.name).join(", ")} to mitigate delay on PO ${po.poNumber}.`,
       type: "info",
       isRead: false,
       correlationId: incident.correlationId,
@@ -147,7 +147,7 @@ export const SourcingAgent = {
     });
 
     if (validQuotes.length === 0) {
-      throw new Error("Chưa có báo giá nào từ nhà cung cấp để phân tích");
+      throw new Error("No supplier quotes available for analysis");
     }
 
     // Exact Ranking Policy formula (SRS §3.3)
@@ -167,9 +167,9 @@ export const SourcingAgent = {
     // Critical (>= 80): prioritize delivery speed (w2 = 0.55, w1 = 0.25, w3 = 0.20)
     // Moderate (< 80): balanced cost and time (w1 = 0.45, w2 = 0.35, w3 = 0.20)
     const isCritical = incident.delayRiskScore >= 80;
-    const w1 = isCritical ? 0.25 : 0.45; // Trọng số chi phí
-    const w2 = isCritical ? 0.55 : 0.35; // Trọng số thời gian
-    const w3 = 0.2; // Trọng số uy tín NCC
+    const w1 = isCritical ? 0.25 : 0.45; // Cost weight
+    const w2 = isCritical ? 0.55 : 0.35; // Time weight
+    const w3 = 0.2; // Supplier reliability weight
 
     const scoredQuotes = validQuotes.map((q) => {
       const totalCost = q.unitPrice * po.quantity;
@@ -188,22 +188,22 @@ export const SourcingAgent = {
       const cons: string[] = [];
 
       if (q.proposedLeadTimeDays <= minLead) {
-        pros.push(`Lead time ngắn nhất (${q.proposedLeadTimeDays} ngày, giao ngày ${q.proposedDeliveryDate})`);
+        pros.push(`Shortest lead time (${q.proposedLeadTimeDays} days, delivery date ${q.proposedDeliveryDate})`);
       } else {
-        cons.push(`Lead time dài hơn đối thủ tốt nhất (+${q.proposedLeadTimeDays - minLead} ngày)`);
+        cons.push(`Longer lead time than top competitor (+${q.proposedLeadTimeDays - minLead} days)`);
       }
 
       if (q.reliabilityScore >= 85) {
-        pros.push(`Điểm tin cậy NCC cao (${q.reliabilityScore}/100)`);
+        pros.push(`High supplier reliability score (${q.reliabilityScore}/100)`);
       } else if (q.reliabilityScore < 75) {
-        cons.push(`Điểm uy tín ở mức trung bình (${q.reliabilityScore}/100)`);
+        cons.push(`Moderate reliability score (${q.reliabilityScore}/100)`);
       }
 
       if (totalCost <= minCost) {
-        pros.push(`Tổng chi phí thấp nhất (${Number(totalCost).toLocaleString("vi-VN")} VNĐ)`);
+        pros.push(`Lowest total cost (VND ${Number(totalCost).toLocaleString("en-US")})`);
       } else {
         const diffPct = Math.round(((totalCost - minCost) / minCost) * 100);
-        cons.push(`Chi phí cao hơn ${diffPct}% so với phương án rẻ nhất`);
+        cons.push(`Cost is ${diffPct}% higher than lowest-cost option`);
       }
 
       return {
@@ -226,7 +226,7 @@ export const SourcingAgent = {
           timeScoreContribution: Number(timeScoreContribution.toFixed(3)),
           reliabilityContribution: Number(reliabilityContribution.toFixed(3)),
         },
-        reasoning: `Công thức §3.3 [${isCritical ? "Khẩn cấp" : "Tiêu chuẩn"}]: Điểm = (${w1}×${(1 - normalizedCost).toFixed(2)}) + (${w2}×${(1 - normalizedLeadTime).toFixed(2)}) + (${w3}×${supplierReliabilityScore.toFixed(2)}) = ${(rawComposite / 100).toFixed(2)} → ${finalScore}/100.`,
+        reasoning: `Formula §3.3 [${isCritical ? "Urgent" : "Standard"}]: Score = (${w1}×${(1 - normalizedCost).toFixed(2)}) + (${w2}×${(1 - normalizedLeadTime).toFixed(2)}) + (${w3}×${supplierReliabilityScore.toFixed(2)}) = ${(rawComposite / 100).toFixed(2)} → ${finalScore}/100.`,
       };
     });
 
@@ -256,10 +256,10 @@ export const SourcingAgent = {
       recommendation = aiAnalysis.data.recommendation;
       rejectedOptionsAnalysis = aiAnalysis.data.rejectedOptionsAnalysis || [];
     } catch {
-      recommendation = `Kiến nghị chọn ${rankings[0]?.supplierName} (Rank #1 - Điểm ${rankings[0]?.score}/100) vì tối ưu tốt nhất theo tiêu chí ${isCritical ? "thời gian giao hàng khẩn cấp" : "cân bằng chi phí và tiến độ"}.`;
+      recommendation = `Recommend selecting ${rankings[0]?.supplierName} (Rank #1 - Score ${rankings[0]?.score}/100) for optimal alignment with ${isCritical ? "urgent delivery schedule" : "balanced cost and timeline"}.`;
       rejectedOptionsAnalysis = rankings.slice(1).map((r) => ({
         supplierName: r.supplierName,
-        reason: `Điểm tổng hợp ${r.score}/100 thấp hơn phương án số 1 (${r.cons.join(", ") || "lead time dài hơn"}).`,
+        reason: `Composite score of ${r.score}/100 is lower than Option #1 (${r.cons.join(", ") || "longer lead time"}).`,
       }));
     }
 
@@ -282,14 +282,14 @@ export const SourcingAgent = {
       selectedRank: 1,
       recommendation:
         recommendation ||
-        `Đề xuất chọn ${bestOption?.supplierName} (Rank #1) đạt ${bestOption?.score}/100 điểm tổng hợp.`,
+        `Proposed selecting ${bestOption?.supplierName} (Rank #1) achieving ${bestOption?.score}/100 composite score.`,
       rejectedOptionsAnalysis: rejectedOptionsAnalysis.length > 0 ? rejectedOptionsAnalysis : [
         {
-          supplierName: rankings[1]?.supplierName || "Phương án 2",
-          reason: "Điểm xếp hạng tổng hợp thấp hơn phương án số 1.",
+          supplierName: rankings[1]?.supplierName || "Option 2",
+          reason: "Composite rank score is lower than Option 1.",
         },
       ],
-      status: "Chờ duyệt",
+      status: "Pending Approval",
       totalValueVND,
       createdAt: new Date().toISOString().replace("T", " ").substring(0, 19),
     };
@@ -305,8 +305,8 @@ export const SourcingAgent = {
       poNumber: po.poNumber,
       supplierName: bestOption?.supplierName,
       sku: po.sku,
-      inputSummary: `Áp dụng Ranking Policy (§3.3) cho ${validQuotes.length} báo giá (Rủi ro F4: ${incident.delayRiskScore}/100). Giá trị: ${Number(totalValueVND).toLocaleString("vi-VN")} VNĐ.`,
-      outputReasoning: `Xếp hạng #1: ${bestOption?.supplierName} (${bestOption?.score}/100) với trọng số [Giá w1=${w1}, Thời gian w2=${w2}, Uy tín w3=${w3}]. Chuyển trạng thái incident -> PENDING_APPROVAL.`,
+      inputSummary: `Applied Ranking Policy (§3.3) to ${validQuotes.length} quotes (F4 Risk Score: ${incident.delayRiskScore}/100). Total value: VND ${Number(totalValueVND).toLocaleString("en-US")}.`,
+      outputReasoning: `Ranked #1: ${bestOption?.supplierName} (${bestOption?.score}/100) with weights [Price w1=${w1}, Time w2=${w2}, Reliability w3=${w3}]. Transitioned incident status -> PENDING_APPROVAL.`,
       metadata: {
         isHighValue,
         totalValueVND,
@@ -319,9 +319,9 @@ export const SourcingAgent = {
       id: `NOTIF-${Date.now()}`,
       timestamp: new Date().toISOString().replace("T", " ").substring(0, 19),
       title: isHighValue
-        ? "Đề xuất tài chính cần duyệt (≥50 triệu VNĐ)"
-        : "Đề xuất mua hàng thay thế (<50 triệu VNĐ)",
-      message: `Agent 2 đề xuất chuyển PO ${po.poNumber} sang ${bestOption?.supplierName || "NCC dự phòng"} (${Number(totalValueVND).toLocaleString("vi-VN")} VNĐ). Vui lòng vào màn hình Phê duyệt để xác nhận.`,
+        ? "Financial Proposal Pending Approval (≥VND 50,000,000)"
+        : "Alternative Sourcing Proposal (<VND 50,000,000)",
+      message: `Agent 2 proposed re-sourcing PO ${po.poNumber} to ${bestOption?.supplierName || "backup supplier"} (VND ${Number(totalValueVND).toLocaleString("en-US")}). Please review in Approvals screen.`,
       type: isHighValue ? "escalation" : "warning",
       isRead: false,
       correlationId: incident.correlationId,

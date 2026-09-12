@@ -21,11 +21,11 @@ export function RouteWeatherPanel({ onWeatherChange }: RouteWeatherPanelProps) {
   const loadRouteWeather = async () => {
     const cities = parseRouteCities(routeInput);
     if (cities.length < 2) {
-      setError("Nhập ít nhất hai thành phố trên tuyến đường.");
+      setError("Please enter at least two cities along the route.");
       return;
     }
     if (cities.length > 10) {
-      setError("Mỗi lần chỉ hỗ trợ tối đa 10 thành phố.");
+      setError("Maximum 10 cities supported per query.");
       return;
     }
 
@@ -37,11 +37,11 @@ export function RouteWeatherPanel({ onWeatherChange }: RouteWeatherPanelProps) {
       setStops(result.stops);
       setFailedCities(result.failedCities);
       onWeatherChange(result.stops);
-      if (result.stops.length === 0) setError("Không tìm thấy dữ liệu thời tiết cho các thành phố đã nhập.");
+      if (result.stops.length === 0) setError("No weather data found for the entered cities.");
     } catch (requestError) {
       setStops([]);
       onWeatherChange([]);
-      setError(requestError instanceof Error ? requestError.message : "Không thể lấy dữ liệu thời tiết.");
+      setError(requestError instanceof Error ? requestError.message : "Unable to fetch weather data.");
     } finally {
       setIsLoading(false);
     }
@@ -54,22 +54,22 @@ export function RouteWeatherPanel({ onWeatherChange }: RouteWeatherPanelProps) {
           <CloudSun className="w-4 h-4" />
         </div>
         <div>
-          <h2 id="route-weather-heading" className="text-sm font-bold text-slate-900">Thời tiết trên tuyến đường</h2>
-          <p className="text-[11px] text-slate-500 mt-0.5">Nhập các thành phố theo đúng thứ tự di chuyển.</p>
+          <h2 id="route-weather-heading" className="text-sm font-bold text-slate-900">Route Weather</h2>
+          <p className="text-[11px] text-slate-500 mt-0.5">Enter cities in order of travel.</p>
         </div>
       </div>
 
-      <label htmlFor="route-cities" className="sr-only">Các thành phố trên tuyến đường</label>
+      <label htmlFor="route-cities" className="sr-only">Cities along the route</label>
       <textarea
         id="route-cities"
         value={routeInput}
         onChange={(event) => setRouteInput(event.target.value)}
-        placeholder="Cần Thơ → TP. Hồ Chí Minh → Đà Nẵng → Hà Nội"
+        placeholder="Can Tho → Ho Chi Minh City → Da Nang → Hanoi"
         rows={2}
         className="w-full resize-y rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none"
       />
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[10px] text-slate-500">Phân cách bằng →, dấu phẩy, chấm phẩy hoặc xuống dòng.</span>
+        <span className="text-[10px] text-slate-500">Separate using →, comma, semicolon, or newline.</span>
         <button
           type="button"
           onClick={loadRouteWeather}
@@ -77,7 +77,7 @@ export function RouteWeatherPanel({ onWeatherChange }: RouteWeatherPanelProps) {
           className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-sky-700 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-60 transition-colors"
         >
           {isLoading ? <LoaderCircle className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-          {isLoading ? "Đang tải" : "Xem thời tiết"}
+          {isLoading ? "Loading..." : "Check Weather"}
         </button>
       </div>
 
@@ -90,12 +90,12 @@ export function RouteWeatherPanel({ onWeatherChange }: RouteWeatherPanelProps) {
 
       {failedCities.length > 0 && (
         <div role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-[11px] text-amber-900">
-          Chưa lấy được dữ liệu cho: {failedCities.join(", ")}.
+          Unable to fetch data for: {failedCities.join(", ")}.
         </div>
       )}
 
       {stops.length > 0 && (
-        <ol className="space-y-2 border-t border-slate-100 pt-3" aria-label="Tình trạng thời tiết từng thành phố">
+        <ol className="space-y-2 border-t border-slate-100 pt-3" aria-label="Weather conditions by city">
           {stops.map((stop, index) => {
             const style = weatherSeverityStyle[stop.severity];
             return (
@@ -109,7 +109,7 @@ export function RouteWeatherPanel({ onWeatherChange }: RouteWeatherPanelProps) {
                         <span className={`h-2 w-2 rounded-full ${style.dotClass}`} />{stop.severityLabel}
                       </span>
                     </div>
-                    <p className="mt-0.5 text-[11px] text-slate-600">{stop.condition} · {stop.isDay ? "Ban ngày" : "Ban đêm"}</p>
+                    <p className="mt-0.5 text-[11px] text-slate-600">{stop.condition} · {stop.isDay ? "Daytime" : "Nighttime"}</p>
                     <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-500">
                       <span className="inline-flex items-center gap-1"><ThermometerSun className="h-3 w-3" />{stop.temperatureC}°C</span>
                       <span className="inline-flex items-center gap-1"><Wind className="h-3 w-3" />{stop.windSpeedKmh} km/h</span>
