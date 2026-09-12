@@ -75,6 +75,7 @@ export interface PurchaseOrder {
   actualOrExpectedDeliveryDate: string; // YYYY-MM-DD (simulated tracking)
   status: POStatus;
   currentRiskScore?: number;
+  riskScoreSource?: "MANUAL" | "CALCULATED";
   riskBreakdown?: RiskBreakdown;
   riskHistory?: RiskHistoryPoint[];
   notes?: string;

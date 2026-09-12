@@ -14,6 +14,7 @@ import {
   FileCheck,
   ChevronDown,
   ChevronUp,
+  ArrowLeft,
 } from "lucide-react";
 
 interface ApprovalViewProps {
@@ -26,6 +27,7 @@ interface ApprovalViewProps {
   onRejectProposal: (proposalId: string, reason: string) => void;
   userRole: UserRole;
   activeIncidentId?: string | null;
+  onBack: () => void;
 }
 
 export const ApprovalView: React.FC<ApprovalViewProps> = ({
@@ -34,6 +36,7 @@ export const ApprovalView: React.FC<ApprovalViewProps> = ({
   onRejectProposal,
   userRole,
   activeIncidentId,
+  onBack,
 }) => {
   const [selectedProposalId, setSelectedProposalId] = useState<string | null>(
     proposals.find((p) => p.status === "Chờ duyệt")?.id || proposals[0]?.id || null
@@ -126,6 +129,7 @@ export const ApprovalView: React.FC<ApprovalViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          <button type="button" onClick={onBack} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50"><ArrowLeft className="h-3.5 w-3.5" />Quay lại</button>
           <span className="text-xs text-slate-600 font-medium">Vai trò hiện tại:</span>
           <span
             className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${
