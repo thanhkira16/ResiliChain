@@ -1,0 +1,19 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "include": [
+    "src",
+    "tests",
+    "ai_worker.py",
+    "dashboard.py",
+    "db_inspect.py"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    ".venv",
+    ".cache",
+    "apidata"
+  ],
+  "typeCheckingMode": "basic",
+  "reportMissingTypeStubs": false
+}
