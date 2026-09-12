@@ -6,7 +6,7 @@ import {
   Color,
   Ion,
   LabelStyle,
-  OpenStreetMapImageryProvider,
+  UrlTemplateImageryProvider,
   ScreenSpaceEventHandler,
   ScreenSpaceEventType,
   Viewer,
@@ -54,7 +54,7 @@ export function GlobalRouteWeatherMap({
 
   const token = (import.meta.env.VITE_CESIUM_ION_TOKEN as string | undefined) || "";
 
-  // 1. Initialize Cesium Viewer once with high-performance flags
+  // 1. Initialize Cesium Viewer once with high-performance ArcGIS / CartoDB imagery tiles
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -64,6 +64,13 @@ export function GlobalRouteWeatherMap({
 
     let viewer: Viewer;
     try {
+      // High-resolution Satellite Imagery Provider (ArcGIS World Imagery - Free, Fast, No API Key needed)
+      const imageryProvider = new UrlTemplateImageryProvider({
+        url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        credit: "Esri, Maxar, Earthstar Geographics",
+        maximumLevel: 19,
+      });
+
       viewer = new Viewer(containerRef.current, {
         animation: false,
         baseLayerPicker: false,
@@ -78,9 +85,7 @@ export function GlobalRouteWeatherMap({
         shouldAnimate: false,
         requestRenderMode: true, // Performance: Only render when scene changes!
         maximumRenderTimeChange: Infinity,
-        imageryProvider: new OpenStreetMapImageryProvider({
-          url: "https://tile.openstreetmap.org/",
-        }),
+        imageryProvider: imageryProvider,
       });
 
       viewerRef.current = viewer;
@@ -235,14 +240,14 @@ export function GlobalRouteWeatherMap({
       });
     });
 
-    // Camera Focus on Selected Shipment (Fix 0 range camera clip bug)
+    // Camera Focus on Selected Shipment
     if (selectedShipment) {
       const points = [...(selectedShipment.routeHistory || [])];
       if (selectedShipment.destinationWarehouse) points.push(selectedShipment.destinationWarehouse);
       const positions = positionsFrom(points);
       if (positions.length > 0) {
         const sphere = BoundingSphere.fromPoints(positions);
-        const flyRange = Math.max(sphere.radius * 2.5, 350000); // Proper zoom distance!
+        const flyRange = Math.max(sphere.radius * 2.5, 350000);
         viewer.camera.flyToBoundingSphere(sphere, {
           duration: 1.2,
           offset: { heading: 0, pitch: -0.85, range: flyRange },
@@ -265,7 +270,7 @@ export function GlobalRouteWeatherMap({
 
       {/* Floating Status Bar */}
       <div className="pointer-events-none absolute left-3 top-3 z-10 rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-800 shadow-sm backdrop-blur">
-        <div className="font-bold text-slate-900">Bản Đồ Địa Cầu 3D Digital Twin · Cesium Engine</div>
+        <div className="font-bold text-slate-900">Bản Đồ Vệ Tinh 3D Digital Twin · ArcGIS Satellite Engine</div>
         <div className="mt-0.5 text-[11px] text-slate-500">Cuộn để phóng to, kéo để xoay. Nhấp vào pin lô hàng để xem chi tiết.</div>
       </div>
 
