@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
-import { getWeather, WeatherRequestError } from "../ai/weatherGraph.js";
+import { getWeather, WeatherRequestError } from "./src/services/weatherGraph.js";
 
 dotenv.config();
 
