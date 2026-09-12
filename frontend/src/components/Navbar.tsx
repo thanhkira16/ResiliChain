@@ -67,15 +67,15 @@ export const Navbar: React.FC<NavbarProps> = ({
       badge: openIncidentsCount > 0 ? `${openIncidentsCount} rủi ro` : undefined,
       badgeColor: "bg-blue-600",
     },
-    { id: "orders", label: "Đơn hàng (PO)" },
-    { id: "suppliers", label: "Nhà cung cấp" },
-    { id: "inventory", label: "Tồn kho" },
     {
       id: "incidents",
       label: "Rủi ro & Sự cố",
       badge: openIncidentsCount > 0 ? openIncidentsCount : undefined,
       badgeColor: "bg-amber-600",
     },
+    { id: "orders", label: "Đơn hàng (PO)" },
+    { id: "suppliers", label: "Nhà cung cấp" },
+    { id: "inventory", label: "Tồn kho" },
     {
       id: "approvals",
       label: "Duyệt (HITL)",
