@@ -47,6 +47,47 @@ function normalizeInventory(item: InventoryItem): InventoryItem {
   };
 }
 
+function normalizeTrackingPoint(point: ShipmentTrackingPoint): ShipmentTrackingPoint {
+  return {
+    ...point,
+    latitude: toNumber(point.latitude),
+    longitude: toNumber(point.longitude),
+    speedKmh: point.speedKmh === undefined || point.speedKmh === null ? undefined : toNumber(point.speedKmh),
+  };
+}
+
+function normalizeMapShipment(shipment: AtRiskShipmentMapItem): AtRiskShipmentMapItem | null {
+  const routeHistory = Array.isArray(shipment.routeHistory)
+    ? shipment.routeHistory.map(normalizeTrackingPoint)
+    : [];
+  const latestTrackingPoint = shipment.latestTrackingPoint
+    ? normalizeTrackingPoint(shipment.latestTrackingPoint)
+    : routeHistory.at(-1);
+
+  // A shipment without a GPS point has no safe position to render on the map.
+  if (!latestTrackingPoint) return null;
+
+  const riskLevel = String(shipment.riskLevel).toUpperCase();
+  return {
+    ...shipment,
+    shipmentId: String(shipment.shipmentId),
+    quantity: toNumber(shipment.quantity),
+    delayDays: toNumber(shipment.delayDays),
+    currentDelayRiskScore: toNumber(shipment.currentDelayRiskScore),
+    appliedThreshold: shipment.appliedThreshold === undefined ? 70 : toNumber(shipment.appliedThreshold),
+    riskLevel: riskLevel === 'HIGH' || riskLevel === 'MEDIUM' || riskLevel === 'LOW' ? riskLevel : 'LOW',
+    destinationWarehouse: {
+      ...shipment.destinationWarehouse,
+      id: shipment.destinationWarehouse.id || `warehouse-${shipment.shipmentId}`,
+      latitude: toNumber(shipment.destinationWarehouse.latitude),
+      longitude: toNumber(shipment.destinationWarehouse.longitude),
+    },
+    latestTrackingPoint,
+    routeHistory,
+    lastUpdatedAt: String(shipment.lastUpdatedAt),
+  };
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
@@ -70,7 +111,10 @@ export const SupplyChainApi = {
   getProposals: () => request<SourcingProposal[]>('/supply-chain/sourcing-proposals'),
   saveProposal: (value: SourcingProposal) => request<SourcingProposal>('/supply-chain/sourcing-proposals', { method: 'POST', body: JSON.stringify(value) }),
   updateProposal: (id: string, value: Partial<SourcingProposal>) => request<SourcingProposal>(`/supply-chain/sourcing-proposals/${id}`, { method: 'PATCH', body: JSON.stringify(value) }),
-  getAtRiskShipments: () => request<AtRiskShipmentMapItem[]>('/supply-chain/shipments/at-risk-map'),
+  getAtRiskShipments: async () => {
+    const shipments = await request<AtRiskShipmentMapItem[]>('/supply-chain/shipments/at-risk-map');
+    return shipments.map(normalizeMapShipment).filter((shipment): shipment is AtRiskShipmentMapItem => shipment !== null);
+  },
   evaluateRiskAlert: (value: { incidentId: string; purchaseOrderId: string; riskScore: number }) => request<{ triggered: boolean }>('/supply-chain/risk-alerts/evaluate', { method: 'POST', body: JSON.stringify(value) }),
   syncHighRiskOrders: () => request<unknown[]>('/supply-chain/risk-alerts/sync', { method: 'POST' }),
   getSupplierRiskAnalysis: () => request<Array<{ supplierId: string; supplierName: string; porsScore: number | string; riskLevel: string; statusLabel: string; analyzedAt: string }>>('/supply-chain/supplier-risk-analysis'),

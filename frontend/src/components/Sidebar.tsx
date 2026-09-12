@@ -79,7 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5">
-            <span className="text-base font-bold tracking-tight text-white">BikeSync AI</span>
+            <span className="text-base font-bold tracking-tight text-white">Resili chain</span>
           </div>
           <span className="text-[10px] text-emerald-400 font-mono tracking-wider uppercase font-semibold">
             Supply Chain MVP
@@ -137,7 +137,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="p-3 border-t border-slate-800 bg-slate-950/50 text-[11px] text-slate-400 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="font-medium text-slate-300">BikeSync Engine v2.4</span>
+          <span className="font-medium text-slate-300">Resili chain Engine v2.4</span>
         </div>
       </div>
     </aside>

@@ -143,7 +143,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="w-6 h-6 rounded bg-emerald-500 flex items-center justify-center text-slate-950 font-black">
               <Bike className="w-4 h-4" />
             </div>
-            <span className="text-sm font-bold tracking-tight">BikeSync AI</span>
+            <span className="text-sm font-bold tracking-tight">Resili chain</span>
             <span className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-slate-800 text-[11px] text-emerald-400 font-mono border border-slate-700">
               Supply Chain MVP
             </span>
@@ -257,7 +257,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                 {/* Footer */}
                 <div className="p-2 border-t border-slate-100 bg-slate-50 text-[11px] text-center text-slate-400">
-                  BikeSync AI System v2.4
+                  Resili chain System v2.4
                 </div>
               </div>
             )}

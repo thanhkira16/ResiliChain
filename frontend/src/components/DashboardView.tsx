@@ -263,7 +263,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-emerald-400" />
             <h3 className="text-sm font-bold text-white tracking-wide">
-              Quy Trình Hoạt Động Của Các AI Agent Trong BikeSync AI
+              Quy Trình Hoạt Động Của Các AI Agent Trong Resili chain
             </h3>
           </div>
           <span className="text-xs text-slate-300 font-mono">
