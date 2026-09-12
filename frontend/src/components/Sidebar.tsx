@@ -40,6 +40,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badgeColor: "bg-blue-500 text-white",
     },
     {
+      id: "incidents",
+      label: "Rủi ro & Sự cố",
+      icon: ShieldAlert,
+      badge: openIncidentsCount > 0 ? `${openIncidentsCount}` : undefined,
+      badgeColor: "bg-amber-500 text-white animate-pulse",
+    },
+    {
       id: "orders",
       label: "Đơn hàng (PO)",
       icon: ShoppingBag,
@@ -53,13 +60,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: "inventory",
       label: "Tồn kho",
       icon: Boxes,
-    },
-    {
-      id: "incidents",
-      label: "Rủi ro & Sự cố",
-      icon: ShieldAlert,
-      badge: openIncidentsCount > 0 ? `${openIncidentsCount}` : undefined,
-      badgeColor: "bg-amber-500 text-white animate-pulse",
     },
     {
       id: "approvals",
