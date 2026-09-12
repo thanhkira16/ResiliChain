@@ -10,6 +10,7 @@ import {
   RefreshCw,
   Sliders,
   ExternalLink,
+  MapPinned,
 } from "lucide-react";
 
 interface IncidentsViewProps {
@@ -21,6 +22,7 @@ interface IncidentsViewProps {
   onRunRiskScan: () => void;
   isScanning: boolean;
   userRole: UserRole;
+  onViewOnMap?: (poNumber: string) => void;
 }
 
 export const IncidentsView: React.FC<IncidentsViewProps> = ({
@@ -32,6 +34,7 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
   onRunRiskScan,
   isScanning,
   userRole,
+  onViewOnMap,
 }) => {
   return (
     <div className="space-y-4">
@@ -210,6 +213,7 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
+                  {onViewOnMap && <button onClick={() => onViewOnMap(inc.poNumber)} className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium rounded-lg transition-colors flex items-center gap-1"><MapPinned className="w-3.5 h-3.5" /><span>Xem trên map</span></button>}
                   {!inc.agent2Triggered ? (
                     <button
                       id={`btn-trigger-agent2-${inc.id}`}

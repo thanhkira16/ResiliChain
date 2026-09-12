@@ -78,6 +78,12 @@ export default function App() {
   const [isEvaluatingQuote, setIsEvaluatingQuote] = useState<boolean>(false);
   const [filterCorrelationId, setFilterCorrelationId] = useState<string | null>(null);
   const [forecastTargetSku, setForecastTargetSku] = useState<string | undefined>(undefined);
+  const [mapFocusPoNumber, setMapFocusPoNumber] = useState<string | null>(null);
+
+  const openShipmentOnMap = (poNumber: string) => {
+    setMapFocusPoNumber(poNumber);
+    setCurrentTab("map");
+  };
 
   // Sync role to storage
   const handleRoleChange = (role: UserRole) => {
@@ -800,13 +806,9 @@ export default function App() {
         <Header
           currentTab={currentTab}
           userRole={userRole}
-          setUserRole={handleRoleChange}
           unreadCount={unreadCount}
           onOpenNotifications={() => setIsNotificationsOpen(true)}
           onOpenConfig={() => setIsConfigOpen(true)}
-          activeSupplierId={activeSupplierId}
-          setActiveSupplierId={setActiveSupplierId}
-          suppliersList={suppliers.map((s) => ({ id: s.id, name: s.name }))}
         />
 
         {/* Main Content Viewport */}
@@ -828,6 +830,9 @@ export default function App() {
         {currentTab === "map" && (
           <ShipmentTrackingMapView
             userRole={userRole}
+            orders={orders}
+            incidents={incidents}
+            focusPoNumber={mapFocusPoNumber}
             onNavigateToIncidents={() => setCurrentTab("incidents")}
             onNavigateToPo={(poNumber) => {
               setCurrentTab("orders");
@@ -842,6 +847,7 @@ export default function App() {
             onRunRiskScan={runRiskScan}
             isScanning={isScanning}
             userRole={userRole}
+            onViewOnMap={openShipmentOnMap}
           />
         )}
 
@@ -894,6 +900,7 @@ export default function App() {
             onRunRiskScan={runRiskScan}
             isScanning={isScanning}
             userRole={userRole}
+            onViewOnMap={openShipmentOnMap}
           />
         )}
 
@@ -908,6 +915,7 @@ export default function App() {
             isEvaluating={isEvaluatingQuote}
             userRole={userRole}
             onNavigateToApprovals={() => setCurrentTab("approvals")}
+            onBack={() => setCurrentTab("incidents")}
           />
         )}
 
@@ -917,6 +925,7 @@ export default function App() {
             onApproveProposal={handleApproveProposal}
             onRejectProposal={handleRejectProposal}
             userRole={userRole}
+            onBack={() => setCurrentTab("incidents")}
           />
         )}
 
@@ -933,6 +942,7 @@ export default function App() {
             onCreatePoFromForecast={handleCreatePoFromForecast}
             userRole={userRole}
             initialSku={forecastTargetSku}
+            onBack={() => setCurrentTab("inventory")}
           />
         )}
 

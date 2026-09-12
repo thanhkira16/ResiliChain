@@ -57,12 +57,16 @@ export class SupplyChainService {
   }
 
   async atRiskShipments() {
-    const shipments = await this.shipments.find({ order: { updatedAt: 'DESC' } });
-    const trackingPoints = await this.trackingPoints.find({ order: { recordedAt: 'DESC' } });
+    // shipment_tracking_points is the authoritative, actual route. Loading it as a
+    // relation prevents the map projection from accidentally mixing GPS points from
+    // different shipments.
+    const shipments = await this.shipments.find({
+      relations: { trackingPoints: true },
+      order: { updatedAt: 'DESC', trackingPoints: { recordedAt: 'ASC' } },
+    });
     const incidents = await this.incidents.find();
     return shipments.map((shipment) => {
-      const routeHistory = trackingPoints
-        .filter((point) => point.shipmentId === shipment.id)
+      const routeHistory = [...shipment.trackingPoints]
         .sort((a, b) => a.recordedAt.localeCompare(b.recordedAt));
       const incident = incidents.find((item) => item.poNumber === shipment.poNumber);
       return {
@@ -75,6 +79,23 @@ export class SupplyChainService {
         lastUpdatedAt: shipment.updatedAt,
       };
     });
+  }
+
+  async shipmentRoute(shipmentId: string) {
+    const shipment = await this.shipments.findOne({
+      where: { id: shipmentId },
+      relations: { trackingPoints: true },
+    });
+    if (!shipment) throw new NotFoundException(`Shipment ${shipmentId} was not found`);
+
+    const routeHistory = [...shipment.trackingPoints]
+      .sort((a, b) => a.recordedAt.localeCompare(b.recordedAt));
+    return {
+      shipmentId: shipment.id,
+      destinationWarehouse: shipment.destinationWarehouse,
+      routeHistory,
+      latestTrackingPoint: routeHistory.at(-1) ?? null,
+    };
   }
 
   async recordTrackingPoint(data: ShipmentTrackingPointEntity) {
