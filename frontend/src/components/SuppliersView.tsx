@@ -400,7 +400,7 @@ export const SuppliersView: React.FC<SuppliersViewProps> = ({
 
               <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
                 <span>Người phụ trách: {sup.contactPerson}</span>
-                <span className="text-slate-400">BikeSync Verified Supplier</span>
+                <span className="text-slate-400">Resili chain Verified Supplier</span>
               </div>
             </div>
           );

@@ -36,5 +36,6 @@ export class SupplyChainController {
   @Post('partner-confirmations/:token/delayed') delayed(@Param('token') token: string) { return this.supplyChainService.confirmDelivery(token, 'DELAYED'); }
   @Get('incidents/:incidentId/logistics-messages') messages(@Param('incidentId') incidentId: string) { return this.supplyChainService.messagesFor(incidentId); }
   @Post('incidents/:incidentId/logistics-messages') sendMessage(@Param('incidentId') incidentId: string, @Body() body: { body: string; senderRole: 'PARTNER' | 'PROCUREMENT' }) { return this.supplyChainService.sendLogisticsMessage(incidentId, body.body, body.senderRole); }
+  @Get('shipments/:id/route') shipmentRoute(@Param('id') id: string) { return this.supplyChainService.shipmentRoute(id); }
   @Post('shipment-tracking-points') recordTrackingPoint(@Body() body: Record<string, unknown>) { return this.supplyChainService.recordTrackingPoint(body as unknown as ShipmentTrackingPointEntity); }
 }

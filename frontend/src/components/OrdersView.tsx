@@ -13,6 +13,7 @@ import {
   ShieldAlert,
   ArrowUpDown,
   Plus,
+  MapPinned,
 } from "lucide-react";
 
 interface OrdersViewProps {
@@ -22,6 +23,7 @@ interface OrdersViewProps {
   isScanning: boolean;
   userRole: UserRole;
   onNavigateToIncident?: (poNumber: string) => void;
+  onViewOnMap?: (poNumber: string) => void;
 }
 
 export const OrdersView: React.FC<OrdersViewProps> = ({
@@ -31,6 +33,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
   isScanning,
   userRole,
   onNavigateToIncident,
+  onViewOnMap,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -278,33 +281,7 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                     </td>
 
                     <td className="py-3 px-3 text-center whitespace-nowrap">
-                      {isEditing ? (
-                        <div className="flex items-center justify-center gap-1">
-                          <button
-                            onClick={() => saveEdit(po)}
-                            className="p-1 rounded bg-emerald-600 text-white hover:bg-emerald-500"
-                            title="Lưu"
-                          >
-                            <Save className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => setEditingPoId(null)}
-                            className="p-1 rounded bg-slate-200 text-slate-700 hover:bg-slate-300"
-                            title="Hủy"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => startEdit(po)}
-                          className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium inline-flex items-center gap-1 transition-colors"
-                          title="Sửa ngày giao để giả lập tracking / trễ hẹn"
-                        >
-                          <Edit2 className="w-3 h-3" />
-                          <span>Giả lập tracking</span>
-                        </button>
-                      )}
+                      {onViewOnMap && <button onClick={() => onViewOnMap(po.poNumber)} className="px-2 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium inline-flex items-center gap-1 transition-colors" title={`Xem tuyến ${po.poNumber} trên bản đồ`}><MapPinned className="w-3 h-3" /><span>Xem map</span></button>}
                     </td>
                   </tr>
                 );

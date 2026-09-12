@@ -89,8 +89,8 @@ export const AIService = {
       console.warn("API /api/ai/rfq call failed, using client fallback:", e);
       return {
         data: {
-          subject: `[BikeSync AI] Yêu cầu báo giá khẩn cấp (RFQ) - ${payload.skuName} (PO: ${payload.poNumber})`,
-          body: `Kính gửi Ban Giám đốc và Phòng Kinh doanh Quý đối tác ${payload.backupSupplierName},\n\nBộ phận Mua sắm BikeSync AI gửi yêu cầu báo giá khẩn cấp cho gói linh kiện ${payload.skuName} (${payload.sku}) số lượng ${Number(payload.quantity).toLocaleString("vi-VN")} chiếc.\n\nThời hạn giao hàng đề xuất: Trước ${payload.targetDeliveryDate}.\n\nKính đề nghị Quý công ty cập nhật phản hồi đơn giá và lead time trên BikeSync Supplier Portal trong vòng 24 giờ.\n\nTrân trọng cảm ơn!`,
+          subject: `[Resili chain] Yêu cầu báo giá khẩn cấp (RFQ) - ${payload.skuName} (PO: ${payload.poNumber})`,
+          body: `Kính gửi Ban Giám đốc và Phòng Kinh doanh Quý đối tác ${payload.backupSupplierName},\n\nBộ phận Mua sắm Resili chain gửi yêu cầu báo giá khẩn cấp cho gói linh kiện ${payload.skuName} (${payload.sku}) số lượng ${Number(payload.quantity).toLocaleString("vi-VN")} chiếc.\n\nThời hạn giao hàng đề xuất: Trước ${payload.targetDeliveryDate}.\n\nKính đề nghị Quý công ty cập nhật phản hồi đơn giá và lead time trên Resili chain Supplier Portal trong vòng 24 giờ.\n\nTrân trọng cảm ơn!`,
           termsSummary: `Giao ${payload.quantity} chiếc trước ngày ${payload.targetDeliveryDate}. Thanh toán T/T 30 ngày sau nghiệm thu.`,
         },
         isLiveAI: false,

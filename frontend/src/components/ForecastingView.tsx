@@ -18,6 +18,7 @@ import {
   Plus,
   RefreshCw,
   AlertTriangle,
+  ArrowLeft,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -41,6 +42,7 @@ interface ForecastingViewProps {
   onCreatePoFromForecast: (sku: string, quantity: number) => void;
   userRole: UserRole;
   initialSku?: string;
+  onBack: () => void;
 }
 
 export const ForecastingView: React.FC<ForecastingViewProps> = ({
@@ -52,6 +54,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
   onCreatePoFromForecast,
   userRole,
   initialSku,
+  onBack,
 }) => {
   const [selectedSku, setSelectedSku] = useState<string>(
     initialSku || inventory[0]?.sku || "SKU-FRM-01"
@@ -164,6 +167,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          <button type="button" onClick={onBack} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50"><ArrowLeft className="h-3.5 w-3.5" />Quay lại</button>
           <div className="flex items-center gap-2 text-xs">
             <span className="font-semibold text-slate-600">Chọn linh kiện xe đạp:</span>
             <select

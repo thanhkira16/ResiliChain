@@ -12,25 +12,17 @@ import {
 interface HeaderProps {
   currentTab: string;
   userRole: UserRole;
-  setUserRole: (role: UserRole) => void;
   unreadCount: number;
   onOpenNotifications: () => void;
   onOpenConfig: () => void;
-  activeSupplierId: string;
-  setActiveSupplierId: (id: string) => void;
-  suppliersList: Array<{ id: string; name: string }>;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   currentTab,
   userRole,
-  setUserRole,
   unreadCount,
   onOpenNotifications,
   onOpenConfig,
-  activeSupplierId,
-  setActiveSupplierId,
-  suppliersList,
 }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -92,7 +84,7 @@ export const Header: React.FC<HeaderProps> = ({
     },
   };
 
-  const currentInfo = pageTitles[currentTab] || { title: "BikeSync AI", subtitle: "Hệ thống quản lý chuỗi cung ứng" };
+  const currentInfo = pageTitles[currentTab] || { title: "Resili chain", subtitle: "Hệ thống quản lý chuỗi cung ứng" };
   const currentUser = userProfiles[userRole];
 
   return (
@@ -109,51 +101,6 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right Controls & User Profile */}
       <div className="flex items-center gap-3 shrink-0">
-        {/* Supplier Simulator switch */}
-        {userRole === "supplier" && (
-          <div className="flex items-center gap-1.5 text-xs bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200">
-            <Building2 className="w-3.5 h-3.5 text-purple-600" />
-            <span className="text-purple-700 font-medium hidden sm:inline">Giả lập NCC:</span>
-            <select
-              id="select-active-supplier"
-              value={activeSupplierId}
-              onChange={(e) => setActiveSupplierId(e.target.value)}
-              className="text-xs bg-transparent text-purple-900 font-semibold focus:outline-none cursor-pointer"
-            >
-              {suppliersList.map((sup) => (
-                <option key={sup.id} value={sup.id}>
-                  {sup.name.length > 24 ? sup.name.slice(0, 24) + "..." : sup.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {/* Role Selector */}
-        <div className="flex items-center gap-2">
-          <div className="text-right hidden xl:block">
-            <div className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
-              Đang đóng vai
-            </div>
-            <div className="text-xs font-semibold text-slate-800">
-              {roleLabels[userRole].title}
-            </div>
-          </div>
-
-          <select
-            id="select-user-role"
-            value={userRole}
-            onChange={(e) => setUserRole(e.target.value as UserRole)}
-            className={`text-xs font-semibold rounded-xl px-3 py-1.5 border transition-all cursor-pointer shadow-2xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20 ${roleLabels[userRole].color}`}
-          >
-            <option value="procurement_officer">1. Procurement Officer (&lt;50tr)</option>
-            <option value="supply_chain_manager">2. Supply Chain Manager (≥50tr)</option>
-            <option value="supplier">3. Supplier (Báo giá RFQ)</option>
-          </select>
-        </div>
-
-        <div className="h-5 w-px bg-slate-200 hidden sm:block" />
-
         {/* Notification Bell */}
         <button
           id="btn-notification-bell"
@@ -260,7 +207,7 @@ export const Header: React.FC<HeaderProps> = ({
 
               {/* Footer */}
               <div className="p-2 border-t border-slate-100 bg-slate-50 text-[11px] text-center text-slate-400">
-                BikeSync AI System v2.4
+                Resili chain System v2.4
               </div>
             </div>
           )}
