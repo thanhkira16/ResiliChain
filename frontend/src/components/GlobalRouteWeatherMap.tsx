@@ -4,9 +4,11 @@ import {
   Cartesian2,
   Cartesian3,
   Color,
+  ImageryLayer,
   Ion,
   LabelStyle,
   UrlTemplateImageryProvider,
+  WebMercatorTilingScheme,
   ScreenSpaceEventHandler,
   ScreenSpaceEventType,
   Viewer,
@@ -25,25 +27,29 @@ interface GlobalRouteWeatherMapProps {
 
 const shipmentColor = (shipment: AtRiskShipmentMapItem) => {
   const risk = String(shipment.riskLevel || "").toUpperCase();
-  if (risk === "HIGH" || shipment.currentDelayRiskScore >= 65) {
+  const score = shipment.currentDelayRiskScore ?? 0;
+  if (risk === "HIGH" || score >= 65) {
     return Color.fromCssColorString("#ef4444"); // Red
   }
-  if (risk === "MEDIUM" || shipment.currentDelayRiskScore >= 35) {
+  if (risk === "MEDIUM" || score >= 35) {
     return Color.fromCssColorString("#f97316"); // Orange
   }
   return Color.fromCssColorString("#10b981"); // Emerald
 };
 
-const positionsFrom = (points: Array<{ latitude: number; longitude: number }>) => {
+type GeoPoint = { latitude: number; longitude: number };
+
+const positionsFrom = (points: GeoPoint[]) => {
+  if (!Array.isArray(points)) return [];
   return points
-    .filter((p) => typeof p.latitude === "number" && typeof p.longitude === "number")
+    .filter((p) => p && typeof p.latitude === "number" && typeof p.longitude === "number" && !isNaN(p.latitude) && !isNaN(p.longitude))
     .map((point) => Cartesian3.fromDegrees(point.longitude, point.latitude, 500));
 };
 
 export function GlobalRouteWeatherMap({
-  shipments,
-  warehouses,
-  routeWeatherStops,
+  shipments = [],
+  warehouses = [],
+  routeWeatherStops = [],
   selectedShipment,
   onSelectShipment,
 }: GlobalRouteWeatherMapProps) {
@@ -51,10 +57,18 @@ export function GlobalRouteWeatherMap({
   const viewerRef = useRef<Viewer | null>(null);
   const shipmentLookupRef = useRef(new Map<string, AtRiskShipmentMapItem>());
   const [error, setError] = useState<string | null>(null);
+  const [viewerReady, setViewerReady] = useState(false);
+
+  // Keep the latest click handler in a ref so an inline parent callback never
+  // forces the Viewer (and its WebGL context) to be torn down and rebuilt.
+  const onSelectShipmentRef = useRef(onSelectShipment);
+  useEffect(() => {
+    onSelectShipmentRef.current = onSelectShipment;
+  }, [onSelectShipment]);
 
   const token = (import.meta.env.VITE_CESIUM_ION_TOKEN as string | undefined) || "";
 
-  // 1. Initialize Cesium Viewer once with high-performance ArcGIS / CartoDB imagery tiles
+  // 1. Initialize Cesium Viewer once with high-performance CartoDB Voyager tiles
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -64,11 +78,13 @@ export function GlobalRouteWeatherMap({
 
     let viewer: Viewer;
     try {
-      // High-resolution Satellite Imagery Provider (ArcGIS World Imagery - Free, Fast, No API Key needed)
+      // High-performance, crisp tile map provider (CARTO Voyager - Free, Fast, CORS enabled, WebMercator)
       const imageryProvider = new UrlTemplateImageryProvider({
-        url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        credit: "Esri, Maxar, Earthstar Geographics",
+        url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+        subdomains: ["a", "b", "c", "d"],
+        tilingScheme: new WebMercatorTilingScheme(),
         maximumLevel: 19,
+        credit: "CARTO, OpenStreetMap contributors",
       });
 
       viewer = new Viewer(containerRef.current, {
@@ -82,10 +98,8 @@ export function GlobalRouteWeatherMap({
         sceneModePicker: false,
         selectionIndicator: false,
         timeline: false,
-        shouldAnimate: false,
-        requestRenderMode: true, // Performance: Only render when scene changes!
-        maximumRenderTimeChange: Infinity,
-        imageryProvider: imageryProvider,
+        shouldAnimate: true,
+        baseLayer: new ImageryLayer(imageryProvider),
       });
 
       viewerRef.current = viewer;
@@ -103,11 +117,14 @@ export function GlobalRouteWeatherMap({
         const id = typeof picked?.id?.id === "string" ? picked.id.id : "";
         const shipment = shipmentLookupRef.current.get(id);
         if (shipment) {
-          onSelectShipment(shipment);
+          onSelectShipmentRef.current?.(shipment);
         }
       }, ScreenSpaceEventType.LEFT_CLICK);
 
+      setViewerReady(true);
+
       return () => {
+        setViewerReady(false);
         handler.destroy();
         if (!viewer.isDestroyed()) {
           viewer.destroy();
@@ -118,145 +135,150 @@ export function GlobalRouteWeatherMap({
       console.error("Cesium initialization error:", err);
       setError("Không thể khởi tạo bản đồ Cesium 3D. Vui lòng thử lại.");
     }
-  }, [onSelectShipment, token]);
+  }, [token]);
 
   // 2. Render Entities (Shipments, Routes, Warehouses, Weather Stops)
   useEffect(() => {
     const viewer = viewerRef.current;
     if (!viewer || viewer.isDestroyed()) return;
 
-    viewer.entities.removeAll();
-    shipmentLookupRef.current = new Map(
-      shipments.flatMap((shipment) => [
-        [`shipment-${shipment.shipmentId}`, shipment],
-        [`route-${shipment.shipmentId}`, shipment],
-      ])
-    );
+    try {
+      viewer.entities.removeAll();
+      const safeShipments = Array.isArray(shipments) ? shipments : [];
+      const safeWarehouses = Array.isArray(warehouses) ? warehouses : [];
+      const safeStops = Array.isArray(routeWeatherStops) ? routeWeatherStops : [];
 
-    // Render Destination Warehouses
-    warehouses.forEach((wh) => {
-      viewer.entities.add({
-        id: `warehouse-${wh.id}`,
-        position: Cartesian3.fromDegrees(wh.longitude, wh.latitude, 1000),
-        point: {
-          color: Color.fromCssColorString("#6366f1"),
-          outlineColor: Color.WHITE,
-          outlineWidth: 2,
-          pixelSize: 12,
-        },
-        label: {
-          text: `🏭 ${wh.name}`,
-          font: "bold 11px sans-serif",
-          fillColor: Color.fromCssColorString("#0f172a"),
-          showBackground: true,
-          backgroundColor: Color.WHITE.withAlpha(0.95),
-          pixelOffset: new Cartesian2(0, 18),
-        },
-      });
-    });
+      shipmentLookupRef.current = new Map(
+        safeShipments.flatMap((shipment) => [
+          [`shipment-${shipment.shipmentId}`, shipment],
+          [`route-${shipment.shipmentId}`, shipment],
+        ])
+      );
 
-    // Render Active Shipments & Route Polylines
-    shipments.forEach((shipment) => {
-      const isSelected = selectedShipment?.shipmentId === shipment.shipmentId;
-      const color = shipmentColor(shipment);
-
-      const trackingPoints = shipment.routeHistory || [];
-      const destination = shipment.destinationWarehouse;
-      const fullPoints = [...trackingPoints];
-      if (destination && !fullPoints.some((p) => p.latitude === destination.latitude && p.longitude === destination.longitude)) {
-        fullPoints.push({
-          id: `wh-${destination.id}`,
-          shipmentId: shipment.shipmentId,
-          checkpointIndex: 99,
-          locationName: destination.name,
-          latitude: destination.latitude,
-          longitude: destination.longitude,
-          timestamp: new Date().toISOString(),
-          checkpointType: "DestinationWarehouse",
-        });
-      }
-
-      const routePositions = positionsFrom(fullPoints);
-
-      // Polyline Route Line
-      if (routePositions.length > 1) {
+      // Render Destination Warehouses
+      safeWarehouses.forEach((wh) => {
+        if (!wh || typeof wh.latitude !== "number" || typeof wh.longitude !== "number" || isNaN(wh.latitude) || isNaN(wh.longitude)) return;
         viewer.entities.add({
-          id: `route-${shipment.shipmentId}`,
-          polyline: {
-            positions: routePositions,
-            width: isSelected ? 6 : 3,
-            material: isSelected ? color : color.withAlpha(0.6),
-          },
-        });
-      }
-
-      // Latest GPS Position Pin Marker
-      const latest = shipment.latestTrackingPoint || trackingPoints[trackingPoints.length - 1];
-      if (latest && typeof latest.latitude === "number" && typeof latest.longitude === "number") {
-        viewer.entities.add({
-          id: `shipment-${shipment.shipmentId}`,
-          position: Cartesian3.fromDegrees(latest.longitude, latest.latitude, 2000),
+          id: `warehouse-${wh.id}`,
+          position: Cartesian3.fromDegrees(wh.longitude, wh.latitude, 1000),
           point: {
-            color: color,
+            color: Color.fromCssColorString("#6366f1"),
             outlineColor: Color.WHITE,
-            outlineWidth: 3,
-            pixelSize: isSelected ? 16 : 12,
+            outlineWidth: 2,
+            pixelSize: 12,
           },
           label: {
-            text: `${shipment.poNumber} · ${shipment.currentDelayRiskScore.toFixed(1)}đ (${shipment.riskLevel})`,
-            font: "bold 12px sans-serif",
-            fillColor: Color.WHITE,
-            style: LabelStyle.FILL_AND_OUTLINE,
-            outlineColor: Color.fromCssColorString("#0f172a"),
-            outlineWidth: 3,
+            text: `🏭 ${wh.name}`,
+            font: "bold 11px sans-serif",
+            fillColor: Color.fromCssColorString("#0f172a"),
             showBackground: true,
-            backgroundColor: Color.fromCssColorString("#0f172a").withAlpha(0.9),
-            pixelOffset: new Cartesian2(0, -28),
+            backgroundColor: Color.WHITE.withAlpha(0.95),
+            pixelOffset: new Cartesian2(0, 18),
           },
         });
-      }
-    });
-
-    // Render Route Weather Stops
-    routeWeatherStops.forEach((stop, index) => {
-      const style = weatherSeverityStyle[stop.severity];
-      viewer.entities.add({
-        id: `weather-${index}`,
-        position: Cartesian3.fromDegrees(stop.location.longitude, stop.location.latitude, 1500),
-        point: {
-          color: Color.fromCssColorString(style.color),
-          outlineColor: Color.WHITE,
-          outlineWidth: 2,
-          pixelSize: 10,
-        },
-        label: {
-          text: `🌩️ ${stop.location.name} · ${stop.severityLabel}`,
-          font: "bold 11px sans-serif",
-          fillColor: Color.WHITE,
-          showBackground: true,
-          backgroundColor: Color.fromCssColorString("#0f172a").withAlpha(0.85),
-          pixelOffset: new Cartesian2(0, -22),
-        },
       });
-    });
 
-    // Camera Focus on Selected Shipment
-    if (selectedShipment) {
-      const points = [...(selectedShipment.routeHistory || [])];
-      if (selectedShipment.destinationWarehouse) points.push(selectedShipment.destinationWarehouse);
-      const positions = positionsFrom(points);
-      if (positions.length > 0) {
-        const sphere = BoundingSphere.fromPoints(positions);
-        const flyRange = Math.max(sphere.radius * 2.5, 350000);
-        viewer.camera.flyToBoundingSphere(sphere, {
-          duration: 1.2,
-          offset: { heading: 0, pitch: -0.85, range: flyRange },
+      // Render Active Shipments & Route Polylines
+      safeShipments.forEach((shipment) => {
+        if (!shipment) return;
+        const isSelected = selectedShipment?.shipmentId === shipment.shipmentId;
+        const color = shipmentColor(shipment);
+
+        const trackingPoints = shipment.routeHistory || [];
+        const destination = shipment.destinationWarehouse;
+        // Only coordinates matter downstream, so keep this a plain lat/lng list
+        // instead of fabricating a partial ShipmentTrackingPoint.
+        const fullPoints: GeoPoint[] = trackingPoints.map((p) => ({ latitude: p.latitude, longitude: p.longitude }));
+        if (destination && typeof destination.latitude === "number" && typeof destination.longitude === "number" && !isNaN(destination.latitude) && !isNaN(destination.longitude) && !fullPoints.some((p) => p.latitude === destination.latitude && p.longitude === destination.longitude)) {
+          fullPoints.push({ latitude: destination.latitude, longitude: destination.longitude });
+        }
+
+        const routePositions = positionsFrom(fullPoints);
+
+        // Polyline Route Line
+        if (routePositions.length > 1) {
+          viewer.entities.add({
+            id: `route-${shipment.shipmentId}`,
+            polyline: {
+              positions: routePositions,
+              width: isSelected ? 6 : 3,
+              material: isSelected ? color : color.withAlpha(0.6),
+            },
+          });
+        }
+
+        // Latest GPS Position Pin Marker
+        const latest = shipment.latestTrackingPoint || trackingPoints[trackingPoints.length - 1];
+        if (latest && typeof latest.latitude === "number" && typeof latest.longitude === "number" && !isNaN(latest.latitude) && !isNaN(latest.longitude)) {
+          const score = typeof shipment.currentDelayRiskScore === "number" ? shipment.currentDelayRiskScore : 0;
+          const riskLabel = shipment.riskLevel || "NORMAL";
+          viewer.entities.add({
+            id: `shipment-${shipment.shipmentId}`,
+            position: Cartesian3.fromDegrees(latest.longitude, latest.latitude, 2000),
+            point: {
+              color: color,
+              outlineColor: Color.WHITE,
+              outlineWidth: 3,
+              pixelSize: isSelected ? 16 : 12,
+            },
+            label: {
+              text: `${shipment.poNumber || 'PO'} · ${score.toFixed(1)}đ (${riskLabel})`,
+              font: "bold 12px sans-serif",
+              fillColor: Color.WHITE,
+              style: LabelStyle.FILL_AND_OUTLINE,
+              outlineColor: Color.fromCssColorString("#0f172a"),
+              outlineWidth: 3,
+              showBackground: true,
+              backgroundColor: Color.fromCssColorString("#0f172a").withAlpha(0.9),
+              pixelOffset: new Cartesian2(0, -28),
+            },
+          });
+        }
+      });
+
+      // Render Route Weather Stops
+      safeStops.forEach((stop, index) => {
+        if (!stop?.location || typeof stop.location.latitude !== "number" || typeof stop.location.longitude !== "number" || isNaN(stop.location.latitude) || isNaN(stop.location.longitude)) return;
+        const style = weatherSeverityStyle[stop.severity] || weatherSeverityStyle.GOOD;
+        viewer.entities.add({
+          id: `weather-${index}`,
+          position: Cartesian3.fromDegrees(stop.location.longitude, stop.location.latitude, 1500),
+          point: {
+            color: Color.fromCssColorString(style.color),
+            outlineColor: Color.WHITE,
+            outlineWidth: 2,
+            pixelSize: 10,
+          },
+          label: {
+            text: `🌩️ ${stop.location.name} · ${stop.severityLabel || 'Thời tiết'}`,
+            font: "bold 11px sans-serif",
+            fillColor: Color.WHITE,
+            showBackground: true,
+            backgroundColor: Color.fromCssColorString("#0f172a").withAlpha(0.85),
+            pixelOffset: new Cartesian2(0, -22),
+          },
         });
-      }
-    }
+      });
 
-    viewer.scene.requestRender();
-  }, [shipments, warehouses, routeWeatherStops, selectedShipment]);
+      // Camera Focus on Selected Shipment
+      if (selectedShipment) {
+        const points: GeoPoint[] = (selectedShipment.routeHistory || []).map((p) => ({ latitude: p.latitude, longitude: p.longitude }));
+        const dest = selectedShipment.destinationWarehouse;
+        if (dest) points.push({ latitude: dest.latitude, longitude: dest.longitude });
+        const positions = positionsFrom(points);
+        if (positions.length > 0) {
+          const sphere = BoundingSphere.fromPoints(positions);
+          const flyRange = Math.max(sphere.radius * 2.5, 350000);
+          viewer.camera.flyToBoundingSphere(sphere, {
+            duration: 1.2,
+            offset: { heading: 0, pitch: -0.85, range: flyRange },
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Error rendering Cesium entities:", err);
+    }
+  }, [viewerReady, shipments, warehouses, routeWeatherStops, selectedShipment]);
 
   return (
     <section className="relative h-[600px] overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-md">
@@ -270,7 +292,7 @@ export function GlobalRouteWeatherMap({
 
       {/* Floating Status Bar */}
       <div className="pointer-events-none absolute left-3 top-3 z-10 rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-800 shadow-sm backdrop-blur">
-        <div className="font-bold text-slate-900">Bản Đồ Vệ Tinh 3D Digital Twin · ArcGIS Satellite Engine</div>
+        <div className="font-bold text-slate-900">Bản Đồ 3D Digital Twin · CARTO Vector Engine</div>
         <div className="mt-0.5 text-[11px] text-slate-500">Cuộn để phóng to, kéo để xoay. Nhấp vào pin lô hàng để xem chi tiết.</div>
       </div>
 
