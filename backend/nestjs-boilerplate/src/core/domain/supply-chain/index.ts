@@ -6,3 +6,5 @@ export * from './entities/sourcing-proposal.entity';
 export * from './entities/shipment-tracking.entity';
 export * from './entities/shipment.entity';
 
+export * from './entities/supplier-risk-analysis.entity';
+export * from './entities/ai-job-run.entity';
