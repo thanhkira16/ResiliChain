@@ -25,5 +25,6 @@ export class SupplyChainController {
   @Post('sourcing-proposals') createProposal(@Body() body: Record<string, unknown>) { return this.supplyChainService.createProposal(body as unknown as SourcingProposalEntity); }
   @Patch('sourcing-proposals/:id') updateProposal(@Param('id') id: string, @Body() body: Partial<SourcingProposalEntity>) { return this.supplyChainService.updateProposal(id, body); }
   @Get('shipments/at-risk-map') atRiskShipments() { return this.supplyChainService.atRiskShipments(); }
+  @Get('shipments/:id/route') shipmentRoute(@Param('id') id: string) { return this.supplyChainService.shipmentRoute(id); }
   @Post('shipment-tracking-points') recordTrackingPoint(@Body() body: Record<string, unknown>) { return this.supplyChainService.recordTrackingPoint(body as unknown as ShipmentTrackingPointEntity); }
 }

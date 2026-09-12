@@ -219,7 +219,7 @@ app.post("/api/ai/rfq", async (req, res) => {
   try {
     const ai = getGeminiAI();
     if (ai) {
-      const prompt = `Bạn là AI Agent đàm phán & tìm nguồn cung (Sourcing & Negotiation Agent) của chuỗi cung ứng xe đạp BikeSync AI tại Việt Nam.
+      const prompt = `Bạn là AI Agent đàm phán & tìm nguồn cung (Sourcing & Negotiation Agent) của Resili chain tại Việt Nam.
 Hãy soạn thảo một thư yêu cầu báo giá khẩn (Request for Quotation - RFQ) chuyên nghiệp, lịch sự nhưng có tính cấp bách gửi đến nhà cung cấp dự phòng: ${backupSupplierName}.
 
 Thông tin đơn hàng khẩn cấp:
@@ -258,10 +258,10 @@ Yêu cầu nội dung thư:
   }
 
   // Fallback high-quality template
-  const fallbackSubject = `[BikeSync AI] Yêu cầu báo giá khẩn cấp (RFQ) linh kiện ${skuName} - PO Ref: ${poNumber}`;
+  const fallbackSubject = `[Resili chain] Yêu cầu báo giá khẩn cấp (RFQ) linh kiện ${skuName} - PO Ref: ${poNumber}`;
   const fallbackBody = `Kính gửi Ban Giám đốc và Phòng Kinh doanh Quý đối tác ${backupSupplierName},
 
-BikeSync AI - Bộ phận Mua sắm & Quản lý Chuỗi Cung Ứng Xe Đạp xin gửi lời chào trân trọng đến Quý công ty.
+Resili chain - Bộ phận Mua sắm & Quản lý Chuỗi Cung Ứng xin gửi lời chào trân trọng đến Quý công ty.
 
 Do tiến độ sản xuất xe đạp theo đơn hàng xuất khẩu đang bước vào giai đoạn quyết định, chúng tôi mở gói thầu bổ sung khẩn cấp cho hạng mục linh kiện sau:
 
@@ -271,12 +271,12 @@ Do tiến độ sản xuất xe đạp theo đơn hàng xuất khẩu đang bư�
 - Tiêu chuẩn kỹ thuật: Đạt tiêu chuẩn kiểm định xuất khẩu, đầy đủ chứng chỉ nguồn gốc (CO/CQ).
 - Mã tham chiếu nội bộ: ${incidentId || "INC-AUTO"} / ${poNumber}
 
-Kính đề nghị Quý công ty phản hồi báo giá (đơn giá VNĐ, lead time cam kết và chính sách thanh toán/bảo hành) qua cổng tự phục vụ BikeSync Supplier Portal trước 17:00 ngày mai.
+Kính đề nghị Quý công ty phản hồi báo giá (đơn giá VNĐ, lead time cam kết và chính sách thanh toán/bảo hành) qua cổng tự phục vụ Resili chain Supplier Portal trước 17:00 ngày mai.
 
 Rất mong nhận được sự hợp tác nhanh chóng từ Quý đối tác.
 
 Trân trọng,
-Bộ phận Mua sắm & Quản ứng Chuỗi Cung Ứng BikeSync AI`;
+Bộ phận Mua sắm & Quản ứng Chuỗi Cung Ứng Resili chain`;
 
   return res.json({
     success: true,
@@ -310,7 +310,7 @@ app.post("/api/ai/analyze-proposals", async (req, res) => {
   try {
     const ai = getGeminiAI();
     if (ai) {
-      const prompt = `Bạn là AI Agent tối ưu hóa nguồn cung ứng (Sourcing Optimization Agent) của hệ thống BikeSync AI.
+      const prompt = `Bạn là AI Agent tối ưu hóa nguồn cung ứng (Sourcing Optimization Agent) của hệ thống Resili chain.
 Sự cố phát hiện: Nhà cung cấp gốc (${originalSupplierName}) giao trễ đơn hàng ${poNumber} (${sku} - ${skuName}, số lượng ${quantity}).
 Giá gốc ban đầu: ${Number(originalUnitPrice).toLocaleString("vi-VN")} VNĐ/đơn vị.
 Hạn giao hàng bắt buộc: ${requiredDeliveryDate}.
@@ -447,7 +447,7 @@ app.post("/api/ai/forecast-explanation", async (req, res) => {
   try {
     const ai = getGeminiAI();
     if (ai) {
-      const prompt = `Bạn là AI Agent dự báo nhu cầu (Demand Forecasting Agent) của BikeSync AI.
+      const prompt = `Bạn là AI Agent dự báo nhu cầu (Demand Forecasting Agent) của Resili chain.
 Hãy viết một bản phân tích ngắn gọn, súc tích (khoảng 3-4 câu) giải thích kết quả dự báo và đề xuất kế hoạch nhập hàng cho linh kiện xe đạp:
 
 Dữ liệu đầu vào:
@@ -519,7 +519,7 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`BikeSync AI Server running on http://0.0.0.0:${PORT}`);
+    console.log(`Resili chain Server running on http://0.0.0.0:${PORT}`);
   });
 }
 

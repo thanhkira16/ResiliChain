@@ -12,6 +12,7 @@ import {
   DollarSign,
   ArrowRight,
   UserCheck,
+  ArrowLeft,
 } from "lucide-react";
 
 interface RfqViewProps {
@@ -24,6 +25,7 @@ interface RfqViewProps {
   isEvaluating: boolean;
   userRole: UserRole;
   onNavigateToApprovals: () => void;
+  onBack: () => void;
 }
 
 export const RfqView: React.FC<RfqViewProps> = ({
@@ -36,6 +38,7 @@ export const RfqView: React.FC<RfqViewProps> = ({
   isEvaluating,
   userRole,
   onNavigateToApprovals,
+  onBack,
 }) => {
   const [selectedRfq, setSelectedRfq] = useState<RFQItem | null>(null);
 
@@ -68,6 +71,7 @@ export const RfqView: React.FC<RfqViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2 text-xs">
+          <button type="button" onClick={onBack} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-700 transition-colors hover:bg-slate-50"><ArrowLeft className="h-3.5 w-3.5" />Quay lại</button>
           <span className="font-semibold text-slate-700">Tổng RFQ đã phát hành:</span>
           <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold">
             {rfqs.length} yêu cầu
