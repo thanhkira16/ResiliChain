@@ -1,0 +1,365 @@
+{
+  "metadata": {
+    "source_file": "bao-cao-rui-ro-nha-cung-ung.html",
+    "report_title": "Radar Rui Ro Nha Cung Ung EV",
+    "observation_window": {
+      "from": "2026-08-14",
+      "to": "2026-09-12"
+    },
+    "financial_period": "FY2025",
+    "rendered_at_utc": "2026-09-12T04:05:00Z",
+    "purpose": "Static fixture/cache for AI worker demo to avoid repeated GDELT/FMP API calls.",
+    "pors_note": "partial_pors_score uses only available report components: 0.35 * ssi_news + 0.30 * ssi_fin. Full PORS still needs ssi_del and g_geo from ERP/order context."
+  },
+  "suppliers": [
+    {
+      "ticker": "F",
+      "name": "Ford Motor",
+      "country": "US",
+      "cluster_id": 1,
+      "cluster_name": "Battery & BMS",
+      "hs_code": "850760",
+      "role": "BlueOval SK - cell pin LFP/NCM",
+      "scores": {
+        "tone": 62.0,
+        "volume": 48.9,
+        "geo_political": 51.0,
+        "ssi_news": 55.9,
+        "altman_z": 0.85,
+        "ssi_fin": 77.7,
+        "partial_pors_score": 42.875
+      },
+      "events_30d": {
+        "total": 16,
+        "supply_chain_related": 6
+      },
+      "status": "Ca hai truc",
+      "risk_bucket": "highest_priority",
+      "recommended_flow": "email_inquiry_then_logistics_chatbox",
+      "key_events": [
+        {
+          "date": "2026-09-08",
+          "summary": "US Transportation Secretary Sean Duffy asked Ford to change relationships with Chinese companies, citing national security."
+        },
+        {
+          "date": "2026-09-10",
+          "summary": "Ford refused calls to end cooperation with CATL, Geely and BYD, defending the Michigan battery plant."
+        },
+        {
+          "date": "2026-09-08",
+          "summary": "Alliance for Automotive Innovation asked Congress to ban sale, import and production of Chinese vehicles and components."
+        }
+      ]
+    },
+    {
+      "ticker": "LCID",
+      "name": "Lucid Motors",
+      "country": "US",
+      "cluster_id": 2,
+      "cluster_name": "E-Powertrain",
+      "hs_code": "850153",
+      "role": "Drive unit & E-Motor, supplying Aston Martin",
+      "scores": {
+        "tone": 59.3,
+        "volume": 6.6,
+        "geo_political": 25.0,
+        "ssi_news": 37.6,
+        "altman_z": -4.49,
+        "ssi_fin": 100.0,
+        "partial_pors_score": 43.16
+      },
+      "events_30d": {
+        "total": 2,
+        "supply_chain_related": 2
+      },
+      "status": "Kiet que",
+      "risk_bucket": "financial_distress",
+      "recommended_flow": "replacement_sourcing",
+      "key_events": [
+        {
+          "date": "2026-08-28",
+          "summary": "Recall of 27,185 Lucid Air vehicles in the US; NHTSA said exterior light circuits may overheat."
+        },
+        {
+          "date": "2026-09-09",
+          "summary": "Official recall filing submitted to US regulator, citing fire risk."
+        }
+      ]
+    },
+    {
+      "ticker": "RIVN",
+      "name": "Rivian",
+      "country": "US",
+      "cluster_id": 2,
+      "cluster_name": "E-Powertrain",
+      "hs_code": "850153",
+      "role": "Enduro drive unit & inverter",
+      "scores": {
+        "tone": 48.9,
+        "volume": 1.4,
+        "geo_political": 25.0,
+        "ssi_news": 31.0,
+        "altman_z": -1.37,
+        "ssi_fin": 95.4,
+        "partial_pors_score": 39.47
+      },
+      "events_30d": {
+        "total": 1,
+        "supply_chain_related": 0
+      },
+      "status": "Kiet que",
+      "risk_bucket": "financial_distress",
+      "recommended_flow": "replacement_sourcing",
+      "key_events": [
+        {
+          "date": "2026-08-27",
+          "summary": "CFO Claire McDonough resigned effective 2026-10-30 to join GE Vernova."
+        }
+      ]
+    },
+    {
+      "ticker": "GM",
+      "name": "General Motors",
+      "country": "US",
+      "cluster_id": 1,
+      "cluster_name": "Battery & BMS",
+      "hs_code": "850760",
+      "role": "Ultium Cells - cell pin NCMA",
+      "scores": {
+        "tone": 76.3,
+        "volume": 45.3,
+        "geo_political": 25.0,
+        "ssi_news": 55.7,
+        "altman_z": 1.21,
+        "ssi_fin": 74.8,
+        "partial_pors_score": 41.935
+      },
+      "events_30d": {
+        "total": 14,
+        "supply_chain_related": 4
+      },
+      "status": "Kiet que",
+      "risk_bucket": "financial_distress",
+      "recommended_flow": "replacement_sourcing",
+      "key_events": [
+        {
+          "date": "2026-08-25",
+          "summary": "Canada announced retaliatory tariffs of 15-50% on US goods including steel, aluminum and electrical equipment."
+        },
+        {
+          "date": "2026-08-29",
+          "summary": "GM committed not to sell or close the idled CAMI Ontario plant."
+        },
+        {
+          "date": "2026-09-01",
+          "summary": "GM Canada and Unifor ratified a three-year contract with more than CAD 1B investment commitment."
+        }
+      ]
+    },
+    {
+      "ticker": "TSM",
+      "name": "TSMC",
+      "country": "TW",
+      "cluster_id": 3,
+      "cluster_name": "Automotive Semiconductor & MCU",
+      "hs_code": "854231",
+      "role": "Foundry MCU oto",
+      "scores": {
+        "tone": 82.3,
+        "volume": 35.1,
+        "geo_political": 90.0,
+        "ssi_news": 72.4,
+        "altman_z": 17.06,
+        "ssi_fin": 5.0,
+        "partial_pors_score": 26.84
+      },
+      "events_30d": {
+        "total": 11,
+        "supply_chain_related": 4
+      },
+      "status": "Dia chinh tri",
+      "risk_bucket": "geopolitical_supply_risk",
+      "recommended_flow": "monitor_and_prepare_backup_source",
+      "key_events": [
+        {
+          "date": "2026-09-06",
+          "summary": "Large Arizona expansion plan: six fabs in Phoenix plus four additional facilities."
+        },
+        {
+          "date": "2026-09-08",
+          "summary": "Record capacity expansion in Taiwan to meet AI demand."
+        },
+        {
+          "date": "2026-09-01",
+          "summary": "Taiwan President Lai Ching-te committed to global semiconductor cooperation to diversify production locations."
+        }
+      ]
+    },
+    {
+      "ticker": "TSLA",
+      "name": "Tesla",
+      "country": "US",
+      "cluster_id": 1,
+      "cluster_name": "Battery & BMS",
+      "hs_code": "850760",
+      "role": "Cell 4680 cylindrical & battery pack",
+      "scores": {
+        "tone": 81.5,
+        "volume": 78.1,
+        "geo_political": 46.2,
+        "ssi_news": 71.8,
+        "altman_z": 15.58,
+        "ssi_fin": 5.0,
+        "partial_pors_score": 26.63
+      },
+      "events_30d": {
+        "total": 34,
+        "supply_chain_related": 4
+      },
+      "status": "Chat luong",
+      "risk_bucket": "quality_risk",
+      "recommended_flow": "monitor_quality_and_logistics",
+      "key_events": [
+        {
+          "date": "2026-08-21",
+          "summary": "China regulator announced recall of more than 4M vehicles, nearly 3M of them Tesla."
+        },
+        {
+          "date": "2026-09-06",
+          "summary": "Recall campaign covering 4.6M vehicles due to flush door handles that may jam."
+        },
+        {
+          "date": "2026-08-19",
+          "summary": "More than 20,000 vehicles withdrawn from the US market due to an unspecified dangerous defect."
+        }
+      ]
+    },
+    {
+      "ticker": "NVDA",
+      "name": "Nvidia",
+      "country": "US",
+      "cluster_id": 3,
+      "cluster_name": "Automotive Semiconductor & MCU",
+      "hs_code": "854231",
+      "role": "DRIVE Orin/Thor SoC",
+      "scores": {
+        "tone": 100.0,
+        "volume": 81.3,
+        "geo_political": 51.0,
+        "ssi_news": 83.1,
+        "altman_z": 39.62,
+        "ssi_fin": 5.0,
+        "partial_pors_score": 30.585
+      },
+      "events_30d": {
+        "total": 72,
+        "supply_chain_related": 3
+      },
+      "status": "Kiem soat XK",
+      "risk_bucket": "export_control_risk",
+      "recommended_flow": "monitor_policy_and_prepare_backup_source",
+      "key_events": [
+        {
+          "date": "2026-08-19",
+          "summary": "China eased restrictions on H200 chips, allowing small batches to ByteDance and Tencent."
+        },
+        {
+          "date": "2026-08-21",
+          "summary": "Supermicro fired employees after investigation into a USD 2.5B AI chip smuggling route to China."
+        },
+        {
+          "date": "2026-08-26",
+          "summary": "Keelung prosecutors in Taiwan indicted nine people, including Nvidia employees, for illegal export of AI servers."
+        }
+      ]
+    },
+    {
+      "ticker": "AMD",
+      "name": "Advanced Micro Devices",
+      "country": "US",
+      "cluster_id": 3,
+      "cluster_name": "Automotive Semiconductor & MCU",
+      "hs_code": "854231",
+      "role": "Xilinx automotive FPGA",
+      "scores": {
+        "tone": 78.8,
+        "volume": 27.3,
+        "geo_political": 51.0,
+        "ssi_news": 59.0,
+        "altman_z": 30.24,
+        "ssi_fin": 5.0,
+        "partial_pors_score": 22.15
+      },
+      "events_30d": {
+        "total": 17,
+        "supply_chain_related": 0
+      },
+      "status": "Khong van de",
+      "risk_bucket": "stable_noise",
+      "recommended_flow": "no_action",
+      "key_events": [
+        {
+          "date": "2026-08-15",
+          "summary": "AMD issued USD 4.75B in bonds, the largest debt issuance in company history; not directly related to automotive supply disruption."
+        }
+      ]
+    },
+    {
+      "ticker": "INTC",
+      "name": "Intel",
+      "country": "US",
+      "cluster_id": 3,
+      "cluster_name": "Automotive Semiconductor & MCU",
+      "hs_code": "854231",
+      "role": "Mobileye ADAS SoC & MCU",
+      "scores": {
+        "tone": 65.4,
+        "volume": 18.4,
+        "geo_political": 51.0,
+        "ssi_news": 50.1,
+        "altman_z": 3.56,
+        "ssi_fin": 38.3,
+        "partial_pors_score": 29.025
+      },
+      "events_30d": {
+        "total": 8,
+        "supply_chain_related": 0
+      },
+      "status": "Khong van de",
+      "risk_bucket": "stable_noise",
+      "recommended_flow": "no_action",
+      "key_events": [
+        {
+          "date": "2026-08-15",
+          "summary": "Intel raised USD 20B to expand its foundry business; this may reduce supply risk rather than increase it."
+        }
+      ]
+    },
+    {
+      "ticker": "SONY",
+      "name": "Sony Group",
+      "country": "JP",
+      "cluster_id": 3,
+      "cluster_name": "Automotive Semiconductor & MCU",
+      "hs_code": "854110",
+      "role": "CMOS sensor / LiDAR module",
+      "scores": {
+        "tone": 48.3,
+        "volume": 10.5,
+        "geo_political": 30.0,
+        "ssi_news": 34.3,
+        "altman_z": 3.47,
+        "ssi_fin": 38.5,
+        "partial_pors_score": 23.555
+      },
+      "events_30d": {
+        "total": 5,
+        "supply_chain_related": 0
+      },
+      "status": "Khong van de",
+      "risk_bucket": "stable_noise",
+      "recommended_flow": "no_action",
+      "key_events": []
+    }
+  ]
+}
