@@ -94,28 +94,10 @@ export default function App() {
         replaceWhenAvailable(apiInventory, setInventory);
         replaceWhenAvailable(apiOrders, setOrders);
         replaceWhenAvailable(apiIncidents, setIncidents);
-        replaceWhenAvailable(apiProposals, setProposals);
-      })
-      .catch((error) => console.warn('Supply-chain API is unavailable; using local demo data.', error));
-    return () => { mounted = false; };
-  }, []);
-
-  // Hydrate persisted supply-chain data. Local mock data remains the fallback for a fresh database.
-  useEffect(() => {
-    let mounted = true;
-    const replaceWhenAvailable = <T,>(items: T[], setter: React.Dispatch<React.SetStateAction<T[]>>) => {
-      if (mounted && items.length > 0) setter(items);
-    };
-    Promise.all([
-      SupplyChainApi.getSuppliers(), SupplyChainApi.getInventory(), SupplyChainApi.getPurchaseOrders(),
-      SupplyChainApi.getIncidents(), SupplyChainApi.getProposals(),
-    ])
-      .then(([apiSuppliers, apiInventory, apiOrders, apiIncidents, apiProposals]) => {
-        replaceWhenAvailable(apiSuppliers, setSuppliers);
-        replaceWhenAvailable(apiInventory, setInventory);
-        replaceWhenAvailable(apiOrders, setOrders);
-        replaceWhenAvailable(apiIncidents, setIncidents);
-        replaceWhenAvailable(apiProposals, setProposals);
+        if (mounted && apiProposals.length > 0) {
+          setProposals(apiProposals);
+          StorageService.saveProposals(apiProposals);
+        }
       })
       .catch((error) => console.warn('Supply-chain API is unavailable; using local demo data.', error));
     return () => { mounted = false; };

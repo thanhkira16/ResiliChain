@@ -1,7 +1,6 @@
 import React from "react";
 import { UserRole } from "../types";
 import {
-  Bike,
   LayoutDashboard,
   Map,
   ShoppingBag,
@@ -9,7 +8,6 @@ import {
   Boxes,
   ShieldAlert,
   FileCheck,
-  ChevronRight,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -37,14 +35,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: "Bản đồ Vận chuyển",
       icon: Map,
       badge: openIncidentsCount > 0 ? `${openIncidentsCount}` : undefined,
-      badgeColor: "bg-blue-500 text-white",
+      badgeStyle: "bg-slate-100 text-slate-700 border border-slate-200",
+      badgeAriaLabel: `${openIncidentsCount} sự cố vận chuyển`,
     },
     {
       id: "incidents",
       label: "Rủi ro & Sự cố",
       icon: ShieldAlert,
       badge: openIncidentsCount > 0 ? `${openIncidentsCount}` : undefined,
-      badgeColor: "bg-amber-500 text-white animate-pulse",
+      badgeStyle: "bg-amber-50 text-amber-800 border border-amber-200",
+      badgeAriaLabel: `${openIncidentsCount} sự cố rủi ro đang mở`,
     },
     {
       id: "orders",
@@ -66,79 +66,104 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: "Duyệt (HITL)",
       icon: FileCheck,
       badge: pendingApprovalCount > 0 ? `${pendingApprovalCount}` : undefined,
-      badgeColor: "bg-red-500 text-white font-bold",
+      badgeStyle: "bg-rose-50 text-rose-800 border border-rose-200",
+      badgeAriaLabel: `${pendingApprovalCount} đề xuất chờ duyệt`,
     },
   ];
 
   return (
-    <aside className="w-64 bg-slate-900 text-slate-300 border-r border-slate-800 flex flex-col shrink-0 min-h-screen sticky top-0 h-screen select-none shadow-xl z-20">
-      {/* Brand Header */}
-      <div className="p-4 border-b border-slate-800 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 shadow-md font-black shrink-0">
-          <Bike className="w-5 h-5 stroke-[2.5]" />
+    <aside
+      aria-label="Điều hướng chính"
+      className="w-16 md:w-64 bg-white text-slate-700 border-r border-slate-200 flex flex-col shrink-0 min-h-screen sticky top-0 h-screen select-none z-20 shadow-xs"
+    >
+      {/* Brand Header - height matches top header for continuous horizontal divider */}
+      <div className="h-[74px] px-3 md:px-4 border-b border-slate-200 flex items-center justify-center md:justify-start shrink-0 bg-white">
+        {/* Full brand logo on expanded sidebar */}
+        <div className="hidden md:flex items-center">
+          <img
+            src="/resilichain-logo.png"
+            alt="ResiliChain Logo"
+            className="h-9 w-auto object-contain select-none"
+          />
         </div>
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1.5">
-            <span className="text-base font-bold tracking-tight text-white">Resili chain</span>
-          </div>
-          <span className="text-[10px] text-emerald-400 font-mono tracking-wider uppercase font-semibold">
-            Supply Chain MVP
-          </span>
+        {/* Standalone mark on collapsed sidebar */}
+        <div className="md:hidden flex items-center justify-center">
+          <img
+            src="/resilichain-icon.png"
+            alt="ResiliChain Mark"
+            className="w-8 h-8 object-contain select-none"
+          />
         </div>
       </div>
 
       {/* Navigation Links */}
-      <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6 scrollbar-thin scrollbar-thumb-slate-800">
-        <div>
-          <div className="px-3 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-            Quản lý chuỗi cung ứng
-          </div>
-          <nav className="space-y-1">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = currentTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  id={`sidebar-tab-${tab.id}`}
-                  onClick={() => setCurrentTab(tab.id)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group ${
-                    isActive
-                      ? "bg-emerald-600 text-white shadow-md shadow-emerald-900/30"
-                      : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/70"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon
-                      className={`w-4 h-4 transition-transform group-hover:scale-110 ${
-                        isActive ? "text-white" : "text-slate-400 group-hover:text-slate-200"
-                      }`}
-                    />
-                    <span>{tab.label}</span>
-                  </div>
+      <div className="flex-1 overflow-y-auto py-3 px-2 md:px-3 scrollbar-thin scrollbar-thumb-slate-200">
+        <nav className="space-y-1" aria-label="Các trang ứng dụng">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = currentTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                id={`sidebar-tab-${tab.id}`}
+                onClick={() => setCurrentTab(tab.id)}
+                title={tab.label}
+                aria-current={isActive ? "page" : undefined}
+                className={`relative w-full flex items-center justify-center md:justify-between px-2.5 md:px-3 py-2 rounded-lg text-xs font-medium transition-colors group cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500 ${
+                  isActive
+                    ? "bg-emerald-50 text-emerald-900 border border-emerald-200/70 font-semibold shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-transparent"
+                }`}
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Icon
+                    className={`w-4 h-4 shrink-0 transition-colors ${
+                      isActive
+                        ? "text-emerald-600"
+                        : "text-slate-400 group-hover:text-slate-600"
+                    }`}
+                    aria-hidden="true"
+                  />
+                  <span className="hidden md:inline truncate">{tab.label}</span>
+                </div>
 
-                  {tab.badge ? (
+                {tab.badge ? (
+                  <>
                     <span
-                      className={`px-2 py-0.5 text-[10px] rounded-full font-bold shadow-xs ${tab.badgeColor}`}
+                      className={`hidden md:inline-block px-1.5 py-0.5 text-[11px] rounded-md font-medium tabular-nums shrink-0 ml-2 ${tab.badgeStyle}`}
+                      aria-label={tab.badgeAriaLabel}
                     >
                       {tab.badge}
                     </span>
-                  ) : isActive ? (
-                    <ChevronRight className="w-3.5 h-3.5 text-emerald-200 opacity-80" />
-                  ) : null}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
+                    <span
+                      className={`md:hidden absolute top-2 right-2 w-1.5 h-1.5 rounded-full ${
+                        tab.id === "incidents"
+                          ? "bg-amber-500"
+                          : tab.id === "approvals"
+                          ? "bg-rose-500"
+                          : "bg-slate-400"
+                      }`}
+                      aria-label={tab.badgeAriaLabel}
+                    />
+                  </>
+                ) : null}
+              </button>
+            );
+          })}
+        </nav>
       </div>
 
       {/* Sidebar Footer info */}
-      <div className="p-3 border-t border-slate-800 bg-slate-950/50 text-[11px] text-slate-400 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="font-medium text-slate-300">Resili chain Engine v2.4</span>
+      <div className="h-12 px-3 md:px-4 border-t border-slate-200 bg-slate-50/70 text-[11px] text-slate-500 flex items-center justify-center md:justify-between shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+          <span className="hidden md:inline text-slate-600 truncate">
+            ResiliChain Engine v2.4
+          </span>
         </div>
+        <span className="hidden md:inline text-[10px] text-slate-400 tabular-nums">
+          Online
+        </span>
       </div>
     </aside>
   );
