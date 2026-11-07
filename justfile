@@ -120,6 +120,20 @@ schema:
 seed:
     cd {{ai_dir}} && psql "$({{py}} -c 'import sys;sys.path.insert(0,".");from src.core.config import settings;print(settings.dsn)')" -v ON_ERROR_STOP=1 -f seed_ai_data.sql
 
+# Seed demo hackathon trên DB trống: ERP → rủi ro NCC (GDELT + Altman Z) → AI seed → finalize
+# XOÁ dữ liệu ERP hiện có. Không chạy trên DB dùng chung.
+# Ví dụ: just seed-demo apidata/out/supplier_risk_demo.json
+seed-demo snapshot="apidata/out/supplier_risk_fixture.json": schema
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd {{ai_dir}}
+    dsn="$({{py}} -c 'import sys;sys.path.insert(0,".");from src.core.config import settings;print(settings.dsn)')"
+    psql "$dsn" -q -v ON_ERROR_STOP=1 -f seed_demo_erp.sql
+    {{py}} scripts/load_supplier_risk.py {{snapshot}}
+    psql "$dsn" -q -v ON_ERROR_STOP=1 -f seed_ai_data.sql
+    psql "$dsn" -q -v ON_ERROR_STOP=1 -f seed_demo_finalize.sql
+    {{py}} db_inspect.py | sed -n '1,16p'
+
 # Dựng lại toàn bộ dữ liệu demo: schema → seed → 2 nhịp quét AI
 reset-demo: schema seed scan scan-suppliers
     @just inspect
