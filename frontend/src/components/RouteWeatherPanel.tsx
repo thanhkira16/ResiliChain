@@ -66,15 +66,32 @@ export function RouteWeatherPanel({ onWeatherChange }: RouteWeatherPanelProps) {
         onChange={(event) => setRouteInput(event.target.value)}
         placeholder="Cần Thơ → TP. Hồ Chí Minh → Đà Nẵng → Hà Nội"
         rows={2}
-        className="w-full resize-y rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none"
+        className="w-full resize-y rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-900/10 outline-none"
       />
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className="text-[10px] text-slate-400">Gợi ý tuyến:</span>
+        <button
+          type="button"
+          onClick={() => setRouteInput("Hà Nội → Đà Nẵng → Hồ Chí Minh")}
+          className="text-[10px] text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 px-2 py-0.5 rounded transition-colors cursor-pointer"
+        >
+          Trục Bắc - Nam
+        </button>
+        <button
+          type="button"
+          onClick={() => setRouteInput("Hải Phòng → Bắc Ninh → Hà Nội")}
+          className="text-[10px] text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 px-2 py-0.5 rounded transition-colors cursor-pointer"
+        >
+          Tuyến Cụm Phía Bắc
+        </button>
+      </div>
+      <div className="flex items-center justify-between gap-2 pt-0.5">
         <span className="text-[10px] text-slate-500">Phân cách bằng →, dấu phẩy, chấm phẩy hoặc xuống dòng.</span>
         <button
           type="button"
           onClick={loadRouteWeather}
           disabled={isLoading}
-          className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-sky-700 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-60 transition-colors"
+          className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60 transition-colors shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
         >
           {isLoading ? <LoaderCircle className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
           {isLoading ? "Đang tải" : "Xem thời tiết"}

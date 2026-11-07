@@ -14,6 +14,7 @@ import {
   Viewer,
 } from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
+import { RotateCcw } from "lucide-react";
 import { AtRiskShipmentMapItem, DestinationWarehouse } from "../types";
 import { RouteWeatherStop, weatherSeverityStyle } from "../services/weatherService";
 
@@ -78,13 +79,12 @@ export function GlobalRouteWeatherMap({
 
     let viewer: Viewer;
     try {
-      // High-performance, crisp tile map provider (CARTO Voyager - Free, Fast, CORS enabled, WebMercator)
+      // High-performance, serene ESRI Light Gray Canvas tiles (clean, CORS-enabled, no watermark)
       const imageryProvider = new UrlTemplateImageryProvider({
-        url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-        subdomains: ["a", "b", "c", "d"],
+        url: "https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
         tilingScheme: new WebMercatorTilingScheme(),
-        maximumLevel: 19,
-        credit: "CARTO, OpenStreetMap contributors",
+        maximumLevel: 16,
+        credit: "Esri, HERE, Garmin, © OpenStreetMap contributors",
       });
 
       viewer = new Viewer(containerRef.current, {
@@ -92,7 +92,7 @@ export function GlobalRouteWeatherMap({
         baseLayerPicker: false,
         fullscreenButton: false,
         geocoder: false,
-        homeButton: true,
+        homeButton: false,
         infoBox: false,
         navigationHelpButton: false,
         sceneModePicker: false,
@@ -280,29 +280,48 @@ export function GlobalRouteWeatherMap({
     }
   }, [viewerReady, shipments, warehouses, routeWeatherStops, selectedShipment]);
 
+  const handleResetCamera = () => {
+    const viewer = viewerRef.current;
+    if (!viewer || viewer.isDestroyed()) return;
+    viewer.camera.flyTo({
+      destination: Cartesian3.fromDegrees(108.2, 16.0, 1800000),
+      duration: 1.0,
+    });
+  };
+
   return (
-    <section className="relative h-[600px] overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-md">
+    <section className="relative h-[620px] overflow-hidden rounded-xl border border-slate-200/80 bg-slate-900 shadow-2xs">
       <div ref={containerRef} className="h-full w-full" />
 
       {error && (
-        <div role="alert" className="absolute inset-4 z-10 grid place-items-center rounded-xl bg-white p-6 text-center text-sm text-red-700 shadow-lg">
+        <div role="alert" className="absolute inset-4 z-10 grid place-items-center rounded-xl bg-white p-6 text-center text-sm text-rose-700 shadow-lg">
           {error}
         </div>
       )}
 
-      {/* Floating Status Bar */}
-      <div className="pointer-events-none absolute left-3 top-3 z-10 rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-800 shadow-sm backdrop-blur">
-        <div className="font-bold text-slate-900">Bản Đồ 3D Digital Twin · CARTO Vector Engine</div>
-        <div className="mt-0.5 text-[11px] text-slate-500">Cuộn để phóng to, kéo để xoay. Nhấp vào pin lô hàng để xem chi tiết.</div>
+      {/* Floating Status Bar: Quiet, Understated */}
+      <div className="absolute left-3 top-3 z-10 flex items-center gap-2 rounded-lg border border-slate-200/80 bg-white/90 px-3 py-1.5 text-xs text-slate-700 shadow-xs backdrop-blur-sm">
+        <div>
+          <div className="font-semibold text-slate-800">Không gian 3D Digital Twin</div>
+          <div className="text-[10px] text-slate-400">Cuộn để zoom · Kéo để xoay · Bấm pin để xem chi tiết</div>
+        </div>
+        <button
+          onClick={handleResetCamera}
+          className="ml-1 p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 cursor-pointer"
+          title="Đặt lại góc nhìn toàn cảnh"
+          aria-label="Đặt lại góc nhìn toàn cảnh"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+        </button>
       </div>
 
-      {/* Legend */}
-      <div className="pointer-events-none absolute bottom-3 left-3 z-10 space-y-1 rounded-lg border border-slate-200 bg-white/95 p-2.5 text-[11px] text-slate-800 shadow-sm backdrop-blur">
-        <div className="font-bold text-slate-900 mb-1">Chú Giải Điểm Rủi Ro Lô Hàng</div>
-        <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-red-500" />Đỏ · Rủi ro cao (&ge;65đ)</div>
-        <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-orange-500" />Cam · Cảnh báo (&ge;35đ)</div>
-        <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />Xanh · An toàn (&lt;35đ)</div>
+      {/* Legend: Quiet and clear */}
+      <div className="pointer-events-none absolute bottom-3 left-3 z-10 space-y-1 rounded-lg border border-slate-200/80 bg-white/90 p-2.5 text-[11px] text-slate-700 shadow-xs backdrop-blur-sm">
+        <div className="font-medium text-slate-800 mb-1">Mức độ rủi ro (PORS)</div>
+        <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-rose-500" />Rủi ro cao (&ge; 65đ)</div>
+        <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-amber-500" />Cảnh báo (&ge; 35đ)</div>
+        <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500" />An toàn (&lt; 35đ)</div>
       </div>
     </section>
   );
-}
+};

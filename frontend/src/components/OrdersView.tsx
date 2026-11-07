@@ -176,10 +176,10 @@ export const OrdersView: React.FC<OrdersViewProps> = ({
                         {onViewOnMap && (
                           <button
                             onClick={() => onViewOnMap(po.poNumber)}
-                            className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition-colors"
+                            className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/70 rounded transition-colors"
                             title="Xem bản đồ 3D"
                           >
-                            <MapPinned className="w-3.5 h-3.5" />
+                            <MapPinned className="w-3.5 h-3.5 text-blue-600" />
                           </button>
                         )}
                         {isHighRisk && onNavigateToIncident && (

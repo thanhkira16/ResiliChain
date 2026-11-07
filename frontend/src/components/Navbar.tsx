@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { UserRole } from "../types";
 import {
-  Bike,
   ShieldAlert,
   Bell,
   RotateCcw,
@@ -127,7 +126,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       name: "Trần Đức Phú",
       email: "phu.tran@supplier-vietnam.com",
       avatarInitials: "TP",
-      gradient: "from-purple-600 to-pink-600",
+      gradient: "from-slate-700 to-slate-900",
       department: "Phòng Kinh doanh Đối tác",
     },
   };
@@ -139,14 +138,12 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Top Banner / Utility Bar */}
       <div className="px-4 py-2 bg-slate-900 text-slate-200 flex flex-wrap items-center justify-between text-xs gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 font-semibold text-white tracking-wide">
-            <div className="w-6 h-6 rounded bg-emerald-500 flex items-center justify-center text-slate-950 font-black">
-              <Bike className="w-4 h-4" />
-            </div>
-            <span className="text-sm font-bold tracking-tight">Resili chain</span>
-            <span className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-slate-800 text-[11px] text-emerald-400 font-mono border border-slate-700">
-              Supply Chain MVP
-            </span>
+          <div className="flex items-center gap-2">
+            <img
+              src="/resilichain-logo-dark.png"
+              alt="ResiliChain Logo"
+              className="h-7 w-auto object-contain select-none"
+            />
           </div>
         </div>
 
@@ -278,7 +275,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => setCurrentTab(tab.id)}
                 className={`relative px-3 py-1.5 text-xs font-semibold rounded-md whitespace-nowrap transition-all flex items-center gap-1.5 ${
                   isActive
-                    ? "bg-slate-900 text-white shadow-xs"
+                    ? "bg-emerald-600 text-white shadow-xs"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                 }`}
               >
