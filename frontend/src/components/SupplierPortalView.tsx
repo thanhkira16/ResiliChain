@@ -162,7 +162,7 @@ export const SupplierPortalView: React.FC<SupplierPortalViewProps> = ({
                   onClick={() => handleSelectRfq(rfq)}
                   className={`w-full text-left p-3.5 rounded-xl border transition-all ${
                     isSelected
-                      ? "bg-slate-900 text-white border-slate-900 shadow-xs"
+                      ? "bg-emerald-700 text-white border-emerald-700 shadow-xs"
                       : "bg-white hover:bg-slate-50 text-slate-800 border-slate-200"
                   }`}
                 >

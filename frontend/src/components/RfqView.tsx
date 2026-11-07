@@ -93,7 +93,7 @@ export const RfqView: React.FC<RfqViewProps> = ({
               <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-slate-900 text-white">
+                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200/80">
                       {incident.id}
                     </span>
                     <span className="font-semibold text-slate-900 text-sm">
@@ -115,7 +115,7 @@ export const RfqView: React.FC<RfqViewProps> = ({
                     id={`btn-evaluate-quotes-${incident.id}`}
                     onClick={() => onRunAiEvaluation(incident.id)}
                     disabled={respondedCount === 0 || isEvaluating}
-                    className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-200 text-white disabled:text-slate-400 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 shadow-2xs"
+                    className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 shadow-2xs"
                     title="Gọi Gemini AI đánh giá và xếp hạng tối đa 3 phương án"
                   >
                     <Sparkles className={`w-3.5 h-3.5 ${isEvaluating ? "animate-spin" : ""}`} />
@@ -302,7 +302,7 @@ export const RfqView: React.FC<RfqViewProps> = ({
             <div className="pt-3 border-t border-slate-100 flex justify-end">
               <button
                 onClick={() => setSelectedRfq(null)}
-                className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg"
+                className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
               >
                 Đóng
               </button>

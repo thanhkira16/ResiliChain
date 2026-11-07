@@ -124,7 +124,7 @@ export const SuppliersView: React.FC<SuppliersViewProps> = ({
         {userRole === "PROCUREMENT_MANAGER" && (
           <button
             onClick={() => setIsAddingNew(true)}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition-colors shadow-sm"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-semibold rounded-lg transition-colors shadow-xs"
           >
             <Plus className="w-4 h-4" />
             Thêm Nhà Cung Cấp
@@ -238,7 +238,7 @@ export const SuppliersView: React.FC<SuppliersViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg"
+                  className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold rounded-lg shadow-xs transition-colors"
                 >
                   Lưu Nhà Cung Cấp
                 </button>
@@ -357,7 +357,7 @@ export const SuppliersView: React.FC<SuppliersViewProps> = ({
                   </button>
                   <button
                     onClick={() => saveEdit(sup)}
-                    className="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded flex items-center gap-1"
+                    className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-semibold rounded flex items-center gap-1 shadow-xs transition-colors"
                   >
                     <Save className="w-3.5 h-3.5" />
                     Lưu Thay Đổi

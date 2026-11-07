@@ -227,7 +227,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
                           <button
                             onClick={() => onNavigateToForecast(item.sku)}
-                            className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-[11px] inline-flex items-center gap-1 transition-colors"
+                            className="px-2.5 py-1 rounded-md bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200/70 font-medium text-[11px] inline-flex items-center gap-1 transition-colors shadow-2xs"
                             title="Xem dự báo nhu cầu Agent 3"
                           >
                             <span>Dự báo</span>
