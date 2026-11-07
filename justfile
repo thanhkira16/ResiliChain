@@ -98,6 +98,10 @@ watch interval="300":
 dry-run:
     cd {{ai_dir}} && {{py}} ai_worker.py --once --dry-run
 
+# Tạo 1 đơn demo từ tín hiệu LIVE (GDELT + FMP + Open-Meteo) rồi quét nó. Thêm --dry-run để chỉ xem xếp hạng
+live-order *args="--refresh-risk --replace":
+    cd {{ai_dir}} && {{py}} scripts/create_live_order.py {{args}}
+
 # Quét đúng một đơn hàng để debug, ví dụ: just scan-po PO-2026-011
 scan-po po:
     cd {{ai_dir}} && {{py}} ai_worker.py --once --po {{po}}

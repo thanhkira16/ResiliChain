@@ -107,7 +107,7 @@ class DbIngestionAgent(Agent[dict[str, Any] | None, list[OrderContext]]):
                     committed_lead_time_days=committed_lead_time_of(
                         order, fallback=item.min_lead_time_days or 1
                     ),
-                    weather_delay_days=0.0,  # Agent 6 bom vao sau khi goi Open-Meteo
+                    weather_delay_days=0.0,  # Agent 6 (node_weather) bom vao sau khi goi Open-Meteo
                     latest_tracking_point=tracking.get(order.po_number),
                 )
             )

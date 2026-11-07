@@ -3,7 +3,7 @@
 Dieu phoi 5 sub-agent bang LangGraph. Day la NOI DUY NHAT duoc ghi DB.
 
 Hai nhip quet:
-  * `order_risk_scan`     (5-10 phut): Agent 1 -> cham diem -> incident -> Agent 5/4 -> ghi
+  * `order_risk_scan`     (5-10 phut): Agent 1 -> Open-Meteo -> cham diem -> incident -> Agent 5/4 -> ghi
   * `supplier_risk_scan`  (1 lan/ngay): Agent 2 ‖ Agent 3 -> PORS -> supplier_risk_analysis
 """
 
@@ -33,6 +33,7 @@ from src.core.contracts import (
 from src.core.formulas import pors_score, risk_level, ssi_del_from_history
 from src.core.logging import get_logger
 from src.core.formulas import delay_risk_score
+from src.integrations.open_meteo import weather_delay_forecast
 from src.integrations.telegram import telegram_client
 from src.database import db_client as db
 
@@ -149,6 +150,64 @@ def node_ingest(state: ScanState) -> ScanState:
         "contexts": contexts,
         "stats": {**state.get("stats", {}), "orders_scanned": len(contexts)},
     }
+
+
+def remaining_waypoints(
+    waypoints: list[dict[str, Any]], latest_point: dict[str, Any] | None
+) -> list[dict[str, Any]]:
+    """Chang con lai cua lo hang: tu waypoint gan vi tri GPS moi nhat tro di.
+
+    Lo hang da qua Hsinchu thi gio bao o Hsinchu khong con lam tre no nua.
+    Khong co GPS -> coi nhu chua roi kho, xet ca tuyen.
+    """
+    ordered = sorted(waypoints or [], key=lambda w: w.get("orderIndex") or 0)
+    if not ordered or not latest_point:
+        return ordered
+    lat, lon = latest_point.get("latitude"), latest_point.get("longitude")
+    if lat is None or lon is None:
+        return ordered
+
+    def dist2(wp: dict[str, Any]) -> float:
+        wlat, wlon = wp.get("latitude"), wp.get("longitude")
+        if wlat is None or wlon is None:
+            return float("inf")
+        return (float(wlat) - float(lat)) ** 2 + (float(wlon) - float(lon)) ** 2
+
+    nearest = min(range(len(ordered)), key=lambda i: dist2(ordered[i]))
+    return ordered[nearest:]
+
+
+def node_weather(state: ScanState) -> ScanState:
+    """Open-Meteo tren chang con lai cua tung don -> `weather_delay_days`.
+
+    Loi API khong lam hong vong quet: `stale` -> giu 0.0 va danh dau degraded.
+    """
+    degraded = state.get("degraded", False)
+    cache: dict[tuple, float] = {}
+    alerts = 0
+    for ctx in state.get("contexts", []):
+        route = remaining_waypoints(ctx.supplier.transit_waypoints, ctx.latest_tracking_point)
+        key = tuple((w.get("latitude"), w.get("longitude")) for w in route)
+        if key not in cache:
+            forecast = weather_delay_forecast(route)
+            degraded = degraded or forecast.stale
+            cache[key] = forecast.delay_days
+            if forecast.delay_days > 0:
+                worst = max(forecast.detail, key=lambda d: d.get("delayDays", 0))
+                log.info(
+                    "orchestrator.weather_delay",
+                    extra={"po_number": ctx.order.po_number,
+                           "delay_days": forecast.delay_days,
+                           "location": worst.get("locationName"),
+                           "condition": worst.get("weatherCondition"),
+                           "gusts_kmh": worst.get("windGustsKmh")},
+                )
+        ctx.weather_delay_days = cache[key]
+        if ctx.weather_delay_days > 0:
+            alerts += 1
+    # Khong dua vao `stats`: finish_job_run chi nhan cac cot co san trong ai_job_runs.
+    log.info("orchestrator.weather_done", extra={"weather_delayed_orders": alerts})
+    return {"contexts": state.get("contexts", []), "degraded": degraded}
 
 
 def node_load_risk(state: ScanState) -> ScanState:
@@ -342,6 +401,7 @@ def node_persist(state: ScanState) -> ScanState:
 def build_order_risk_graph():
     g = StateGraph(ScanState)
     g.add_node("ingest", node_ingest)
+    g.add_node("weather", node_weather)
     g.add_node("load_risk", node_load_risk)
     g.add_node("score", node_score)
     g.add_node("detect", node_detect)
@@ -350,7 +410,8 @@ def build_order_risk_graph():
     g.add_node("persist", node_persist)
 
     g.add_edge(START, "ingest")
-    g.add_edge("ingest", "load_risk")
+    g.add_edge("ingest", "weather")
+    g.add_edge("weather", "load_risk")
     g.add_edge("load_risk", "score")
     g.add_edge("score", "detect")
     g.add_edge("detect", "sourcing")
